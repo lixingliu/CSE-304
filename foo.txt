@@ -1,6 +1,10 @@
 i
 l
-d   c 10
-ildc 20
-dup
+
+
+    d
+    
+        c -10
+
+il                   d            c                           20
 iadd
