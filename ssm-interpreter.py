@@ -26,28 +26,28 @@ def ssm_interpreter(file_name):
                 case "iadd":
                     num1 = stack.pop()
                     num2 = stack.pop()
-                    word = ""
                     stack.append(num1 + num2)
+                    word = ""
                 case "isub":
                     num1 = stack.pop()
                     num2 = stack.pop()
-                    word = ""
                     stack.append(num2 - num1)
+                    word = ""
                 case "imul":
                     num1 = stack.pop()
                     num2 = stack.pop()
-                    word = ""
                     stack.append(num1 * num2)
+                    word = ""
                 case "idiv":
                     num1 = stack.pop()
                     num2 = stack.pop()
-                    word = ""
                     stack.append(num2 / num1)
+                    word = ""
                 case "imod":
                     num1 = stack.pop()
                     num2 = stack.pop()
-                    word = ""
                     stack.append(num2 % num1)
+                    word = ""
                 case "pop":
                     stack.pop()
                     word = ""
