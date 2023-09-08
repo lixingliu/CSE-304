@@ -39,6 +39,10 @@ def ssm_interpreter(file_name):
                 print(word)
                 print("stack:", stack)
 
+                if word[0] == "#":
+                    i = i + 1
+                    continue
+
                 #If there is an unresolved jump instruction and this is a new line
                 #Skip until the line is found
                 if(i == 0 and (jz_command == True or jnz_command == True or jmp_command == True) and word != curjmplabel):
