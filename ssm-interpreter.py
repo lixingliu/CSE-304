@@ -1,6 +1,9 @@
-def ssm_interpreter(file_name):
+import sys
+
+
+def ssm_interpreter():
     try:
-        f = open(file_name, "r")
+        f = open(sys.argv[1], "r")
         lines = f.readlines()
  
         store = {}
@@ -162,11 +165,4 @@ def ssm_interpreter(file_name):
     except Exception as error:
         print("error: ", error)
 
-
-### !IMPORTANT CHANGE IT TO SYSTEN ARGUMENT ###
-
-
-# file_name = input("Enter path to file: ")
-file_name = "./test1.txt"
-# file_name = r"C:\Users\L\CSE-304\foo.txt"
-ssm_interpreter(file_name)
+ssm_interpreter()

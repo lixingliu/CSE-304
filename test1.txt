@@ -1,6 +1,5 @@
-ild#abc 
-c 
-10
-ildc 20
+ildc 30
+ildc -1
 iadd
-pop
+here: ildc 0
+jnz here
