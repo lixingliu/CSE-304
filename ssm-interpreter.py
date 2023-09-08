@@ -35,7 +35,7 @@ def ssm_interpreter(file_name):
                     i += 1
                     continue
                 word = words[i]
-                test_word += word
+                test_word += word                    
                 print(word)
                 print("stack:", stack)
 
@@ -56,6 +56,9 @@ def ssm_interpreter(file_name):
                     test_word = ""
                 #If the current word is made of chars only and it is in the right format
                 if(word.isalpha() and (jz_command != True and jnz_command != True and jmp_command != True)):
+                    if word.islower() == False:
+                        print("Instruction has to be lower-case!")
+                        return
                     match word:
                         case "ildc":
                             ildc_command = True
@@ -113,12 +116,15 @@ def ssm_interpreter(file_name):
 
                 #If the current word is a label, save the label name as the key and the current line number as the entry into the dict
                 elif(word.endswith(":")):
+                    if (not word[0].isalpha()):
+                        print("Invalid label. Label must start with a alphabetical character")
+                        return
                     labels[word] = curline
                     test_word = ""
                     
                 #If the current word is followed by a jump instruction, store label name
                 #If the label has been seen before, go to the labeled line
-                elif(word.isalpha() and (jz_command == True or jnz_command == True or jmp_command == True)):
+                elif(jz_command == True or jnz_command == True or jmp_command == True):
                     curjmplabel = word + ":"
                     if curjmplabel in labels:
                         curline = labels[curjmplabel] - 1
@@ -152,7 +158,11 @@ def ssm_interpreter(file_name):
     except Exception as error:
         print("error: ", error)
 
+
+### !IMPORTANT CHANGE IT TO SYSTEN ARGUMENT ###
+
+
 # file_name = input("Enter path to file: ")
-file_name = "./foo.txt"
+file_name = "./test1.txt"
 # file_name = r"C:\Users\L\CSE-304\foo.txt"
 ssm_interpreter(file_name)
