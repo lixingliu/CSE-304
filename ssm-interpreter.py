@@ -8,6 +8,12 @@ def ssm_interpreter(file_name):
         words = []
         labels = {}
 
+        test_word = ""
+        commands = ["ildc", "iadd", "isub", "imul", "idiv", "imod", "pop", "dup", "swap", "jz", "jmp", "load", "store"]
+        skip_jz_command = False
+        skip_jnz_command = False
+
+
         ildc_command = False
         jz_command = False
         jnz_command = False
@@ -23,7 +29,13 @@ def ssm_interpreter(file_name):
             #Go through the array word by word to check for instructions
             i = 0
             while i < len(words):
+                if (skip_jnz_command or skip_jz_command):
+                    skip_jnz_command = False
+                    skip_jz_command = False
+                    i += 1
+                    continue
                 word = words[i]
+                test_word += word
                 print(word)
                 print("stack:", stack)
 
@@ -39,6 +51,9 @@ def ssm_interpreter(file_name):
                     jmp_command = False
                     curjmplabel = ""
 
+                if test_word in commands:
+                    word = test_word
+                    test_word = ""
                 #If the current word is made of chars only and it is in the right format
                 if(word.isalpha() and (jz_command != True and jnz_command != True and jmp_command != True)):
                     match word:
@@ -84,10 +99,14 @@ def ssm_interpreter(file_name):
                             num = stack.pop()
                             if(num == 0):
                                 jz_command = True
+                            else:
+                                skip_jz_command = True
                         case "jnz":
                             num = stack.pop()
                             if(num != 0):
                                 jnz_command = True
+                            else:
+                                skip_jnz_command = True
                         case "jmp":
                             jmp_command = True
                     word = ""
@@ -95,6 +114,7 @@ def ssm_interpreter(file_name):
                 #If the current word is a label, save the label name as the key and the current line number as the entry into the dict
                 elif(word.endswith(":")):
                     labels[word] = curline
+                    test_word = ""
                     
                 #If the current word is followed by a jump instruction, store label name
                 #If the label has been seen before, go to the labeled line
@@ -113,6 +133,7 @@ def ssm_interpreter(file_name):
                     if ildc_command == True:
                         stack.append(num)
                         ildc_command = False
+                    test_word = ""
                 
                 #If the current word does not pass char and number check, then instruction is invalid
                 else:
