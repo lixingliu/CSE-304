@@ -100,8 +100,8 @@ def ssm_interpreter(file_name):
                 #If the label has been seen before, go to the labeled line
                 elif(word.isalpha() and (jz_command == True or jnz_command == True or jmp_command == True)):
                     curjmplabel = word + ":"
-                    if word in labels:
-                        curline = labels[word] - 1
+                    if curjmplabel in labels:
+                        curline = labels[curjmplabel] - 1
                         jz_command = False
                         jnz_command = False
                         jmp_command = False
