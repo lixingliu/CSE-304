@@ -1,0 +1,5 @@
+ildc 30
+ildc -1
+iadd
+here: ildc 0
+jnz here
