@@ -3,7 +3,8 @@ import sys
 
 def ssm_interpreter():
     try:
-        f = open(sys.argv[1], "r")
+        f = open("./load_store.txt", "r")
+        # f = open(sys.argv[1], "r")
         lines = f.readlines()
  
         store = {}
@@ -100,7 +101,11 @@ def ssm_interpreter():
                             stack.append(num2)
                         case "load":
                             num = stack.pop()
-                            stack.append(store[num])
+                            if (num in store):
+                                stack.append(store[num])
+                            else:
+                                print(f"Store does not contain this key: {num}")
+                                return
                         case "store":
                             num = stack.pop()
                             address = stack.pop()
