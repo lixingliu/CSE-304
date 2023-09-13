@@ -3,7 +3,7 @@ import sys
 
 def ssm_interpreter():
     try:
-        f = open("./load_store.txt", "r")
+        f = open("./foo.txt", "r")
         # f = open(sys.argv[1], "r")
         lines = f.readlines()
  
@@ -16,7 +16,7 @@ def ssm_interpreter():
         commands = ["ildc", "iadd", "isub", "imul", "idiv", "imod", "pop", "dup", "swap", "jz", "jmp", "load", "store"]
         skip_jz_command = False
         skip_jnz_command = False
-
+        comment_found = False
 
         ildc_command = False
         jz_command = False
@@ -26,13 +26,17 @@ def ssm_interpreter():
 
         curline = 0
         while curline < len(lines):
+            comment_found = False
             #Split the line into words seperated by whitespace
             words = lines[curline].split()
-            print(words)
+            # print(words)
 
             #Go through the array word by word to check for instructions
             i = 0
             while i < len(words):
+                if comment_found:
+                    i = i + 1
+                    continue
                 if (skip_jnz_command or skip_jz_command):
                     skip_jnz_command = False
                     skip_jz_command = False
@@ -40,20 +44,21 @@ def ssm_interpreter():
                     continue
                 word = words[i]
                 test_word += word                    
-                print(word)
-                print("stack:", stack)
+                # print(word)
+                # print("stack:", stack)
 
                 if word[0] == "#":
-                    i = i + 1
+                    comment_found = True
+                    test_word = ""
                     continue
 
                 #If there is an unresolved jump instruction and this is a new line
                 #Skip until the line is found
                 if(i == 0 and (jz_command == True or jnz_command == True or jmp_command == True) and word != curjmplabel):
-                    print("skipped", curjmplabel, word)
+                    # print("skipped", curjmplabel, word)
                     break
                 elif(i == 0 and (jz_command == True or jnz_command == True or jmp_command == True) and word == curjmplabel):
-                    print("not skip")
+                    # print("not skip")
                     jz_command = False
                     jnz_command = False
                     jmp_command = False
@@ -165,8 +170,8 @@ def ssm_interpreter():
 
         if(len(stack) > 0):
             print(stack.pop())
-        print(stack)
-        print(store)
+        # print(stack)
+        # print(store)
     except Exception as error:
         print("error: ", error)
 
