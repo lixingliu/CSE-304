@@ -29,7 +29,7 @@ def ssm_interpreter():
             comment_found = False
             #Split the line into words seperated by whitespace
             words = lines[curline].split()
-            # print(words)
+            print(words)
 
             #Go through the array word by word to check for instructions
             i = 0
@@ -43,22 +43,22 @@ def ssm_interpreter():
                     i += 1
                     continue
                 word = words[i]
-                test_word += word                    
-                # print(word)
-                # print("stack:", stack)
-
                 if word[0] == "#":
                     comment_found = True
-                    test_word = ""
                     continue
+
+                test_word += word                    
+                print(word)
+                print("stack:", stack)
+
 
                 #If there is an unresolved jump instruction and this is a new line
                 #Skip until the line is found
                 if(i == 0 and (jz_command == True or jnz_command == True or jmp_command == True) and word != curjmplabel):
-                    # print("skipped", curjmplabel, word)
+                    print("skipped", curjmplabel, word)
                     break
                 elif(i == 0 and (jz_command == True or jnz_command == True or jmp_command == True) and word == curjmplabel):
-                    # print("not skip")
+                    print("not skip")
                     jz_command = False
                     jnz_command = False
                     jmp_command = False
@@ -170,8 +170,8 @@ def ssm_interpreter():
 
         if(len(stack) > 0):
             print(stack.pop())
-        # print(stack)
-        # print(store)
+        print(stack)
+        print(store)
     except Exception as error:
         print("error: ", error)
 
