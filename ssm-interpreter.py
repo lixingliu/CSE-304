@@ -150,6 +150,7 @@ def ssm_interpreter():
                         jmp_command = False
                         curjmplabel = ""
 
+
                 #If the current word is made of only digits or - followed by digits and is in the right format
                 elif(word.isdigit or (word.startswith('-') and word[1:].isdigit())):
                     num = int(words[i])
@@ -167,7 +168,9 @@ def ssm_interpreter():
 
             #Go to next line
             curline += 1   
-
+        if curjmplabel != "":
+            print("jump label not found! Terminating...")
+            return
         if(len(stack) > 0):
             print(stack.pop())
         print(stack)
