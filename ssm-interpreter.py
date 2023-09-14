@@ -3,8 +3,8 @@ import sys
 
 def ssm_interpreter():
     try:
-        f = open("./foo.txt", "r")
-        # f = open(sys.argv[1], "r")
+        # f = open("./foo.txt", "r")
+        f = open(sys.argv[1], "r")
         lines = f.readlines()
  
         store = {}
@@ -29,7 +29,7 @@ def ssm_interpreter():
             comment_found = False
             #Split the line into words seperated by whitespace
             words = lines[curline].split()
-            print(words)
+            # print(words)
 
             #Go through the array word by word to check for instructions
             i = 0
@@ -48,17 +48,17 @@ def ssm_interpreter():
                     continue
 
                 test_word += word                    
-                print(word)
-                print("stack:", stack)
+                # print(word)
+                # print("stack:", stack)
 
 
                 #If there is an unresolved jump instruction and this is a new line
                 #Skip until the line is found
                 if(i == 0 and (jz_command == True or jnz_command == True or jmp_command == True) and word != curjmplabel):
-                    print("skipped", curjmplabel, word)
+                    # print("skipped", curjmplabel, word)
                     break
                 elif(i == 0 and (jz_command == True or jnz_command == True or jmp_command == True) and word == curjmplabel):
-                    print("not skip")
+                    # print("not skip")
                     jz_command = False
                     jnz_command = False
                     jmp_command = False
@@ -173,8 +173,10 @@ def ssm_interpreter():
             return
         if(len(stack) > 0):
             print(stack.pop())
-        print(stack)
-        print(store)
+        # print(stack)
+        # print(store)
+    except IndexError:
+        print("Please enter a File!")
     except Exception as error:
         print("error: ", error)
 
