@@ -45,7 +45,7 @@ tokens = [
     'ID'
 ] + list(reserved.values())
 
-literals = "\+-\*/()[]{}!;,=><"
+literals = "\+-\*/()[]{}!;,=><."
 
 # this is interpreted as /* <stuff> */;
 # <stuff> is represetned by .*? : . repesents any character and .* means zero or more any character

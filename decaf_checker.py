@@ -39,7 +39,7 @@ def main():
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
-        sys.exit()
+a        sys.exit()
     import decaf_lexer
     import decaf_parser
     lexer = lex.lex(module = decaf_lexer, debug = 1)
