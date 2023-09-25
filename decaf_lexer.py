@@ -1,5 +1,5 @@
 import sys
-
+import re
 
 
 reserved = {
@@ -33,7 +33,7 @@ tokens = [
     'SING_COMMENT',
     'INT_CONST',
     'FLOAT_CONST',
-    'STRNG_CONST',
+    'STRING_CONST',
     'INCREMENT',
     'DECREMENT',
     'BOOL_AND',
@@ -44,6 +44,8 @@ tokens = [
     'GEQ',
     'ID'
 ] + list(reserved.values())
+
+literals = "\+-\*/()[]{}!;,=><"
 
 # this is interpreted as /* <stuff> */;
 # <stuff> is represetned by .*? : . repesents any character and .* means zero or more any character
@@ -67,3 +69,56 @@ def t_FLOAT_CONST(t):
     r'(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?'
     t.value = float(t.value)
     return t
+
+# starts with " and ends with "
+# " <stuff> "; <stuff> is represented by (?:\\.|[^"\\])*
+# ?: means it is a non-capturing group. It's used to group multiple patterns together for the purpose of regex
+# \\. means it represents anything like \n, \t, \\, or \"; stuff with special meaning
+# [^"\\] means it will ignore all " and \; " and \ are special special characters that strings cannot have
+def t_STRING_CONST(t):
+    r'"(?:\\.|[^"\\])*"'
+    t.value = t.value[1:-1]
+    t.value = re.sub(r'\\(.)', r'1', t.value) 
+    return t
+
+t_INCREMENT = r'\+\+'
+t_DECREMENT = r'--'
+
+t_BOOL_AND = r'&&'
+t_BOOL_OR = r'\|\|'
+
+t_EQUALITY = r'=='
+t_DISQUALITY = r'!='
+
+t_LEQ = r'<='
+t_GEQ = r'>='
+
+# ID must start with a letter and then followed be zero or more letters, numbers, or underscores
+# t.type = reserved.get(t.value, 'ID') is used to check for reserved keywords
+def t_ID(t):
+    r'[a-zA-Z][a-zA-Z0-9_]*'
+    t.type = reserved.get(t.value, 'ID')
+    return t
+
+# t_ignore is a special name. The regular expression indicates which characters the scanner will skip past
+# while tokenizing. Ignore whitespace and tab
+t_ignore = ' \t'
+
+# Another special name. Determines what counts as a newline and what gets done when a newline character is read.
+# Here the number of seq. newlines is counted, and the count is added to the current lineno, as tracked
+# by the lexer. This allows the lexer to detemrine theline on which each token occurs for debugging and error reporting
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += t.value.count('\n')
+
+# Another special name. The body of this function determines what happens when the lexer encounters an
+# illegal character. In this case, we print the character, its line number, adn its column number.
+def t_error(t):
+    print()
+    print("LEXER: SYNTAX ERROR: ", end = '')
+    print("Illegal Character '%s', at %d, %d" %
+          (t.value[0], t.lineno, t.lexpos))
+    print("CONTEXT: " + t.value[0:10])
+    print()
+    sys.exit()
+    #t.lexer.skip(1)
