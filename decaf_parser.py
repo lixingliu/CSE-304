@@ -63,14 +63,16 @@ def p_method_decl(p):
     formal_param : type variable'''
 
 def p_block(p):
-    '''block : '{' temp_7 '}' 
-    temp_7 : empty 
-            | stmt temp_7
+    # '''block : '{' temp_7 '}' 
+    # temp_7 : empty 
+    #         | stmt temp_7
             
-    stmt : IF '(' expr ')' stmt
-        | IF '(' expr ')'  stmt ELSE stmt
-        | WHILE '(' expr ')' stmt
-        '''
+    # stmt : IF '(' expr ')' stmt
+    #     | IF '(' expr ')'  stmt ELSE stmt
+    #     | WHILE '(' expr ')' stmt
+    #     '''
+    
+
 def p_empty(p):
     'empty :'
     pass
