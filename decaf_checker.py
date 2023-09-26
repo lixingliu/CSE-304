@@ -36,10 +36,11 @@ def just_scan():
 
 def main():
     fn = sys.argv[1] if len(sys.argv) > 1 else ""
+    fn = './hello_world.decaf'
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
-a        sys.exit()
+        sys.exit()
     import decaf_lexer
     import decaf_parser
     lexer = lex.lex(module = decaf_lexer, debug = 1)
