@@ -42,10 +42,8 @@ def p_field_decl(p):
     temp_3 : ',' variable temp_3
             | empty
             
-    variable : ID temp_4
+    variable : ID '''
     
-    temp_4 : '[' ']' temp_4
-        | empty'''
 def p_method_decl(p):
     '''method_decl : modifier temp_5 ID '(' formals ')' block
      
@@ -54,8 +52,8 @@ def p_method_decl(p):
     temp_5 : type
             | VOID
             
-    formals : empty
-            | formal_param temp_6
+    formals : formal_param temp_6
+            | empty
             
     temp_6 : ',' formal_param temp_6
             | empty
@@ -63,14 +61,24 @@ def p_method_decl(p):
     formal_param : type variable'''
 
 def p_block(p):
-    # '''block : '{' temp_7 '}' 
-    # temp_7 : empty 
-    #         | stmt temp_7
+    '''block : '{' temp_7 '}' 
+    temp_7 : stmt temp_7 
+            | empty
             
-    # stmt : IF '(' expr ')' stmt
-    #     | IF '(' expr ')'  stmt ELSE stmt
-    #     | WHILE '(' expr ')' stmt
-    #     '''
+    stmt : IF '(' expr ')' stmt
+        | IF '(' expr ')'  stmt ELSE stmt
+        | WHILE '(' expr ')' stmt
+        | FOR '(' stmt_expr ';' expr ';' stmt_expr ')' stmt
+        | RETURN expr ';'
+        | stmt_expr ';'
+        | BREAK ';'
+        | CONTINUE ';'
+        | block
+        | var_decl
+        | ';'
+        '''
+    
+
     
 
 def p_empty(p):
