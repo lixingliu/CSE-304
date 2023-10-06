@@ -69,7 +69,14 @@ def p_block(p):
         | IF '(' expr ')'  stmt ELSE stmt
         | WHILE '(' expr ')' stmt
         | FOR '(' stmt_expr ';' expr ';' stmt_expr ')' stmt
+        | FOR '(' ';' expr ';' stmt_expr ')' stmt
+        | FOR '(' stmt_expr ';' expr ';' ')' stmt
+        | FOR '(' stmt_expr ';' ';' stmt_expr ')' stmt
+        | FOR '(' stmt_expr ';' ';' ')' stmt
+        | FOR '(' ';' expr ';' ')' stmt
+        | FOR '(' ';' ';' stmt_expr ')' stmt
         | RETURN expr ';'
+        | RETURN ';'
         | stmt_expr ';'
         | BREAK ';'
         | CONTINUE ';'
@@ -77,10 +84,71 @@ def p_block(p):
         | var_decl
         | ';'
         '''
-    
 
-    
+def expression(p):
+    '''
+    literal : INT_CONST
+        | FLOAT_CONST
+        | STRING_CONST
+        | NULL
+        | TRUE
+        | FALSE
 
+    primary : literal
+        | THIS
+        | SUPER
+        | '(' expr ')'
+        | NEW ID
+        | lhs
+        | method_invocation
+
+    arguments : expr '(' commaexpr ')'
+
+    commaexpr : , expr commaexpr
+        |empty
+
+    lhs : field_access
+
+    field access : primary '.' ID
+        | ID
+
+    method_invocation : field_access
+        | field_access '(' arguments ')'
+
+    expr : primary
+        | assign
+        | expr arith_op expr
+        | expr bool_op expr
+        | unary_op expr
+
+    assign : lhs '=' expr
+        | lhs INCREMENT
+        | INCREMENT lhs
+        | lhs DECREMENT
+        | DECREMENT lhs
+
+    arith_op : '+'
+        | '-'
+        | '*'
+        | '/'
+
+    bool_op : BOOL_AND
+        | BOOL_OR
+        | EQUALITY
+        | DISEQUALITY
+        | '<' 
+        | '>'
+        | LEQ  
+        | GEQ
+
+    unary op : '+' 
+        | '−' 
+        | '!'
+
+    stmt expr : assign
+        | method_invocation
+        '''
+    
 def p_empty(p):
     'empty :'
     pass
