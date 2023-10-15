@@ -1,3 +1,13 @@
+'''
+Name: Li Xing Liu
+Netid: lixiliu
+Student Id: 113318331
+
+Name: Andy You
+Netid: Andyou
+Student Id: 113494190
+'''
+
 import sys
 from decaf_lexer import *
 # program ::= class_decl* 
