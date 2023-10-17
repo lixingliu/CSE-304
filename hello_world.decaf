@@ -2,8 +2,8 @@ class hello_world
 {
     public static void main()
     {
-        //a
-        x = "5"
+        i = i + 1 * a;
         Out.print("Hello World!\n");
+
     }
 }

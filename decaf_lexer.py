@@ -42,24 +42,38 @@ tokens = [
     'DISQUALITY',
     'LEQ',
     'GEQ',
-    'ID'
+    'ID',
+    'PLUS',
+    'MINUS',
+    'MULTIPLY',
+    'DIVIDE',
+    'NOT',
+    'GREATERTHAN',
+    'LESSTHAN',
+    'LEFTPAREN',
+    'RIGHTPAREN'
 ] + list(reserved.values())
 
-literals = "\+-\*/()[]{}!;,=><."
+literals = "[]{};,=."
+
+t_LEFTPAREN = r'\('
+t_RIGHTPAREN = r'\)'
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_MULTIPLY = r'\*'
+t_DIVIDE = r'/'
+t_NOT = r'!'
+t_GREATERTHAN = r'>'
+t_LESSTHAN = r'<'
+
 
 # this is interpreted as /* <stuff> */;
 # <stuff> is represetned by .*? : . repesents any character and .* means zero or more any character
-t_ignore_MULTI_COMMENT = r'/\*.*?\*/'
+t_ignore_MULTI_COMMENT = r'/\*(.|\n)*?\*/'
 
 # this is interpreted as // <stuff>
 # <stuff> is represented by .* measning zero or more any character
 t_ignore_SING_COMMENT = r'//.*'
-
-# \d matches any digit; [0-9] and the '+' signifies one or more occurences
-def t_INT_CONST(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
 
 # \d+\.\d* is used for at least one number in front [0-9] followed by a . and then zero or more digits
 # \d*\.\d+ is used for zero or more numbers in front [0-9] followed by a . and then one ore more digits
@@ -69,6 +83,14 @@ def t_FLOAT_CONST(t):
     r'(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?'
     t.value = float(t.value)
     return t
+
+# \d matches any digit; [0-9] and the '+' signifies one or more occurences
+def t_INT_CONST(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+
+
 
 # starts with " and ends with "
 # " <stuff> "; <stuff> is represented by (?:\\.|[^"\\])*
@@ -96,7 +118,7 @@ t_GEQ = r'>='
 # ID must start with a letter and then followed be zero or more letters, numbers, or underscores
 # t.type = reserved.get(t.value, 'ID') is used to check for reserved keywords
 def t_ID(t):
-    r'[a-zA-Z][a-zA-Z0-9_]*'
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
     t.type = reserved.get(t.value, 'ID')
     return t
 
@@ -109,6 +131,7 @@ t_ignore = ' \t'
 # by the lexer. This allows the lexer to detemrine theline on which each token occurs for debugging and error reporting
 def t_newline(t):
     r'\n+'
+    t.lexer.lineStart = t.lexer.lexpos
     t.lexer.lineno += t.value.count('\n')
 
 # Another special name. The body of this function determines what happens when the lexer encounters an
