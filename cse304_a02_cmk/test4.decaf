@@ -1,0 +1,15 @@
+class test4
+{
+    public static int f(int x, int y)
+    {
+        int a;
+        int b;
+        a = x + y;
+        b = x - y;
+        return a * b;
+    }
+    public static void main()
+    {
+        test4.f(20, 10);
+    }
+}
