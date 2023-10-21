@@ -25,20 +25,17 @@ precedence = (
     ('right', 'NOT', 'UMINUS', "UPLUS")
 )
 
-names = dict()
 
 def p_program(p):
-    '''program : stress
-        
-        stress : class_decl stress
-                | empty'''
-    print(p[0])
-    print(p[1])
-    p[0] = Program(names, p[1].things)
-    
+    '''program : class_decl program
+                | empty
+    '''
+    pass
+     
 def p_class_decl(p):
     '''class_decl : CLASS ID EXTENDS ID '{' class_body_decl '}'
                 | CLASS ID '{' class_body_decl '}' '''
+    pass
     
 def p_class_body_decl(p):
     '''class_body_decl : field_decl
@@ -47,79 +44,108 @@ def p_class_body_decl(p):
                         | class_body_decl field_decl
                         | class_body_decl method_decl
                         | class_body_decl constructor_decl'''
+    pass
 
 def p_field_decl(p):
-    '''field_decl : modifier var_decl
-    
-    modifier : PUBLIC STATIC
-            | PUBLIC
+    '''field_decl : modifier var_decl'''
+    pass
+
+def p_modifier(p):
+    '''modifier : PUBLIC STATIC
             | PRIVATE STATIC
+            | PUBLIC
             | PRIVATE
             | STATIC
-            | empty
-            
-    var_decl : type variables ';' '''
+            | empty'''
+def p_var_decl(p):
+    '''var_decl : type variables ';' '''
+    pass
+
 def p_type(p):
     '''type : INT
         | FLOAT
         | BOOLEAN
         | ID'''
+    pass
 
 def p_variables(p):
-    '''variables : variable temp_3
-    	
-    temp_3 : ',' variable temp_3
-		| empty
-        
-    variable : ID'''
+    '''variables : variable variables_cont'''
+    pass
+
+def p_variables_cont(p):
+    '''variables_cont : ',' variable variables_cont
+		                | empty'''
+    pass
+
+def p_variable(p):
+    '''variable : ID'''
+    pass
             
 def p_method_decl(p):
     '''method_decl : modifier type ID LEFTPAREN formals RIGHTPAREN block
-				| modifier VOID ID LEFTPAREN formals RIGHTPAREN block
-     
-    constructor_decl : modifier ID LEFTPAREN formals RIGHTPAREN block
-            
-    formals : formal_param temp_6
-            | empty
-            
-    temp_6 : ',' formal_param temp_6
-            | empty
-            
-            
-    formal_param : type variable'''
+				| modifier VOID ID LEFTPAREN formals RIGHTPAREN block'''
+    pass
+
+def p_constructor_decl(p):
+    '''constructor_decl : modifier ID LEFTPAREN formals RIGHTPAREN block'''
+    pass
+
+def p_formals(p):
+    '''formals : formal_param formals_cont
+            | empty'''
+    pass
+
+def p_formals_cont(p):
+    '''formals_cont : ',' formal_param formals_cont
+            | empty'''
+    pass
+
+def p_formal_param(p):
+    '''formal_param : type variable'''
+    pass
 
 def p_block(p):
-	'''block : '{' temp_7 '}'
-	
-    temp_7 : stmt temp_7
-		| empty
-        
-    stmt : open_stmt
-		| close_stmt
-        
-    open_stmt : IF LEFTPAREN expr RIGHTPAREN stmt
-			| IF LEFTPAREN expr RIGHTPAREN close_stmt ELSE open_stmt
-            | WHILE LEFTPAREN expr RIGHTPAREN open_stmt
-            | FOR LEFTPAREN temp_8 ';' temp_9 ';' temp_8 RIGHTPAREN open_stmt
-    close_stmt : RETURN temp_9 ';'
-			| stmt_expr ';'
+    '''block : '{' stmt_list '}' '''
+    pass
+
+def p_stmt_list(p):
+    ''' stmt_list : stmt stmt_list
+                | empty '''
+    pass
+
+def p_stmt(p):
+    '''stmt : IF LEFTPAREN expr RIGHTPAREN stmt
+            | IF LEFTPAREN expr RIGHTPAREN stmt ELSE stmt
+            | WHILE LEFTPAREN expr RIGHTPAREN stmt 
+            | FOR LEFTPAREN for_cond_1 ';' for_cond_2 ';' for_cond_3 RIGHTPAREN stmt
+            | RETURN return_val ';'
+            | stmt_expr ';'
             | BREAK ';'
             | CONTINUE ';'
-            | var_decl
-            | ';'
             | block
-			| IF LEFTPAREN expr RIGHTPAREN close_stmt ELSE close_stmt
-            | WHILE LEFTPAREN expr RIGHTPAREN close_stmt
-            | FOR LEFTPAREN temp_8 ';' temp_9 ';' temp_8 RIGHTPAREN close_stmt
-    temp_8 : stmt_expr
-		| empty
-        
-    temp_9 : expr
-		| empty
-    
-	stmt_expr : assign
-		| method_invocation  
-	'''
+            | var_decl
+            | ';' '''
+    pass
+
+def p_for_cond_1(p):
+    '''for_cond_1 : stmt_expr
+                | empty'''
+    pass
+
+def p_for_cond_2(p):
+    '''for_cond_2 : expr
+                | empty'''
+    pass
+
+def p_for_cond_3(p):
+    '''for_cond_3 : stmt_expr
+                | empty'''
+    pass
+
+def p_return_val(p):
+    '''return_val : expr
+                | empty'''
+    pass
 
 def p_literal(p):
     '''literal : INT_CONST
@@ -134,55 +160,111 @@ def p_primary(p):
                 | THIS
                 | SUPER
                 | LEFTPAREN expr RIGHTPAREN 
-                | NEW ID LEFTPAREN test_1 RIGHTPAREN
+                | NEW ID LEFTPAREN arguments RIGHTPAREN
                 | lhs
-                | method_invocation
-                 
-        test_1 : expr test_2
-                | empty
-                 
-        test_2 : ',' expr test_2 
-                | empty
+                | method_invocation '''
+    pass
+def p_arguments(p):
+    ''' arguments : expr arguments_cont
+            | empty '''
+    pass
 
-                
-        lhs : field_access
-        
-        field_access : primary '.' ID
-                | ID
-                        
-        method_invocation : field_access LEFTPAREN test_1 RIGHTPAREN '''
+def p_arguments_cont(p):
+    ''' arguments_cont : ',' expr arguments_cont 
+                    | empty '''
+    pass
 
+def p_lhs(p):
+    '''lhs : field_access'''         
+    pass
+
+def p_field_access(p):
+    '''field_access : primary '.' ID
+                    | ID'''
+    pass
+
+def p_method_invocation(p):
+    ''' method_invocation : field_access LEFTPAREN arguments RIGHTPAREN '''
+    pass
 
 def p_expr(p):
     '''expr : primary
-                | assign
-                | arith_op
-                | bool_op 
-                | unary_op
-        
-        assign : lhs '=' expr
+            | assign'''
+pass
+
+def p_assign(p):
+    '''assign : lhs '=' expr
                 | lhs INCREMENT
-                | INCREMENT lhs
+                | INCREMENT lhs 
                 | lhs DECREMENT
-                | DECREMENT lhs
-                        
-        arith_op : expr PLUS expr
-                | expr MINUS expr
-                | expr MULTIPLY expr
-                | expr DIVIDE expr
-        
-        bool_op : expr BOOL_AND expr
-                | expr BOOL_OR expr
-                | expr EQUALITY expr
-                | expr DISQUALITY expr
-                | expr LESSTHAN expr
-                | expr GREATERTHAN expr
-                | expr LEQ expr
-                | expr GEQ expr
-        
-        unary_op : PLUS expr %prec UPLUS
-                | MINUS expr %prec UMINUS
-                | NOT expr'''
+                | DECREMENT lhs'''
+    pass
+
+def p_add_expr(p):
+    '''expr : expr PLUS expr'''
+    pass
+def p_sub_expr(p):
+    '''expr : expr MINUS expr'''
+    pass
+
+def p_mult_expr(p):
+    '''expr : expr MULTIPLY expr'''
+    pass
+
+def p_div_expr(p):
+    '''expr : expr DIVIDE expr '''
+    pass
+
+def p_conj_expr(p):
+    '''expr : expr BOOL_AND expr'''
+    pass
+
+def p_disj_expr(p):
+    '''expr : expr BOOL_OR expr'''
+    pass
+
+def p_equals_expr(p):
+    '''expr : expr EQUALITY expr'''
+    pass
+
+def p_notequals_expr(p):
+    '''expr : expr DISQUALITY expr'''
+    pass
+
+def p_lt_expr(p):
+    '''expr : expr LESSTHAN expr'''
+    pass
+
+def p_lte_expr(p):
+    '''expr : expr LEQ expr'''
+    pass
+
+def p_gt_expr(p):
+    '''expr : expr GREATERTHAN expr'''
+    pass
+
+def p_gte_expr(p):
+    '''expr : expr GEQ expr'''
+    pass
+
+def p_pos_expr(p):
+    '''expr : PLUS expr %prec UPLUS'''
+    pass
+
+def p_minus_expr(p):
+    '''expr : MINUS expr %prec UMINUS'''
+    pass
+
+def p_not_expr(p):
+    '''expr : NOT expr'''
+    pass
+def p_stmt_expr(p):
+    '''stmt_expr : assign
+                | method_invocation'''
+    
+def p_empty(p):
+    '''empty :'''
+    pass
 
 def p_error(p):
     print()
@@ -201,8 +283,6 @@ def p_error(p):
     
 				
 
-def p_empty(p):
-    '''empty :'''
-    pass
+
                 
 
