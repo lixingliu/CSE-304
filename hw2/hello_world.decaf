@@ -2,8 +2,7 @@ class hello_world
 {
     public static void main()
     {
-        //a
-        x = "5"
         Out.print("Hello World!\n");
+
     }
 }

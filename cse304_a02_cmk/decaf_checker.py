@@ -1,13 +1,3 @@
-'''
-Name: Li Xing Liu
-Netid: lixiliu
-Student Id: 113318331
-
-Name: Andy You
-Netid: Andyou
-Student Id: 113494190
-'''
-
 
 
 import sys
@@ -15,8 +5,8 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 def just_scan():
-    fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = './hello_world.decaf'
+    # fn = sys.argv[1] if len(sys.argv) > 1 else ""
+    fn = "C:\\Users\\lixin\\CSE-304\\hw2\\hello_world.decaf"
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
@@ -35,8 +25,8 @@ def just_scan():
 
 
 def main():
-    fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = './hello_world.decaf'
+    # fn = sys.argv[1] if len(sys.argv) > 1 else ""
+    fn = "C:\\Users\\lixin\\CSE-304\\hw2\\hello_world.decaf"
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
