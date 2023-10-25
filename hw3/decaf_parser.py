@@ -28,12 +28,17 @@ precedence = (
 
 def p_program(p):
     '''program : class_decl_list'''
-    p[0] = Program(p[1])
+    p[0] = Program(p[1].things)
     return True
      
 def p_class_decl_list(p):
     '''class_decl_list : class_decl class_decl_list
                     | empty'''
+    if len(p) == 2:
+        p[0] = []
+    else:
+        p[2].things.append(p[1])
+        p[0] = p[2] 
     pass
 
 def p_class_decl(p):

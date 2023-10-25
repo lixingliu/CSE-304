@@ -16,7 +16,7 @@ import ply.yacc as yacc
 
 def just_scan():
     # fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = "C:\\Users\\lixin\\CSE-304\\hw2\\hello_world.decaf"
+    fn = "test.txt"
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
@@ -36,26 +36,50 @@ def just_scan():
 
 def main():
     # fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = "C:\\Users\\lixin\\CSE-304\\hw2\\hello_world.decaf"
+    # fn = "C:\\Users\\lixin\\CSE-304\\hw2\\hello_world.decaf"
+    fn = "test.txt"
+    source = []
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
         sys.exit()
+    fh = open(fn, 'r')
+    source = fh.read()
+    fh.close()
     import decaf_lexer
     import decaf_parser
     lexer = lex.lex(module = decaf_lexer, debug = 1)
     parser = yacc.yacc(module = decaf_parser, debug = 1)
-
-    fh = open(fn, 'r')
-    source = fh.read()
-    fh.close()
+    print()
     result = parser.parse(source, lexer = lexer, debug = 1)
-    #print(result)
-    # Parsing Successful
-    #print()
+    print()
     print("YES")
-    #print()
+    print()
+    print("SOURCE:")
+    print(source)
+    print()
+    print("RESULT:", type(result))
+    print(result)
+    print()
+    #for line in source:
+    #    print()
+    #    print("INPUT:", line)
+    #    print()
+    #    result = parser.parse(line, lexer = lexer, debug = 1)
+    #    print()
+    #    #print(result)
+    #    # Parsing Successful
+    #    #print()
+    #    print("YES")
+    #    print()
+    #    print("INPUT:", line)
+    #    print()
+    #    print("RESULT:", type(result))
+    #    print(result)
+    #    print()
+    return "Done"
 
 if __name__ == "__main__":
-    just_scan()
-    main()
+    #just_scan()
+    result = main()
+    print(result)

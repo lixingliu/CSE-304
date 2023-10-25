@@ -18,6 +18,8 @@ class Program(Node):
         self.classes = classes
     def __str__(self):
         res = "CLASSES: " + str(self.classes)
-        for node in self.classes:
+        # for node in self.classes:
+        return res
+
             
 
