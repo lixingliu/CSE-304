@@ -27,11 +27,15 @@ precedence = (
 
 
 def p_program(p):
-    '''program : class_decl program
-                | empty
-    '''
-    pass
+    '''program : class_decl_list'''
+    p[0] = Program(p[1])
+    return True
      
+def p_class_decl_list(p):
+    '''class_decl_list : class_decl class_decl_list
+                    | empty'''
+    pass
+
 def p_class_decl(p):
     '''class_decl : CLASS ID EXTENDS ID '{' class_body_decl '}'
                 | CLASS ID '{' class_body_decl '}' '''
