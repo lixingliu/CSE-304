@@ -87,7 +87,7 @@ t_ignore_SING_COMMENT = r'//.*'
 
 # \d matches any digit; [0-9] and the '+' signifies one or more occurences
 def t_INT_CONST(t):
-    r'\d+'
+    r'\d+' ## are we acccepting 00000 ?
     t.value = int(t.value)
     return t
 
@@ -96,7 +96,7 @@ def t_INT_CONST(t):
 # ([eE][+-]?\d+)? is used for the second kind of floating point numbers; starts with a e or E and is followed 
 # by an optional + or - and then one or more digits. The ? surrounding the entire thing makes it all optional
 def t_FLOAT_CONST(t):
-    r'(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?'
+    r'(\d*\.\d+)([eE][+-]?\d+)?'
     t.value = float(t.value)
     return t
 
@@ -106,7 +106,7 @@ def t_FLOAT_CONST(t):
 # \\. means it represents anything like \n, \t, \\, or \"; stuff with special meaning
 # [^"\\] means it will ignore all " and \; " and \ are special special characters that strings cannot have
 def t_STRING_CONST(t):
-    r'"(?:\\.|[^"\\])*"'
+    r'\"(?:\\.|[^\"\\])*\"'
     t.value = t.value[1:-1]
     t.value = re.sub(r'\\(.)', r'1', t.value) 
     return t
