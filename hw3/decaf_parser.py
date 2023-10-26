@@ -44,7 +44,10 @@ def p_class_decl_list(p):
 def p_class_decl(p):
     '''class_decl : CLASS ID EXTENDS ID '{' class_body_decl '}'
                 | CLASS ID '{' class_body_decl '}' '''
-    p[0] = Class_decl(p[2])
+    if len(p) == 6:
+        p[0] = Class_decl(p[2], "", p[4])
+    else:
+        p[0] = Class_decl(p[2], p[4], p[6])
     pass
     
 def p_class_body_decl(p):
@@ -54,10 +57,16 @@ def p_class_body_decl(p):
                         | class_body_decl field_decl
                         | class_body_decl method_decl
                         | class_body_decl constructor_decl'''
-    pass
+    if len(p) == 3:
+        p[1].things.append(p[2])
+        p[0] = p[1]
+    else:
+        p[0] = Class_body_decl()
+        p[0].things.append(p[1])
 
 def p_field_decl(p):
     '''field_decl : modifier var_decl'''
+    p[0] = Field_decl(p[1], p[2], 5)
     pass
 
 def p_modifier(p):
@@ -67,8 +76,18 @@ def p_modifier(p):
             | PRIVATE
             | STATIC
             | empty'''
+    if len(p) == 3:
+        p[0] = Modifier(p[1] + ' ' + p[2])
+    elif len(p) == 2:
+        if p[1] == None:
+            p[0] = Modifier("private")
+        else:
+            p[0] = Modifier(p[1])
+    pass
+
 def p_var_decl(p):
     '''var_decl : type variables ';' '''
+    p[0] = Var_decl(p[1], p[2])
     pass
 
 def p_type(p):
@@ -76,10 +95,12 @@ def p_type(p):
         | FLOAT
         | BOOLEAN
         | ID'''
+    p[0] = Type(p[1])
     pass
 
 def p_variables(p):
     '''variables : variable variables_cont'''
+    p[0] = Variables(p[1])
     pass
 
 def p_variables_cont(p):
@@ -89,6 +110,7 @@ def p_variables_cont(p):
 
 def p_variable(p):
     '''variable : ID'''
+    p[0] = Variable(p[1])
     pass
             
 def p_method_decl(p):

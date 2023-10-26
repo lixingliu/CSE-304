@@ -48,10 +48,10 @@ def main():
     fh.close()
     import decaf_lexer
     import decaf_parser
-    lexer = lex.lex(module = decaf_lexer, debug = 1)
-    parser = yacc.yacc(module = decaf_parser, debug = 1)
+    lexer = lex.lex(module = decaf_lexer, debug = 0)
+    parser = yacc.yacc(module = decaf_parser, debug = 0)
     print()
-    result = parser.parse(source, lexer = lexer, debug = 1)
+    result = parser.parse(source, lexer = lexer, debug = 0)
     print()
     print("YES")
     print()
