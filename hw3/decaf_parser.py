@@ -31,16 +31,16 @@ precedence = (
 
 def p_program(p):
     '''program : class_decl_list'''
-    p[0] = Program(p[1].things)
+    p[0] = Program(p[1].things) #Starting with the program, we create a list of classes
     return True
      
 def p_class_decl_list(p):
     '''class_decl_list : class_decl class_decl_list
                     | empty'''
     if len(p) == 2:
-        p[0] = Class_decl_list()
+        p[0] = Class_decl_list() #if we dont have a class_decl to add, we create the list and return it up
     else:
-        p[2].things.append(p[1])
+        p[2].things.append(p[1])    #after getting the class_decl_list, we add the class to the list and send it up
         p[0] = p[2] 
     pass
 
@@ -69,9 +69,7 @@ def p_class_body_decl(p):
 
 def p_field_decl(p):
     '''field_decl : modifier var_decl'''
-    global FIELD_COUNTER
-    FIELD_COUNTER = FIELD_COUNTER + 1
-    p[0] = Field_decl(p[1], p[2], FIELD_COUNTER)
+    p[0] = Field_decl(p[1], p[2])
     pass
 
 def p_modifier(p):
@@ -105,12 +103,18 @@ def p_type(p):
 
 def p_variables(p):
     '''variables : variable variables_cont'''
-    p[0] = Variables(p[1])
+    p[2].things.append(p[1])
+    p[0] = Variables(p[2])
     pass
 
 def p_variables_cont(p):
     '''variables_cont : ',' variable variables_cont
 		                | empty'''
+    if len(p) == 2:
+        p[0] = Variables_cont()
+    else:
+        p[3].things.append(p[2])
+        p[0] = p[3]
     pass
 
 def p_variable(p):
@@ -121,16 +125,12 @@ def p_variable(p):
 def p_method_decl(p):
     '''method_decl : modifier type ID LEFTPAREN formals RIGHTPAREN block
 				| modifier VOID ID LEFTPAREN formals RIGHTPAREN block'''
-    global METHOD_COUNTER
-    METHOD_COUNTER = METHOD_COUNTER + 1
-    p[0] = Method_decl(METHOD_COUNTER, p[3], p[1], p[2])
+    p[0] = Method_decl(p[3], p[1], p[2])
     pass
 
 def p_constructor_decl(p):
     '''constructor_decl : modifier ID LEFTPAREN formals RIGHTPAREN block'''
-    global CONSTRUCTOR_COUNTER
-    CONSTRUCTOR_COUNTER = CONSTRUCTOR_COUNTER + 1
-    p[0] = Constructor_decl(CONSTRUCTOR_COUNTER, p[1])
+    p[0] = Constructor_decl(p[1])
     pass
 
 def p_formals(p):

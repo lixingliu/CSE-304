@@ -1,9 +1,11 @@
 class A {
-    int x;
+    string w, x, y;
+    boolean z;
+    King henry;
     A () {
         this.x = 0;
     }
-     int f() {
+    int f() {
         return this.x + 1;
     }
     public int g() {
@@ -13,6 +15,7 @@ class A {
         return i;
     }
 }
+
 class B extends A {
     int y;
     public A s;
