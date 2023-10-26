@@ -130,21 +130,32 @@ def p_method_decl(p):
 
 def p_constructor_decl(p):
     '''constructor_decl : modifier ID LEFTPAREN formals RIGHTPAREN block'''
-    p[0] = Constructor_decl(p[1])
+    p[0] = Constructor_decl(p[1], p[4])
     pass
 
 def p_formals(p):
     '''formals : formal_param formals_cont
             | empty'''
+    if len(p) == 2:
+        p[0] = ""
+    else:
+        p[2].things.append(p[1])
+        p[0] = Formals(p[2])
     pass
 
 def p_formals_cont(p):
     '''formals_cont : ',' formal_param formals_cont
             | empty'''
+    if len(p) == 2:
+        p[0] = Formals_cont()
+    else:
+        p[3].things.append(p[2])
+        p[0] = p[3]
     pass
 
 def p_formal_param(p):
     '''formal_param : type variable'''
+    p[0] = Formal_param(p[1], p[2])
     pass
 
 def p_block(p):

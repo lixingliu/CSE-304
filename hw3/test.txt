@@ -2,7 +2,7 @@ class A {
     string w, x, y;
     boolean z;
     King henry;
-    A () {
+    A (int j, int k) {
         this.x = 0;
     }
     int f() {
@@ -13,17 +13,5 @@ class A {
         i = this.f();
         i++;
         return i;
-    }
-}
-
-class B extends A {
-    int y;
-    public A s;
-    B () {
-        this.y = 2;
-        this.s = new A();
-    }
-    public int f(int k) {
-        return super.f() + k;
     }
 }

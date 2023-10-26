@@ -28,11 +28,12 @@ class Program(Node):
             constructor = ""
             method = ""
             for stuff in thing.class_body_decl.things:
-                if type(stuff) == type(Constructor_decl(None)):
+                if type(stuff) == type(Constructor_decl(None, None)):
                     global CONSTRUCTOR_COUNTER
                     CONSTRUCTOR_COUNTER = CONSTRUCTOR_COUNTER + 1
+                    
                     constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
-                    constructor = constructor + f"\nConstructor Parameters: "
+                    constructor = constructor + f"\nConstructor Parameters: {len(stuff.formals.formal_param.things)}"
                     constructor = constructor + f"\nVariable Table: "
                     constructor = constructor + f"\nConstructor Body: "
 
@@ -76,7 +77,7 @@ class Class_decl(Node):
         self.class_body_decl = class_body_decl
     def __str__(self):
         pass
-    
+
 class Class_body_decl(Node):
     def __init__(self):
         super().__init__()
@@ -145,11 +146,35 @@ class Variables_cont(Node):
         pass
 
 class Constructor_decl(Node):
-    def __init__(self, modifier):
+    def __init__(self, modifier, formals):
         super().__init__()
         self.modifier = modifier
+        self.formals = formals
     def __str__(self):
         pass
+
+class Formals(Node):
+    def __init__(self, formal_param):
+        super().__init__()
+        self.formal_param = formal_param
+    def __str__(self):
+        pass
+
+class Formals_cont(Node):
+    def __init__(self):
+        super().__init__()
+        self.things = []
+    def __str__(self):
+        pass
+
+class Formal_param(Node):
+    def __init__(self, type, variable):
+        super().__init__()
+        self.type = type
+        self.variable = variable
+    def __str__(self):
+        pass
+        
 
 class Method_decl(Node):
     def __init__(self, method_name, modifier, type):
