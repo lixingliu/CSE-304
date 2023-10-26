@@ -14,6 +14,9 @@ from decaf_ast import *
 # program ::= class_decl* 
 # this means that the program consists of zero or more classes
 
+FIELD_COUNTER = 0
+CONSTRUCTOR_COUNTER = 0
+METHOD_COUNTER = 0
 precedence = (
     ('right', '='),
     ('left', 'BOOL_OR'),
@@ -66,7 +69,9 @@ def p_class_body_decl(p):
 
 def p_field_decl(p):
     '''field_decl : modifier var_decl'''
-    p[0] = Field_decl(p[1], p[2], 5)
+    global FIELD_COUNTER
+    FIELD_COUNTER = FIELD_COUNTER + 1
+    p[0] = Field_decl(p[1], p[2], FIELD_COUNTER)
     pass
 
 def p_modifier(p):
@@ -77,12 +82,12 @@ def p_modifier(p):
             | STATIC
             | empty'''
     if len(p) == 3:
-        p[0] = Modifier(p[1] + ' ' + p[2])
+        p[0] = Modifier(p[1], p[2])
     elif len(p) == 2:
         if p[1] == None:
-            p[0] = Modifier("private")
+            p[0] = Modifier("private", "")
         else:
-            p[0] = Modifier(p[1])
+            p[0] = Modifier(p[1], "")
     pass
 
 def p_var_decl(p):
@@ -116,10 +121,16 @@ def p_variable(p):
 def p_method_decl(p):
     '''method_decl : modifier type ID LEFTPAREN formals RIGHTPAREN block
 				| modifier VOID ID LEFTPAREN formals RIGHTPAREN block'''
+    global METHOD_COUNTER
+    METHOD_COUNTER = METHOD_COUNTER + 1
+    p[0] = Method_decl(METHOD_COUNTER, p[3], p[1], p[2])
     pass
 
 def p_constructor_decl(p):
     '''constructor_decl : modifier ID LEFTPAREN formals RIGHTPAREN block'''
+    global CONSTRUCTOR_COUNTER
+    CONSTRUCTOR_COUNTER = CONSTRUCTOR_COUNTER + 1
+    p[0] = Constructor_decl(CONSTRUCTOR_COUNTER, p[1])
     pass
 
 def p_formals(p):
