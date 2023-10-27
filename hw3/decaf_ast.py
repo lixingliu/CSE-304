@@ -31,10 +31,20 @@ class Program(Node):
                 if type(stuff) == type(Constructor_decl(None, None)):
                     global CONSTRUCTOR_COUNTER
                     CONSTRUCTOR_COUNTER = CONSTRUCTOR_COUNTER + 1
-                    
+
+                    constructor_param_list = []
+                    constructor_param_list_counter = 0
+                    variable_table = ""
+                    for constructor_stuff in stuff.formals.formal_param.things[::-1]:
+                        constructor_param_list_counter = constructor_param_list_counter + 1
+                        constructor_param_list.append(constructor_param_list_counter)
+                        print(constructor_stuff.variable.variable_name)
+                        print(constructor_stuff.type.type_value)
+                        variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, ?, {constructor_stuff.type.type_value}"
+
                     constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
-                    constructor = constructor + f"\nConstructor Parameters: {len(stuff.formals.formal_param.things)}"
-                    constructor = constructor + f"\nVariable Table: "
+                    constructor = constructor + f"\nConstructor Parameters: {str(constructor_param_list).strip('[]')}"
+                    constructor = constructor + f"\nVariable Table: {variable_table}"
                     constructor = constructor + f"\nConstructor Body: "
 
                 if type(stuff) == type(Field_decl(None, None)):
