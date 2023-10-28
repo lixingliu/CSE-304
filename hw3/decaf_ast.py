@@ -38,8 +38,6 @@ class Program(Node):
                     for constructor_stuff in stuff.formals.formal_param.things[::-1]:
                         constructor_param_list_counter = constructor_param_list_counter + 1
                         constructor_param_list.append(constructor_param_list_counter)
-                        print(constructor_stuff.variable.variable_name)
-                        print(constructor_stuff.type.type_value)
                         variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, ?, {constructor_stuff.type.type_value}"
 
                     constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
@@ -53,13 +51,21 @@ class Program(Node):
                         FIELD_COUNTER = FIELD_COUNTER + 1
                         field = field + f"\nFIELD {FIELD_COUNTER}, {str(field_stuff.variable_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.var_decl.type.type_value)}"
 
-                if type(stuff) == type(Method_decl(None, None, None)):
+                if type(stuff) == type(Method_decl(None, None, None, None)):
                     global METHOD_COUNTER
                     METHOD_COUNTER = METHOD_COUNTER + 1
+                    
+                    method_param_list = []
+                    method_param_list_counter = 0
+                    variable_table = ""
+                    for method_stuff in stuff.formals.formal_param.things[::-1]:
+                        method_param_list_counter = method_param_list_counter + 1
+                        method_param_list.append(method_param_list_counter)
+                        variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, ?, {method_stuff.type.type_value}"
+
                     method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(stuff.method_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.type)}"
-                    method = method + f"\nMethod Parameters: "
-                    method = method + f"\nVariable Table: "
-                    method = method + f"\nVariable "
+                    method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
+                    method = method + f"\nVariable Table:  {variable_table}"
                     method = method + f"\nMethod Body: "
 
             res = res +f"\nClass Name: {str(thing.class_name)}"
@@ -187,10 +193,11 @@ class Formal_param(Node):
         
 
 class Method_decl(Node):
-    def __init__(self, method_name, modifier, type):
+    def __init__(self, method_name, modifier, type, formals):
         super().__init__()
         self.method_name = method_name
         self.modifier = modifier
         self.type = type
+        self.formals = formals
     def __str__(self):
         pass
