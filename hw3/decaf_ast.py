@@ -58,6 +58,7 @@ class Program(Node):
                     method_param_list = []
                     method_param_list_counter = 0
                     variable_table = ""
+
                     for method_stuff in stuff.formals.formal_param.things[::-1]:
                         method_param_list_counter = method_param_list_counter + 1
                         method_param_list.append(method_param_list_counter)
@@ -172,7 +173,10 @@ class Constructor_decl(Node):
 class Formals(Node):
     def __init__(self, formal_param):
         super().__init__()
-        self.formal_param = formal_param
+        if formal_param == None:
+            self.formal_param = []
+        else:
+            self.formal_param = formal_param
     def __str__(self):
         pass
 

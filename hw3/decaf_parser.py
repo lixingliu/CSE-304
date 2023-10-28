@@ -137,7 +137,7 @@ def p_formals(p):
     '''formals : formal_param formals_cont
             | empty'''
     if len(p) == 2:
-        p[0] = ""
+        p[0] = Formals(None)
     else:
         p[2].things.append(p[1])
         p[0] = Formals(p[2])
