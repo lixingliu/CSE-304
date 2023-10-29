@@ -233,7 +233,8 @@ def p_literal(p):
                 | STRING_CONST
                 | NULL
                 | TRUE
-                | FALSE'''   
+                | FALSE''' 
+    p[0] = p[1]  
     pass
     
 def p_primary(p):
@@ -249,11 +250,21 @@ def p_primary(p):
 def p_arguments(p):
     ''' arguments : expr arguments_cont
             | empty '''
+    if len(p) == 2:
+        p[0] = ""
+    else:
+        p[2].things.append(p[1])
+        p[0] = Arguments(p[2])
     pass
 
 def p_arguments_cont(p):
     ''' arguments_cont : ',' expr arguments_cont 
                     | empty '''
+    if len(p) == 2:
+        p[0] = Arguments_cont()
+    else:
+        p[3].things.append(p[2])
+        p[0] = p[3]
     pass
 
 def p_lhs(p):

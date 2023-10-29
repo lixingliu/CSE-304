@@ -264,3 +264,16 @@ class For_stmt(Node):
         self.then = body
     def __str__(self):
         pass
+    
+class Arguments(Node):
+    def __init__(self,  arguments):
+        super().__init__()
+        self.arguments = arguments
+    def __str__(self):
+        pass
+class Arguments_cont(Node):
+    def __init__(self):
+        super().__init__()
+        self.things = []
+    def __str__(self):
+        pass
