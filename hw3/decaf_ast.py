@@ -35,15 +35,28 @@ class Program(Node):
                     constructor_param_list = []
                     constructor_param_list_counter = 0
                     variable_table = ""
+                    constructor_body = ""
                     for constructor_stuff in stuff.formals.formal_param.things[::-1]:
                         constructor_param_list_counter = constructor_param_list_counter + 1
                         constructor_param_list.append(constructor_param_list_counter)
                         variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, ?, {constructor_stuff.type.type_value}"
 
+                    for constructor_stmt in stuff.body.things[::-1]:
+                        if(type(constructor_stmt) == type(Ifelsewhile_stmt(None, None, None))):
+                            constructor_body = constructor_body + f"\n{str(constructor_stmt.type)}( {str(constructor_stmt.cond)}, {str(constructor_stmt.then)}, {str(constructor_stmt.els)} ),"
+                        if(type(constructor_stmt) == type(For_stmt(None, None, None))):
+                            constructor_body = constructor_body + f"\nFor( {str(constructor_stmt.cond1)}, {str(constructor_stmt.cond2)}, {str(constructor_stmt.cond3)},  {str(constructor_stmt.body)}),"
+                        if(type(constructor_stmt) == type(Stmt(None, None))):
+                            if(constructor_stmt.type != None):
+                                constructor_body = constructor_body + f"\n{str(constructor_stmt.type)}( {str(constructor_stmt.component)} ),"
+                        #stmt_expr ->
+                        if(type(constructor_stmt) == type(Var_decl(None))):
+                            constructor_body = constructor_body + f"\n{str(constructor_stmt.type)}( {str(constructor_stmt.variables)} ),"
+
                     constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
                     constructor = constructor + f"\nConstructor Parameters: {str(constructor_param_list).strip('[]')}"
                     constructor = constructor + f"\nVariable Table: {variable_table}"
-                    constructor = constructor + f"\nConstructor Body: "
+                    constructor = constructor + f"\nConstructor Body: {constructor_body[:-1]}"
 
                 if type(stuff) == type(Field_decl(None, None)):
                     for field_stuff in stuff.var_decl.variables.variable.things[::-1]:
@@ -58,15 +71,29 @@ class Program(Node):
                     method_param_list = []
                     method_param_list_counter = 0
                     variable_table = ""
+                    method_body = ""
                     for method_stuff in stuff.formals.formal_param.things[::-1]:
                         method_param_list_counter = method_param_list_counter + 1
                         method_param_list.append(method_param_list_counter)
                         variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, ?, {method_stuff.type.type_value}"
-
+                    
+                    for method_stmt in stuff.body.things[::-1]:
+                        if(type(method_stmt) == type(Ifelsewhile_stmt(None, None, None))):
+                            method_body = method_body + f"\n{str(method_stmt.type)}( {str(method_stmt.cond)}, {str(method_stmt.then)}, {str(method_stmt.els)} ),"
+                        if(type(method_stmt) == type(For_stmt(None, None, None))):
+                            method_body = method_body + f"\nFor( {str(method_stmt.cond1)}, {str(method_stmt.cond2)}, {str(method_stmt.cond3)},  {str(method_stmt.body)}),"
+                        if(type(method_stmt) == type(Stmt(None, None))):
+                            if(method_stmt.type != None):
+                                method_body = method_body + f"\n{str(method_stmt.type)}( {str(method_stmt.component)} ),"
+                        #stmt_expr ->
+                        if(type(method_stmt) == type(Var_decl(None))):
+                            method_body = method_body + f"\n{str(method_stmt.type)}( {str(method_stmt.variables)} ),"
+                   
                     method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(stuff.method_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.type)}"
                     method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
                     method = method + f"\nVariable Table:  {variable_table}"
-                    method = method + f"\nMethod Body: "
+                    method = method + f"\nMethod Body:   {method_body[:-1]}"
+                    
 
             res = res +f"\nClass Name: {str(thing.class_name)}"
             res = res + f"\nSuperclass Name: {str(thing.superclass_name)}"
@@ -162,10 +189,11 @@ class Variables_cont(Node):
         pass
 
 class Constructor_decl(Node):
-    def __init__(self, modifier, formals):
+    def __init__(self, modifier, formals, body):
         super().__init__()
         self.modifier = modifier
         self.formals = formals
+        self.body = body
     def __str__(self):
         pass
 
@@ -191,13 +219,48 @@ class Formal_param(Node):
     def __str__(self):
         pass
         
-
 class Method_decl(Node):
-    def __init__(self, method_name, modifier, type, formals):
+    def __init__(self, method_name, modifier, type, formals, body):
         super().__init__()
         self.method_name = method_name
         self.modifier = modifier
         self.type = type
         self.formals = formals
+        self.body = body
+    def __str__(self):
+        pass
+
+class Block(Node):
+    def __init__(self):
+        super().__init__()
+        self.things = []
+    def __str__(self):
+        pass
+
+class Stmt(Node):
+    def __init__(self, type, component):
+        super().__init__()
+        self.type = type
+        self.component = component
+    def __str__(self):
+        pass
+
+class Ifelsewhile_stmt(Node):
+    def __init__(self, type, cond, then, els):
+        super().__init__()
+        self.type = type
+        self.cond = cond
+        self.then = then
+        self.els = els
+    def __str__(self):
+        pass
+
+class For_stmt(Node):
+    def __init__(self, cond1, cond2, cond3, body):
+        super().__init__()
+        self.cond1 = cond1
+        self.cond2 = cond2
+        self.cond3 = cond3
+        self.then = body
     def __str__(self):
         pass

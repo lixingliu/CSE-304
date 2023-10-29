@@ -125,12 +125,12 @@ def p_variable(p):
 def p_method_decl(p):
     '''method_decl : modifier type ID LEFTPAREN formals RIGHTPAREN block
 				| modifier VOID ID LEFTPAREN formals RIGHTPAREN block'''
-    p[0] = Method_decl(p[3], p[1], p[2], p[5])
+    p[0] = Method_decl(p[3], p[1], p[2], p[5], p[7])
     pass
 
 def p_constructor_decl(p):
     '''constructor_decl : modifier ID LEFTPAREN formals RIGHTPAREN block'''
-    p[0] = Constructor_decl(p[1], p[4])
+    p[0] = Constructor_decl(p[1], p[4], p[6])
     pass
 
 def p_formals(p):
@@ -159,12 +159,13 @@ def p_formal_param(p):
     pass
 
 def p_block(p):
-    '''block : '{' stmt_list '}' '''
-    pass
-
-def p_stmt_list(p):
-    ''' stmt_list : stmt stmt_list
+    ''' block : stmt block
                 | empty '''
+    if len(p) == 2:
+        p[0] = Block()
+    else:
+        p[2].things.append(p[1])
+        p[0] = p[2]
     pass
 
 def p_stmt(p):
@@ -179,26 +180,51 @@ def p_stmt(p):
             | block
             | var_decl
             | ';' '''
+    if(p[1] == 'if' or p[1] == 'while'):
+        if(len(p) == 6):
+            p[0] = Ifelsewhile_stmt(p[1], p[3], [p[5], None])
+        if(len(p) == 8):
+            p[0] = Ifelsewhile_stmt(p[1], [p[3], p[5], p[7]])  
+    if(p[1] == 'for' and len(p) == 10):
+        p[0] = For_stmt([p[3], p[5], p[7], p[9]])
+    if(p[1] == 'return' and len(p) == 4):
+        p[0] = Stmt(p[1], [p[2]])
+    if(p[1] == 'break' and len(p) == 3):
+        p[0] = Stmt(p[1], [])
+    if(p[1] == 'continue' and len(p) == 3):
+        p[0] = Stmt(p[1], [])
+    elif(len(p) == 3):
+        p[0] = p[1]
+    if(type(p[1]) == type(Block(None)) and len(p) == 2):
+        p[0] = p[1]
+    if(type(p[1]) == type(Var_decl(None)) and len(p) == 2):
+        p[0] = p[1]
+    if(p[1] == ';' and len(p) == 2):
+        p[0] = Stmt('empty', [])
     pass
 
 def p_for_cond_1(p):
     '''for_cond_1 : stmt_expr
                 | empty'''
+    p[0] = p[1]
     pass
 
 def p_for_cond_2(p):
     '''for_cond_2 : expr
                 | empty'''
+    p[0] = p[1]
     pass
 
 def p_for_cond_3(p):
     '''for_cond_3 : stmt_expr
                 | empty'''
+    p[0] = p[1]
     pass
 
 def p_return_val(p):
     '''return_val : expr
                 | empty'''
+    p[0] = p[1]
     pass
 
 def p_literal(p):
@@ -207,7 +233,8 @@ def p_literal(p):
                 | STRING_CONST
                 | NULL
                 | TRUE
-                | FALSE'''
+                | FALSE'''   
+    pass
     
 def p_primary(p):
     '''primary : literal
@@ -218,6 +245,7 @@ def p_primary(p):
                 | lhs
                 | method_invocation '''
     pass
+
 def p_arguments(p):
     ''' arguments : expr arguments_cont
             | empty '''
@@ -229,12 +257,16 @@ def p_arguments_cont(p):
     pass
 
 def p_lhs(p):
-    '''lhs : field_access'''         
+    '''lhs : field_access'''  
+    p[0] = p[1]       
     pass
 
 def p_field_access(p):
     '''field_access : primary '.' ID
                     | ID'''
+    if(len(p) == 2):
+        p[0] = p[1]
+    #Missing primary.ID
     pass
 
 def p_method_invocation(p):
@@ -252,6 +284,22 @@ def p_assign(p):
                 | INCREMENT lhs 
                 | lhs DECREMENT
                 | DECREMENT lhs'''
+    if(len(p) == 4):
+        p[1] = p[3]
+        p[0] = p[1]
+    if(len(p) == 3):
+        if(p[2] == r'\+\+'):
+            p[0] = p[1]
+            p[1] = p[1] + 1
+        if(p[1] == r'\+\+'):
+            p[1] = p[1] + 1
+            p[0] = p[1]
+        if(p[2] == r'--'):
+            p[0] = p[1]
+            p[1] = p[1] - 1
+        if(p[1] == r'--'):
+            p[1] = p[1] - 1
+            p[0] = p[1]
     pass
 
 def p_add_expr(p):
@@ -315,6 +363,8 @@ def p_not_expr(p):
 def p_stmt_expr(p):
     '''stmt_expr : assign
                 | method_invocation'''
+    p[0] = p[1]
+    pass
     
 def p_empty(p):
     '''empty :'''
