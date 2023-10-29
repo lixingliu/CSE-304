@@ -315,61 +315,76 @@ def p_assign(p):
 
 def p_add_expr(p):
     '''expr : expr PLUS expr'''
+    p[0] = p[1] + p[2]
     pass
 def p_sub_expr(p):
     '''expr : expr MINUS expr'''
+    p[0] = p[1] - p[2]
     pass
 
 def p_mult_expr(p):
     '''expr : expr MULTIPLY expr'''
+    p[0] = p[1] * p[2]
     pass
 
 def p_div_expr(p):
     '''expr : expr DIVIDE expr '''
+    p[0] = p[1] / p[2]
     pass
 
 def p_conj_expr(p):
     '''expr : expr BOOL_AND expr'''
+    p[0] = p[1] and p[2]
     pass
 
 def p_disj_expr(p):
     '''expr : expr BOOL_OR expr'''
+    p[0] = p[1] or p[2]
     pass
 
 def p_equals_expr(p):
     '''expr : expr EQUALITY expr'''
+    p[0] = (p[1] == p[2])
     pass
 
 def p_notequals_expr(p):
     '''expr : expr DISQUALITY expr'''
+    p[0] = (p[1] != p[2])
     pass
 
 def p_lt_expr(p):
     '''expr : expr LESSTHAN expr'''
+    p[0] = (p[1] < p[2])
     pass
 
 def p_lte_expr(p):
     '''expr : expr LEQ expr'''
+    p[0] = (p[1] <= p[2])
     pass
 
 def p_gt_expr(p):
     '''expr : expr GREATERTHAN expr'''
+    p[0] = (p[1] > p[2])
     pass
 
 def p_gte_expr(p):
     '''expr : expr GEQ expr'''
+    p[0] = (p[1] >= p[2])
     pass
 
 def p_pos_expr(p):
     '''expr : PLUS expr %prec UPLUS'''
+    p[0] = abs(p[2])
     pass
 
 def p_minus_expr(p):
     '''expr : MINUS expr %prec UMINUS'''
+    p[0] = -1 * p[2]
     pass
 
 def p_not_expr(p):
     '''expr : NOT expr'''
+    p[0] = not(p[1])
     pass
 def p_stmt_expr(p):
     '''stmt_expr : assign
@@ -379,6 +394,7 @@ def p_stmt_expr(p):
     
 def p_empty(p):
     '''empty :'''
+    p[0] = None
     pass
 
 def p_error(p):
