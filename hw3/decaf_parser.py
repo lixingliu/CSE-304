@@ -158,11 +158,26 @@ def p_formal_param(p):
     p[0] = Formal_param(p[1], p[2])
     pass
 
+# def p_block(p):
+#     ''' block : stmt block
+#                 | empty '''
+#     if len(p) == 2:
+#         p[0] = Block()
+#     else:
+#         p[2].things.append(p[1])
+#         p[0] = p[2]
+#     pass
+
 def p_block(p):
-    ''' block : stmt block
-                | empty '''
+    '''block : '{' stmt_list '}' '''
+    p[0] = Block(p[2])
+    pass
+
+def p_stmt_list(p):
+    ''' stmt_list : stmt stmt_list
+                | empty'''
     if len(p) == 2:
-        p[0] = Block()
+        p[0] = Stmt_list()
     else:
         p[2].things.append(p[1])
         p[0] = p[2]
@@ -182,22 +197,22 @@ def p_stmt(p):
             | ';' '''
     if(p[1] == 'if' or p[1] == 'while'):
         if(len(p) == 6):
-            p[0] = Ifelsewhile_stmt(p[1], p[3], [p[5], None])
+            p[0] = Ifelsewhile_stmt(p[1], p[3], p[5])
         if(len(p) == 8):
             p[0] = Ifelsewhile_stmt(p[1], [p[3], p[5], p[7]])  
     if(p[1] == 'for' and len(p) == 10):
         p[0] = For_stmt([p[3], p[5], p[7], p[9]])
     if(p[1] == 'return' and len(p) == 4):
-        p[0] = Stmt(p[1], [p[2]])
+        p[0] = Stmt(p[1], p[2])
     if(p[1] == 'break' and len(p) == 3):
         p[0] = Stmt(p[1], [])
     if(p[1] == 'continue' and len(p) == 3):
-        p[0] = Stmt(p[1], [])
+        p[0] = Stmt(p[1])
     elif(len(p) == 3):
         p[0] = p[1]
     if(type(p[1]) == type(Block(None)) and len(p) == 2):
         p[0] = p[1]
-    if(type(p[1]) == type(Var_decl(None)) and len(p) == 2):
+    if(type(p[1]) == type(Var_decl(None, None)) and len(p) == 2):
         p[0] = p[1]
     if(p[1] == ';' and len(p) == 2):
         p[0] = Stmt('empty', [])
@@ -245,6 +260,7 @@ def p_primary(p):
                 | NEW ID LEFTPAREN arguments RIGHTPAREN
                 | lhs
                 | method_invocation '''
+    p[0] = p[1]
     pass
 
 def p_arguments(p):
@@ -287,6 +303,7 @@ def p_method_invocation(p):
 def p_expr(p):
     '''expr : primary
             | assign'''
+    p[0] = p[1]
 pass
 
 def p_assign(p):

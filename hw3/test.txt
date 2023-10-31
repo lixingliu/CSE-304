@@ -3,16 +3,15 @@ class A {
     boolean z;
     King henry;
     A (int one) {
-        this.x = 0;
-    }
-    int f(int one) {
-        return this.x + 1;
-    }
-
-    public int g(int one) {
-        int i;
-        i = this.f();
-        i++;
-        return i;
+        if (x) {
+            return True;
+        }
+        if (y) {
+            if (z) {
+                return z;
+            }
+            return False;
+        }
+        continue;
     }
 }

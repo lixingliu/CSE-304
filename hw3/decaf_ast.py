@@ -4,6 +4,42 @@ FIELD_COUNTER = 0
 CONSTRUCTOR_COUNTER = 0
 METHOD_COUNTER = 0
 
+def inner_block_creator(inner_block):
+    result = ""
+    if type(inner_block) == type([]):
+        if len(inner_block) == 1:
+            
+            return f"Block ([\n{inner_block[0].type} ({inner_block[0].component}])"
+        elif len(inner_block) > 1:
+            print("greater than 1")
+            block_stuff = ""
+            print(len(inner_block))
+            for stuff in inner_block:
+                print("aaa")
+                print(type(stuff))
+                block_stuff = block_stuff + inner_block_creator(stuff)
+            result = f"Block ([\n{block_stuff}])"
+            return result
+        else:
+            return 'nothing'
+    if type(inner_block) == type(Ifelsewhile_stmt(None, None, None, None)):
+        for thing in inner_block.then.stmt_list.things:
+            then_else = inner_block_creator(thing)
+            result = result + f"{str(inner_block.type)}({str(inner_block.cond)}) Block ([\n{then_else} ]) "
+        return result
+    if type(inner_block) == type(Stmt(None, None)):
+        return f"{inner_block.type} ({inner_block.component})"
+    return result
+
+def block_creator(block):
+    print(type(block))
+    if (type(block)) == type(Ifelsewhile_stmt(None, None, None)):
+        return f"Block ([{str(block.type)}({str(block.cond)}) L ]) "
+    if (type(block)) == type(Stmt(None, None)):
+        return f"Block ([{block.type} ({block.component}) ]) "
+
+    return "hi"
+
 class Node():
     def __init__(self):
         self.parent = None
@@ -28,7 +64,7 @@ class Program(Node):
             constructor = ""
             method = ""
             for stuff in thing.class_body_decl.things:
-                if type(stuff) == type(Constructor_decl(None, None)):
+                if type(stuff) == type(Constructor_decl(None, None, None)):
                     global CONSTRUCTOR_COUNTER
                     CONSTRUCTOR_COUNTER = CONSTRUCTOR_COUNTER + 1
 
@@ -41,22 +77,37 @@ class Program(Node):
                         constructor_param_list.append(constructor_param_list_counter)
                         variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, ?, {constructor_stuff.type.type_value}"
 
-                    for constructor_stmt in stuff.body.things[::-1]:
-                        if(type(constructor_stmt) == type(Ifelsewhile_stmt(None, None, None))):
-                            constructor_body = constructor_body + f"\n{str(constructor_stmt.type)}( {str(constructor_stmt.cond)}, {str(constructor_stmt.then)}, {str(constructor_stmt.els)} ),"
-                        if(type(constructor_stmt) == type(For_stmt(None, None, None))):
-                            constructor_body = constructor_body + f"\nFor( {str(constructor_stmt.cond1)}, {str(constructor_stmt.cond2)}, {str(constructor_stmt.cond3)},  {str(constructor_stmt.body)}),"
-                        if(type(constructor_stmt) == type(Stmt(None, None))):
-                            if(constructor_stmt.type != None):
-                                constructor_body = constructor_body + f"\n{str(constructor_stmt.type)}( {str(constructor_stmt.component)} ),"
-                        #stmt_expr ->
-                        if(type(constructor_stmt) == type(Var_decl(None))):
-                            constructor_body = constructor_body + f"\n{str(constructor_stmt.type)}( {str(constructor_stmt.variables)} ),"
 
+                    then_else = inner_block_creator(stuff.body.stmt_list.things[::-1])
+                    constructor_body = "\n" + constructor_body + then_else
+
+                    # body_items = []
+                    # for constructor_stmt in stuff.body.stmt_list.things[::-1]:
+                    #     then_else = block_creator(constructor_stmt)
+                    #     body_items.append(then_else)
+                    #     string_body_items = str(body_items).strip('[]\'')
+                    # constructor_body = f"\nBlock ([\n{string_body_items}\n])"
+
+                    # for constructor_stmt in stuff.body.stmt_list.things[::-1]:
+                    #     then_else = inner_block_creator(constructor_stmt)
+                    #     constructor_body = "\n" + constructor_body + then_else
+
+                        # if(type(constructor_stmt) == type(Ifelsewhile_stmt(None, None, None))):   
+                        #     print("aaa")                            
+                        #     then_else = inner_block_creator(constructor_stmt)
+                        #     constructor_body = "\n" + then_else
+                        # if(type(constructor_stmt) == type(Stmt(None, None))):
+                        #     if(constructor_stmt.type != None):
+                        #         constructor_body = constructor_body + f"\nBlock ([\n{str(constructor_stmt.type)}({str(constructor_stmt.component)})\n)]"
+
+                        # if(type(constructor_stmt) == type(Var_decl(None))):
+                        #     constructor_body = constructor_body + f"\n{str(constructor_stmt.type)}( {str(constructor_stmt.variables)} ),"
+
+                    
                     constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
                     constructor = constructor + f"\nConstructor Parameters: {str(constructor_param_list).strip('[]')}"
                     constructor = constructor + f"\nVariable Table: {variable_table}"
-                    constructor = constructor + f"\nConstructor Body: {constructor_body[:-1]}"
+                    constructor = constructor + f"\nConstructor Body: {constructor_body}"
 
                 if type(stuff) == type(Field_decl(None, None)):
                     for field_stuff in stuff.var_decl.variables.variable.things[::-1]:
@@ -64,7 +115,7 @@ class Program(Node):
                         FIELD_COUNTER = FIELD_COUNTER + 1
                         field = field + f"\nFIELD {FIELD_COUNTER}, {str(field_stuff.variable_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.var_decl.type.type_value)}"
 
-                if type(stuff) == type(Method_decl(None, None, None, None)):
+                if type(stuff) == type(Method_decl(None, None, None, None, None)):
                     global METHOD_COUNTER
                     METHOD_COUNTER = METHOD_COUNTER + 1
                     
@@ -234,6 +285,13 @@ class Method_decl(Node):
         pass
 
 class Block(Node):
+    def __init__(self, stmt_list):
+        super().__init__()
+        self.stmt_list = stmt_list
+    def __str__(self):
+        pass
+
+class Stmt_list(Node):
     def __init__(self):
         super().__init__()
         self.things = []
@@ -241,7 +299,7 @@ class Block(Node):
         pass
 
 class Stmt(Node):
-    def __init__(self, type, component):
+    def __init__(self, type, component = ''):
         super().__init__()
         self.type = type
         self.component = component
@@ -249,7 +307,7 @@ class Stmt(Node):
         pass
 
 class Ifelsewhile_stmt(Node):
-    def __init__(self, type, cond, then, els):
+    def __init__(self, type, cond, then, els = ''):
         super().__init__()
         self.type = type
         self.cond = cond
