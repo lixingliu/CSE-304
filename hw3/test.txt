@@ -3,15 +3,8 @@ class A {
     boolean z;
     King henry;
     A (int one) {
-        if (x) {
-            return True;
-        }
         if (y) {
-            if (z) {
-                return z;
-            }
             return False;
         }
-        continue;
     }
 }

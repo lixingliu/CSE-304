@@ -8,7 +8,8 @@ def inner_block_creator(inner_block):
     result = ""
     if type(inner_block) == type([]):
         if len(inner_block) == 1:
-            
+            if type(inner_block[0]) == type(Ifelsewhile_stmt(None, None, None, None)):
+                return 
             return f"Block ([\n{inner_block[0].type} ({inner_block[0].component}])"
         elif len(inner_block) > 1:
             print("greater than 1")
@@ -23,11 +24,14 @@ def inner_block_creator(inner_block):
         else:
             return 'nothing'
     if type(inner_block) == type(Ifelsewhile_stmt(None, None, None, None)):
+        print(len(inner_block.then.stmt_list.things))
         for thing in inner_block.then.stmt_list.things:
+            print("BBB")
             then_else = inner_block_creator(thing)
             result = result + f"{str(inner_block.type)}({str(inner_block.cond)}) Block ([\n{then_else} ]) "
         return result
     if type(inner_block) == type(Stmt(None, None)):
+        print("L")
         return f"{inner_block.type} ({inner_block.component})"
     return result
 
