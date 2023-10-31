@@ -37,8 +37,8 @@ def just_scan():
 def main():
     # fn = sys.argv[1] if len(sys.argv) > 1 else ""
     # fn = "C:\\Users\\lixin\\CSE-304\\hw2\\hello_world.decaf"
-    # fn = "test.txt"
-    fn = "C:\\Users\\L\\CSE-304\\hw3\\test.txt"
+    fn = "test.txt"
+    # fn = "C:\\Users\\L\\CSE-304\\hw3\\test.txt"
     source = []
     if fn == "":
         print("Missing file name for source program.")

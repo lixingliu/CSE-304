@@ -158,16 +158,6 @@ def p_formal_param(p):
     p[0] = Formal_param(p[1], p[2])
     pass
 
-# def p_block(p):
-#     ''' block : stmt block
-#                 | empty '''
-#     if len(p) == 2:
-#         p[0] = Block()
-#     else:
-#         p[2].things.append(p[1])
-#         p[0] = p[2]
-#     pass
-
 def p_block(p):
     '''block : '{' stmt_list '}' '''
     p[0] = Block(p[2])

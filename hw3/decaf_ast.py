@@ -7,31 +7,41 @@ METHOD_COUNTER = 0
 def inner_block_creator(inner_block):
     result = ""
     if type(inner_block) == type([]):
+        print("type list")
         if len(inner_block) == 1:
+            print("list length one")
             if type(inner_block[0]) == type(Ifelsewhile_stmt(None, None, None, None)):
-                return 
+                print("list length one if else")
+                then_else = inner_block_creator(inner_block[0].then.stmt_list.things[::-1])
+                return f"Block ([\n{str(inner_block[0].type)}({str(inner_block[0].cond)}) {then_else}])"
             return f"Block ([\n{inner_block[0].type} ({inner_block[0].component}])"
         elif len(inner_block) > 1:
             print("greater than 1")
             block_stuff = ""
             print(len(inner_block))
             for stuff in inner_block:
-                print("aaa")
+                print("greater than 1 check all contents")
                 print(type(stuff))
                 block_stuff = block_stuff + inner_block_creator(stuff)
-            result = f"Block ([\n{block_stuff}])"
+            result = f"Blockkkk ([\n{block_stuff}])"
             return result
         else:
             return 'nothing'
     if type(inner_block) == type(Ifelsewhile_stmt(None, None, None, None)):
+        print("not list but type if else")
         print(len(inner_block.then.stmt_list.things))
-        for thing in inner_block.then.stmt_list.things:
-            print("BBB")
+        for thing in inner_block.then.stmt_list.things[::-1]:
+            print("type if else not list inside stuff")
+            print(result)
             then_else = inner_block_creator(thing)
-            result = result + f"{str(inner_block.type)}({str(inner_block.cond)}) Block ([\n{then_else} ]) "
+            print(then_else)
+            result = result + f"{str(inner_block.type)}({str(inner_block.cond)}) Blockqqq ([\n{then_else} ]) "
+            print("ppp")
+            print(result)
+            print("GGG")
         return result
     if type(inner_block) == type(Stmt(None, None)):
-        print("L")
+        print("stmt")
         return f"{inner_block.type} ({inner_block.component})"
     return result
 
@@ -76,11 +86,11 @@ class Program(Node):
                     constructor_param_list_counter = 0
                     variable_table = ""
                     constructor_body = ""
-                    for constructor_stuff in stuff.formals.formal_param.things[::-1]:
-                        constructor_param_list_counter = constructor_param_list_counter + 1
-                        constructor_param_list.append(constructor_param_list_counter)
-                        variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, ?, {constructor_stuff.type.type_value}"
-
+                    if (len(stuff.formals.formal_param) != 0):
+                        for constructor_stuff in stuff.formals.formal_param.things[::-1]:
+                            constructor_param_list_counter = constructor_param_list_counter + 1
+                            constructor_param_list.append(constructor_param_list_counter)
+                            variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, ?, {constructor_stuff.type.type_value}"
 
                     then_else = inner_block_creator(stuff.body.stmt_list.things[::-1])
                     constructor_body = "\n" + constructor_body + then_else
