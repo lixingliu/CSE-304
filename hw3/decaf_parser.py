@@ -189,7 +189,7 @@ def p_stmt(p):
         if(len(p) == 6):
             p[0] = Ifelsewhile_stmt(p[1], p[3], p[5])
         if(len(p) == 8):
-            p[0] = Ifelsewhile_stmt(p[1], [p[3], p[5], p[7]])  
+            p[0] = Ifelsewhile_stmt(p[1], p[3], p[5], p[7], p[6])  
     if(p[1] == 'for' and len(p) == 10):
         p[0] = For_stmt([p[3], p[5], p[7], p[9]])
     if(p[1] == 'return' and len(p) == 4):

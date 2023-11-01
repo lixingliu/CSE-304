@@ -1,21 +1,10 @@
 class A {
     A () {
-        if (z) {
-            if (y) {
-                return y;
-            }
-            return z;
+        if (x) {
+            return True;
         }
-        continue;
+        else {
+            return False;
+        }
     }
 }
-
-Blockkkk ([
-    if(z) Blockqqq ([
-        if(y) Blockqqq ([
-            return (y) ])  
-        ]) if(z) Blockqqq ([
-            return (z) 
-        ]) 
-    continue ()
-])
