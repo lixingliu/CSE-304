@@ -4,46 +4,135 @@ FIELD_COUNTER = 0
 CONSTRUCTOR_COUNTER = 0
 METHOD_COUNTER = 0
 
-def create_body(stmt):
+def create_body(stmt, variable_table, constructor_param_list_counter):
     print(type(stmt))
     if type(stmt) == type(Stmt(None, None)):
-        return f"{stmt.type}({stmt.component})"
+        outcome = [stmt, variable_table, constructor_param_list_counter]
+        outcome[0] = f"{stmt.type}({stmt.component})"
+        return outcome
     if type(stmt) == type(Ifelsewhile_stmt(None, None, None, None)):
         if_body_stuff = ""
         else_body_stuff = ""
+        outcome = [None, None, None]
         for if_stuff in stmt.then.stmt_list.things[::-1]:
-            if_body_stuff = if_body_stuff + create_body(if_stuff)
+            print(type(if_stuff))
+            outcome = create_body(if_stuff, variable_table, constructor_param_list_counter)
+            if_body_stuff = if_body_stuff + outcome[0]
+            variable_table = outcome[1]
+            constructor_param_list_counter = outcome[2]
         if stmt.els != "":
             for else_stuff in stmt.els.stmt_list.things[::-1]:
-                else_body_stuff = else_body_stuff + create_body(else_stuff)
+                outcome = create_body(else_stuff, variable_table, constructor_param_list_counter)
+                variable_table = outcome[1]
+                constructor_param_list_counter = outcome[2]
+                else_body_stuff = else_body_stuff + outcome[0]
         
-        result = f"{stmt.type}({stmt.cond}) Block ([\n{if_body_stuff}])"
+        outcome[0] = f"{stmt.type}({stmt.cond}) Block ([\n{if_body_stuff}])"
 
         if else_body_stuff != "":
-            return result + f" {stmt.type_2} Block ([\n{create_body(else_stuff)}])"
+            outcome = create_body(else_stuff, variable_table, constructor_param_list_counter)
+            outcome[0] = result + f" {stmt.type_2} Block ([\n{outcome[0]}])"
+            variable_table = outcome[1]
+            variable_table = outcome[2]
+            return outcome
         else:
-            return result
+            return outcome
     if type(stmt) == type(For_stmt(None, None, None, None, None)):
         for_body_stuff = ""
         for for_stuff in stmt.then.stmt_list.things[::-1]:
-            print(type(for_stuff))
-            for_body_stuff = for_body_stuff + create_body(for_stuff)
+            outcome = create_body(for_stuff, variable_table, constructor_param_list_counter)
+            for_body_stuff = for_body_stuff + outcome[0]
+            variable_table = outcome[1]
+            constructor_param_list_counter = outcome[2]
+            
         result = f"{stmt.type}({stmt.cond1}, {stmt.cond2}, {stmt.cond3}) Block ([\n{for_body_stuff}])"
-        return result
+        outcome[0] = result
+        return outcome
+    if type(stmt) == type(Auto(None, None, None)):
         
+        if (stmt.pre != None):
+            if (stmt.pre == "++"):
+                return f"Auto(Variable, inc, pre)"
+            if (stmt.pre == "--"):
+                return f"Auto(Variable, dec, pre)"
+        if (stmt.post != None):
+            if (stmt.post == "++"):
+                return f"Auto(Variable, inc, post)"
+            if (stmt.post == "--"):
+                return f"Auto(Variable, dec, post)"
+        return "AAAA"
+    if type(stmt) == type(Var_decl(None, None)):
+        constructor_param_list_counter = constructor_param_list_counter + 1
+        variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
+        return ['', variable_table, constructor_param_list_counter]
+    if type(stmt) == type(Assign(None, None)):
+        print(stmt.lhs.type)
+        left = ""
+        right = ""
+        if stmt.lhs.type == ".":
+            left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
+        if stmt.lhs.type == None:
+            left = f"Variable({stmt.lhs.id})"
+        right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
+        result = f"Expr( Assign({left}, {right}) )\n"
+        outcome = [result, variable_table, constructor_param_list_counter]
+        return outcome
+    if stmt == "true":
+        return f"Constant({True})";
+    if stmt == "false":
+        return f"Constant({False})";
+    if stmt == "null":
+        return f"Constant(Null)"
+    if type(stmt) == type(Uminus(None, None)):
+        return f"Unary-expression(MINUS, {create_body(stmt.expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Field_access(None, None, None)):
+        return f"Variable({stmt.id})"
+    if type(stmt) == type(0.0):
+        return f"Constant(Float-constant({stmt}))"
+    if type(stmt) == type(0):
+        return f"Constant(Integer-constant({stmt}))"
     if type(stmt) == type(""):
-        return stmt
-
-    return "hi"
-
-def block_creator(block):
-    print(type(block))
-    if (type(block)) == type(Ifelsewhile_stmt(None, None, None)):
-        return f"Block ([{str(block.type)}({str(block.cond)}) L ]) "
-    if (type(block)) == type(Stmt(None, None)):
-        return f"Block ([{block.type} ({block.component}) ]) "
-
-    return "hi"
+        return f"Constant(String-constant({stmt}))"
+    if type(stmt) == type(Addition(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(add, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Subtraction(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(sub, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Multiplication(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(mul, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Division(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(div, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Conjection(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(and, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Disjunction(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(or, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Equality(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(eq, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(Disquality(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(neq, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(LessThan(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(lt, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(LessThanEqual(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(leq, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(GreaterThan(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(gt, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+    if type(stmt) == type(GreaterThanEqual(None, None, None)):
+        print(dir(stmt))
+        return f"Binary(geq, {create_body(stmt.left_expr, variable_table, constructor_param_list_counter)}, {create_body(stmt.right_expr, variable_table, constructor_param_list_counter)})"
+        
+    outcome = [None, None, None]
+    print("ERROROROROROROROROR")
+    return outcome
 
 class Node():
     def __init__(self):
@@ -81,13 +170,17 @@ class Program(Node):
                         for constructor_stuff in stuff.formals.formal_param.things[::-1]:
                             constructor_param_list_counter = constructor_param_list_counter + 1
                             constructor_param_list.append(constructor_param_list_counter)
-                            variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, ?, {constructor_stuff.type.type_value}"
+                            variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, formal, {constructor_stuff.type.type_value}"
 
                     constructor_body_stuff = ""
                     for constructor_stmt in stuff.body.stmt_list.things[::-1]:
-                        constructor_body_stuff = constructor_body_stuff + create_body(constructor_stmt)
+                        outcome = create_body(constructor_stmt, variable_table, constructor_param_list_counter)
+                        constructor_body_stuff = constructor_body_stuff + outcome[0]
+                        variable_table = outcome[1]
+                        constructor_param_list_counter = outcome[2]
                     
                     constructor_body = f"\nBlock ([\n{constructor_body_stuff}])"
+                    print(variable_table)
                     constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
                     constructor = constructor + f"\nConstructor Parameters: {str(constructor_param_list).strip('[]')}"
                     constructor = constructor + f"\nVariable Table: {variable_table}"
@@ -325,5 +418,148 @@ class Arguments_cont(Node):
     def __init__(self):
         super().__init__()
         self.things = []
+    def __str__(self):
+        pass
+
+class Assign(Node):
+    def __init__(self, lhs, expr):
+        super().__init__()
+        self.lhs = lhs
+        self.expr = expr
+    def __str__(self):
+        pass
+
+class Addition(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class Subtraction(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class Multiplication(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class Division(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class Conjection(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class Disjunction(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class Equality(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class Disquality(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class LessThan(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class LessThanEqual(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class GreaterThan(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+class GreaterThanEqual(Node):
+    def __init__(self, type, left_expr, right_expr):
+        super().__init__()
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.type = type
+    def __str__(self):
+        pass
+
+
+class Field_access(Node):
+    def __init__(self, primary, id, type):
+        super().__init__()
+        self.primary = primary
+        self.id = id
+        self.type = type
+    def __str__(self):
+        pass
+
+class Uminus(Node):
+    def __init__(self, type, expr):
+        super().__init__()
+        self.type = type
+        self.expr = expr
+    def __str__(self):
+        pass
+
+class Auto(Node):
+    def __init__(self, post, pre, lhs):
+        super().__init__()
+        self.post = post
+        self.pre = pre
+        self.lhs = lhs
     def __str__(self):
         pass

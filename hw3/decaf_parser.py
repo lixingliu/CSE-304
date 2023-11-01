@@ -282,9 +282,9 @@ def p_field_access(p):
     '''field_access : primary '.' ID
                     | ID'''
     if(len(p) == 2):
-        p[0] = p[1]
+        p[0] = Field_access(None, p[1], None)
     else:
-        p[0] = p[1] + str(p[2]) + p[3]
+        p[0] = Field_access(p[1], p[3], p[2])
     pass
 
 def p_method_invocation(p):
@@ -305,83 +305,82 @@ def p_assign(p):
                 | lhs DECREMENT
                 | DECREMENT lhs'''
     if(len(p) == 4):
-        p[0] = p[1] + p[2] + str(p[3])
+        p[0] = Assign(p[1], p[3])
     if(len(p) == 3):
-        print("a")
         if(p[1] == '++' or p[1] == '--'):
-            p[0] = str(p[1]) + p[2]
+            p[0] = Auto(p[1], None, p[2])
         if(p[2] == '--' or p[2] == "++"):
-            p[0] = p[1] + str(p[2])
+            p[0] = Auto(None, p[2], p[1])
 
     pass
 
 def p_add_expr(p):
     '''expr : expr PLUS expr'''
-    p[0] = p[1] + p[2]
+    p[0] = Addition(p[2], p[1], p[3])
     pass
 def p_sub_expr(p):
     '''expr : expr MINUS expr'''
-    p[0] = p[1] - p[2]
+    p[0] = Subtraction(p[2], p[1], p[3])
     pass
 
 def p_mult_expr(p):
     '''expr : expr MULTIPLY expr'''
-    p[0] = p[1] * p[2]
+    p[0] = Multiplication(p[2], p[1], p[3])
     pass
 
 def p_div_expr(p):
     '''expr : expr DIVIDE expr '''
-    p[0] = p[1] / p[2]
+    p[0] = Division(p[2], p[1], p[3])
     pass
 
 def p_conj_expr(p):
     '''expr : expr BOOL_AND expr'''
-    p[0] = p[1] and p[2]
+    p[0] = Conjection(p[2], p[1], p[3])
     pass
 
 def p_disj_expr(p):
     '''expr : expr BOOL_OR expr'''
-    p[0] = p[1] or p[2]
+    p[0] = Disjunction(p[2], p[1], p[3])
     pass
 
 def p_equals_expr(p):
     '''expr : expr EQUALITY expr'''
-    p[0] = (p[1] == p[2])
+    p[0] = Equality(p[2], p[1], p[3])
     pass
 
 def p_notequals_expr(p):
     '''expr : expr DISQUALITY expr'''
-    p[0] = (p[1] != p[2])
+    p[0] = Disquality(p[2], p[1], p[3])
     pass
 
 def p_lt_expr(p):
     '''expr : expr LESSTHAN expr'''
-    p[0] = (p[1] < p[2])
+    p[0] = LessThan(p[2], p[1], p[3])
     pass
 
 def p_lte_expr(p):
     '''expr : expr LEQ expr'''
-    p[0] = (p[1] <= p[2])
+    p[0] = LessThanEqual(p[2], p[1], p[3])
     pass
 
 def p_gt_expr(p):
     '''expr : expr GREATERTHAN expr'''
-    p[0] = (p[1] > p[2])
+    p[0] = GreaterThan(p[2], p[1], p[3])
     pass
 
 def p_gte_expr(p):
     '''expr : expr GEQ expr'''
-    p[0] = (p[1] >= p[2])
+    p[0] = GreaterThanEqual(p[2], p[1], p[3])
     pass
 
 def p_pos_expr(p):
     '''expr : PLUS expr %prec UPLUS'''
-    p[0] = abs(p[2])
+    p[0] = p[2]
     pass
 
 def p_minus_expr(p):
     '''expr : MINUS expr %prec UMINUS'''
-    p[0] = -1 * p[2]
+    p[0] = Uminus(p[1], p[2])
     pass
 
 def p_not_expr(p):

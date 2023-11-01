@@ -26,7 +26,7 @@ def just_scan():
 
 def main():
     # fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = "C:\\Users\\lixin\\CSE-304\\hw3\\test.txt"
+    fn = "C:\\Users\\L\\CSE-304\\hw3\\test.txt"
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
@@ -47,5 +47,4 @@ def main():
     #print()
 
 if __name__ == "__main__":
-    just_scan()
     main()

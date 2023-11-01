@@ -86,11 +86,6 @@ t_ignore_MULTI_COMMENT = r'/\*.*?\*/'
 t_ignore_SING_COMMENT = r'//.*'
 
 # \d matches any digit; [0-9] and the '+' signifies one or more occurences
-def t_INT_CONST(t):
-    r'\d+' ## are we acccepting 00000 ?
-    t.value = int(t.value)
-    return t
-
 # \d+\.\d* is used for at least one number in front [0-9] followed by a . and then zero or more digits
 # \d*\.\d+ is used for zero or more numbers in front [0-9] followed by a . and then one ore more digits
 # ([eE][+-]?\d+)? is used for the second kind of floating point numbers; starts with a e or E and is followed 
@@ -99,6 +94,12 @@ def t_FLOAT_CONST(t):
     r'(\d*\.\d+)([eE][+-]?\d+)?'
     t.value = float(t.value)
     return t
+
+def t_INT_CONST(t):
+    r'\d+' ## are we acccepting 00000 ?
+    t.value = int(t.value)
+    return t
+
 
 # starts with " and ends with "
 # " <stuff> "; <stuff> is represented by (?:\\.|[^"\\])*

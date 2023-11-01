@@ -1,6 +1,8 @@
 class A {
-    A (int x) {
-        x++;
-        break;
+    A () {
+        int y;
+        int z;
+        y = 2;
+        z = y++;
     }
 }
