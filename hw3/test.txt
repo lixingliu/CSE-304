@@ -1,18 +1,10 @@
 class A {
-    string w, x, y;
-    boolean z;
-    King henry;
-    A (int one) {
-        this.x = 0;
-    }
-    int f(int one) {
-        return this.x + 1;
-    }
-
-    public int g(int one) {
-        int i;
-        i = this.f();
-        i++;
-        return i;
+    A () {
+        if (x) {
+            return True;
+        }
+        else {
+            return False;
+        }
     }
 }
