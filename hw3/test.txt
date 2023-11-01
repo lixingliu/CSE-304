@@ -4,5 +4,8 @@ class A {
         int z;
         y = 2;
         z = y++;
+        z = ++y;
+        z = y--;
+        z = --y;
     }
 }

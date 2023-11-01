@@ -307,10 +307,10 @@ def p_assign(p):
     if(len(p) == 4):
         p[0] = Assign(p[1], p[3])
     if(len(p) == 3):
-        if(p[1] == '++' or p[1] == '--'):
-            p[0] = Auto(p[1], None, p[2])
-        if(p[2] == '--' or p[2] == "++"):
-            p[0] = Auto(None, p[2], p[1])
+        if(p[2] == '++' or p[2] == '--'):
+            p[0] = Auto(p[2], None, p[1])
+        if(p[1] == '--' or p[1] == "++"):
+            p[0] = Auto(None, p[1], p[2])
 
     pass
 

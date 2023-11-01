@@ -49,30 +49,34 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[0] = result
         return outcome
     if type(stmt) == type(Auto(None, None, None)):
-        
+        find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+        variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
         if (stmt.pre != None):
             if (stmt.pre == "++"):
-                return f"Auto(Variable, inc, pre)"
+                return f"Auto(Variable({variable_number}), inc, pre)"
             if (stmt.pre == "--"):
-                return f"Auto(Variable, dec, pre)"
+                return f"Auto(Variable({variable_number}), dec, pre)"
         if (stmt.post != None):
             if (stmt.post == "++"):
-                return f"Auto(Variable, inc, post)"
+                return f"Auto(Variable({variable_number}), inc, post)"
             if (stmt.post == "--"):
-                return f"Auto(Variable, dec, post)"
+                return f"Auto(Variable({variable_number}), dec, post)"
         return "AAAA"
     if type(stmt) == type(Var_decl(None, None)):
-        constructor_param_list_counter = constructor_param_list_counter + 1
+        constructor_param_list_counter = constructor_param_list_counter
         variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
         return ['', variable_table, constructor_param_list_counter]
     if type(stmt) == type(Assign(None, None)):
         print(stmt.lhs.type)
         left = ""
         right = ""
+        find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+        variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
+        
         if stmt.lhs.type == ".":
-            left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
+            left = f"Field-access({stmt.lhs.primary}, {variable_number})"
         if stmt.lhs.type == None:
-            left = f"Variable({stmt.lhs.id})"
+            left = f"Variable({variable_number})"
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         result = f"Expr( Assign({left}, {right}) )\n"
         outcome = [result, variable_table, constructor_param_list_counter]
@@ -86,7 +90,9 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
     if type(stmt) == type(Uminus(None, None)):
         return f"Unary-expression(MINUS, {create_body(stmt.expr, variable_table, constructor_param_list_counter)})"
     if type(stmt) == type(Field_access(None, None, None)):
-        return f"Variable({stmt.id})"
+        find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+        variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
+        return f"Variable({variable_number})"
     if type(stmt) == type(0.0):
         return f"Constant(Float-constant({stmt}))"
     if type(stmt) == type(0):
@@ -558,8 +564,8 @@ class Uminus(Node):
 class Auto(Node):
     def __init__(self, post, pre, lhs):
         super().__init__()
-        self.post = post
         self.pre = pre
+        self.post = post
         self.lhs = lhs
     def __str__(self):
         pass
