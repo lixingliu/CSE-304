@@ -191,7 +191,7 @@ def p_stmt(p):
         if(len(p) == 8):
             p[0] = Ifelsewhile_stmt(p[1], p[3], p[5], p[7], p[6])  
     if(p[1] == 'for' and len(p) == 10):
-        p[0] = For_stmt([p[3], p[5], p[7], p[9]])
+        p[0] = For_stmt(p[3], p[5], p[7], p[9], p[1])
     if(p[1] == 'return' and len(p) == 4):
         p[0] = Stmt(p[1], p[2])
     if(p[1] == 'break' and len(p) == 3):
@@ -283,11 +283,13 @@ def p_field_access(p):
                     | ID'''
     if(len(p) == 2):
         p[0] = p[1]
-    #Missing primary.ID
+    else:
+        p[0] = p[1] + str(p[2]) + p[3]
     pass
 
 def p_method_invocation(p):
     ''' method_invocation : field_access LEFTPAREN arguments RIGHTPAREN '''
+    
     pass
 
 def p_expr(p):
@@ -303,21 +305,14 @@ def p_assign(p):
                 | lhs DECREMENT
                 | DECREMENT lhs'''
     if(len(p) == 4):
-        p[1] = p[3]
-        p[0] = p[1]
+        p[0] = p[1] + p[2] + str(p[3])
     if(len(p) == 3):
-        if(p[2] == r'\+\+'):
-            p[0] = p[1]
-            p[1] = p[1] + 1
-        if(p[1] == r'\+\+'):
-            p[1] = p[1] + 1
-            p[0] = p[1]
-        if(p[2] == r'--'):
-            p[0] = p[1]
-            p[1] = p[1] - 1
-        if(p[1] == r'--'):
-            p[1] = p[1] - 1
-            p[0] = p[1]
+        print("a")
+        if(p[1] == '++' or p[1] == '--'):
+            p[0] = str(p[1]) + p[2]
+        if(p[2] == '--' or p[2] == "++"):
+            p[0] = p[1] + str(p[2])
+
     pass
 
 def p_add_expr(p):
