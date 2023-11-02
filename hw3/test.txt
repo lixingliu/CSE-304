@@ -1,11 +1,11 @@
 class A {
-    A () {
-        int y;
-        int z;
-        y = 2;
-        z = y++;
-        z = ++y;
-        z = y--;
-        z = --y;
+    A (int a) {
+        int i;
+        for (i = 0; i < 5; i++) {
+            if (i == 2) {
+                return true;
+            }
+        }
+        continue;
     }
 }
