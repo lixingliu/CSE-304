@@ -63,8 +63,10 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[2] = constructor_param_list_counter
         return outcome
     if type(stmt) == type(Auto(None, None, None)):
+        print(repr(variable_table))
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-        variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
+        variable_value = f", {stmt.lhs.id},"
+        variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
         if (stmt.pre != None):
             if (stmt.pre == "++"):
                 return [f"Auto(Variable({variable_number}), inc, pre)", variable_table, constructor_param_list_counter]
@@ -87,12 +89,13 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
         if stmt.lhs.type == None:
             find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-            variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
+            variable_value = f", {stmt.lhs.id},"
+            variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
             left = f"Variable({variable_number})"
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         variable_table = right[1]
         constructor_param_list_counter = right[2]
-        result = f"Expr( Assign({left}, {right[0]}) )\n"
+        result = f"Expr( Assign({left}, {right[0]}) )"
         outcome = [result, variable_table, constructor_param_list_counter]
         return outcome
     if stmt == "true":
@@ -107,7 +110,8 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         return outcome
     if type(stmt) == type(Field_access(None, None, None)):
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-        variable_number = find_indices(variable_table.split("\n"), stmt.id)[0]
+        variable_value = f", {stmt.id},"
+        variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
         return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
     if type(stmt) == type(0.0):
         return [f"Constant(Float-constant({stmt}))", variable_table, constructor_param_list_counter]
