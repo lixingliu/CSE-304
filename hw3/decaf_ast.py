@@ -15,7 +15,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         else_body_stuff = ""
         outcome = [None, None, None]
         for if_stuff in stmt.then.stmt_list.things[::-1]:
-            print(type(if_stuff))
             outcome = create_body(if_stuff, variable_table, constructor_param_list_counter)
             if_body_stuff = if_body_stuff + outcome[0]
             variable_table = outcome[1]
@@ -26,8 +25,10 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
                 variable_table = outcome[1]
                 constructor_param_list_counter = outcome[2]
                 else_body_stuff = else_body_stuff + outcome[0]
-        
-        outcome[0] = f"{stmt.type}({stmt.cond}) Block ([\n{if_body_stuff}])"
+        if_condition = create_body(stmt.cond, variable_table, constructor_param_list_counter)
+        # print(if_condition)
+        if_condition = "a"
+        outcome[0] = f"{stmt.type}({if_condition}) Block ([\n{if_body_stuff}])"
 
         if else_body_stuff != "":
             outcome = create_body(else_stuff, variable_table, constructor_param_list_counter)
@@ -49,8 +50,11 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[0] = result
         return outcome
     if type(stmt) == type(Auto(None, None, None)):
+        print(repr(variable_table))
+        print(variable_table.split("\n"))
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
         variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
+        print(variable_number)
         if (stmt.pre != None):
             if (stmt.pre == "++"):
                 return f"Auto(Variable({variable_number}), inc, pre)"
@@ -63,19 +67,18 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
                 return f"Auto(Variable({variable_number}), dec, post)"
         return "AAAA"
     if type(stmt) == type(Var_decl(None, None)):
-        constructor_param_list_counter = constructor_param_list_counter
+        constructor_param_list_counter = constructor_param_list_counter + 1
         variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
         return ['', variable_table, constructor_param_list_counter]
     if type(stmt) == type(Assign(None, None)):
         print(stmt.lhs.type)
         left = ""
         right = ""
-        find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-        variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
-        
         if stmt.lhs.type == ".":
-            left = f"Field-access({stmt.lhs.primary}, {variable_number})"
+            left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
         if stmt.lhs.type == None:
+            find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+            variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
             left = f"Variable({variable_number})"
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         result = f"Expr( Assign({left}, {right}) )\n"
@@ -91,7 +94,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         return f"Unary-expression(MINUS, {create_body(stmt.expr, variable_table, constructor_param_list_counter)})"
     if type(stmt) == type(Field_access(None, None, None)):
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-        variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
+        variable_number = find_indices(variable_table.split("\n"), stmt.id)[0]
         return f"Variable({variable_number})"
     if type(stmt) == type(0.0):
         return f"Constant(Float-constant({stmt}))"
@@ -564,8 +567,8 @@ class Uminus(Node):
 class Auto(Node):
     def __init__(self, post, pre, lhs):
         super().__init__()
-        self.pre = pre
         self.post = post
+        self.pre = pre
         self.lhs = lhs
     def __str__(self):
         pass
