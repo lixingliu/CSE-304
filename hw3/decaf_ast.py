@@ -63,7 +63,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[2] = constructor_param_list_counter
         return outcome
     if type(stmt) == type(Auto(None, None, None)):
-        print(repr(variable_table))
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
         variable_value = f", {stmt.lhs.id},"
         variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
