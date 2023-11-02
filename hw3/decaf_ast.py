@@ -99,6 +99,46 @@ class Program(Node):
         
     def __str__(self):
         res = ""
+        #In class intialization
+        pub_sta_mod = Modifier("public", "static")
+        scan_int = Method_decl("scan_int", pub_sta_mod, Type("int"), Formals(Formals_cont()), Stmt_list()) #Initializing scan_int
+        scan_float = Method_decl("scan_float", pub_sta_mod, Type("float"), Formals(Formals_cont()), Stmt_list()) #Initializing scan_float
+        class_in_body_decl = Class_body_decl()
+        class_in_body_decl.things.append(scan_int)
+        class_in_body_decl.things.append(scan_float)
+        class_in = Class_decl("In", "", class_in_body_decl)
+
+        #Out class intialization
+        print_int_formal_cont = Formals_cont()
+        print_int_formal_cont.things.append(Formal_param(Type("int"), Variable("i")))
+        print_int_formal = Formals(print_int_formal_cont)
+        print_int = Method_decl("print", pub_sta_mod, None, print_int_formal, Stmt_list()) #Initializing print_int
+
+        print_float_formal_cont = Formals_cont()
+        print_float_formal_cont.things.append(Formal_param(Type("float"), Variable("f")))
+        print_float_formal = Formals(print_float_formal_cont)
+        print_float = Method_decl("print", pub_sta_mod, None, print_float_formal, Stmt_list()) #Initializing print_float
+
+        print_boolean_formal_cont = Formals_cont()
+        print_boolean_formal_cont.things.append(Formal_param(Type("boolean"), Variable("b")))
+        print_boolean_formal = Formals(print_boolean_formal_cont)
+        print_boolean = Method_decl("print", pub_sta_mod, None, print_boolean_formal, Stmt_list()) #Initializing print_boolean
+
+        print_string_formal_cont = Formals_cont()
+        print_string_formal_cont.things.append(Formal_param(Type("string"), Variable("s")))
+        print_string_formal = Formals(print_string_formal_cont)
+        print_string = Method_decl("print", pub_sta_mod, None, print_string_formal, Stmt_list()) #Initializing print_string
+
+        class_out_body_decl = Class_body_decl()
+        class_out_body_decl.things.append(print_int)
+        class_out_body_decl.things.append(print_float)
+        class_out_body_decl.things.append(print_boolean)
+        class_out_body_decl.things.append(print_string)
+        class_out = Class_decl("Out", "", class_out_body_decl) #Append the four methods to Out's class_body_decl
+
+        self.classes.append(class_in)
+        self.classes.append(class_out) #Append predefined In and Out class to class table
+
         for thing in self.classes[::-1]:
             field = ""
             constructor = ""
