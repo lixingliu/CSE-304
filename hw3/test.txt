@@ -1,11 +1,15 @@
 class A {
-    A (int one) {
+    int x;
+    A () {
+        this.x = 0;
+    }   
+    int f() {
+        return this.x;
+    }   
+    public int g() {
         int i;
-        for (i = 0; i < 5; i++) {
-            if (i == 2) {
-                return true;
-            }
-        }
-        continue;
+        //i = this.f();
+        i++;
+        return i;
     }
 }

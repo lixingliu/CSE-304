@@ -6,8 +6,10 @@ METHOD_COUNTER = 0
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
     if type(stmt) == type(Stmt(None, None)):
-        outcome = [stmt, variable_table, constructor_param_list_counter]
-        outcome[0] = f"{stmt.type}({stmt.component})"
+        x = create_body(stmt.component, variable_table, constructor_param_list_counter)
+        print(x)
+        outcome = [None, x[1], x[2]]
+        outcome[0] = f"{stmt.type}({x[0]})"
         return outcome
     if type(stmt) == type(Ifelsewhile_stmt(None, None, None, None)):
         if_body_stuff = ""
@@ -91,11 +93,15 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             variable_value = f", {stmt.lhs.id},"
             variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
             left = f"Variable({variable_number})"
+        print("AAAA")
+        print(variable_table)
+        print(type(stmt.expr))
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         variable_table = right[1]
         constructor_param_list_counter = right[2]
         result = f"Expr( Assign({left}, {right[0]}) )"
         outcome = [result, variable_table, constructor_param_list_counter]
+        print(variable_table)
         return outcome
     if stmt == "true":
         return [f"Constant({True})", variable_table, constructor_param_list_counter]
@@ -108,6 +114,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[0] = f"Unary-expression(MINUS, {outcome[0]})"
         return outcome
     if type(stmt) == type(Field_access(None, None, None)):
+        return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
         variable_value = f", {stmt.id},"
         variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
@@ -241,32 +248,30 @@ class Program(Node):
                 if type(stuff) == type(Method_decl(None, None, None, None, None)):
                     global METHOD_COUNTER
                     METHOD_COUNTER = METHOD_COUNTER + 1
-                    
+                    print("BBB")
                     method_param_list = []
                     method_param_list_counter = 0
                     variable_table = ""
                     method_body = ""
-                    for method_stuff in stuff.formals.formal_param.things[::-1]:
-                        method_param_list_counter = method_param_list_counter + 1
-                        method_param_list.append(method_param_list_counter)
-                        variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, ?, {method_stuff.type.type_value}"
+                    if (hasattr(stuff.formals.formal_param, "things")):
+                        for method_stuff in stuff.formals.formal_param.things[::-1]:
+                            print(type(method_stuff))
+                            method_param_list_counter = method_param_list_counter + 1
+                            method_param_list.append(method_param_list_counter)
+                            variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, formal, {method_stuff.type.type_value}"
                     
-                    for method_stmt in stuff.body.things[::-1]:
-                        if(type(method_stmt) == type(Ifelsewhile_stmt(None, None, None))):
-                            method_body = method_body + f"\n{str(method_stmt.type)}( {str(method_stmt.cond)}, {str(method_stmt.then)}, {str(method_stmt.els)} ),"
-                        if(type(method_stmt) == type(For_stmt(None, None, None))):
-                            method_body = method_body + f"\nFor( {str(method_stmt.cond1)}, {str(method_stmt.cond2)}, {str(method_stmt.cond3)},  {str(method_stmt.body)}),"
-                        if(type(method_stmt) == type(Stmt(None, None))):
-                            if(method_stmt.type != None):
-                                method_body = method_body + f"\n{str(method_stmt.type)}( {str(method_stmt.component)} ),"
-                        #stmt_expr ->
-                        if(type(method_stmt) == type(Var_decl(None))):
-                            method_body = method_body + f"\n{str(method_stmt.type)}( {str(method_stmt.variables)} ),"
-                   
+                    method_body_stuff = ""
+                    for method_stmt in stuff.body.stmt_list.things[::-1]:
+                        outcome = create_body(method_stmt, variable_table, method_param_list_counter)
+                        variable_table = outcome[1]
+                        constructor_param_list_counter = outcome[2]
+                        method_body_stuff = method_body_stuff + outcome[0]
+
+                    method_body = f"\nBlock ([\n{method_body_stuff}])"
                     method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(stuff.method_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.type)}"
                     method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
                     method = method + f"\nVariable Table:  {variable_table}"
-                    method = method + f"\nMethod Body:   {method_body[:-1]}"
+                    method = method + f"\nMethod Body:   {method_body}"
                     
 
             res = res +f"\nClass Name: {str(thing.class_name)}"
