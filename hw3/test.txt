@@ -1,11 +1,10 @@
 class A {
     A (int a) {
         int i;
-        for (i = 0; i < 5; i++) {
-            if (i == 2) {
-                return true;
-            }
+        i = 2;
+        if (i == 2) {
+            return true;
         }
-        continue;
+        return false;
     }
 }

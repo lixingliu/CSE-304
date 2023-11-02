@@ -5,7 +5,6 @@ CONSTRUCTOR_COUNTER = 0
 METHOD_COUNTER = 0
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
-    print(type(stmt))
     if type(stmt) == type(Stmt(None, None)):
         outcome = [stmt, variable_table, constructor_param_list_counter]
         outcome[0] = f"{stmt.type}({stmt.component})"
@@ -64,11 +63,8 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[2] = constructor_param_list_counter
         return outcome
     if type(stmt) == type(Auto(None, None, None)):
-        print(repr(variable_table))
-        print(variable_table.split("\n"))
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
         variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
-        print(variable_number)
         if (stmt.pre != None):
             if (stmt.pre == "++"):
                 return [f"Auto(Variable({variable_number}), inc, pre)", variable_table, constructor_param_list_counter]
@@ -90,14 +86,9 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         if stmt.lhs.type == ".":
             left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
         if stmt.lhs.type == None:
-            print("AAA")
-            print(variable_table)
-            print(stmt.lhs.id)
-            print("BBB")
             find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
             variable_number = find_indices(variable_table.split("\n"), stmt.lhs.id)[0]
             left = f"Variable({variable_number})"
-            print(left)
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         variable_table = right[1]
         constructor_param_list_counter = right[2]
@@ -115,10 +106,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[0] = f"Unary-expression(MINUS, {outcome[0]})"
         return outcome
     if type(stmt) == type(Field_access(None, None, None)):
-        print("CCC")
-        print(stmt.id)
-        print(variable_table)
-        print("DDD")
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
         variable_number = find_indices(variable_table.split("\n"), stmt.id)[0]
         return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
@@ -131,70 +118,64 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
     if type(stmt) == type(Addition(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(add, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(add, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Subtraction(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(sub, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(sub, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Multiplication(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(mul, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(mul, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Division(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(div, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(div, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Conjection(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(and, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(and, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Disjunction(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(or, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(or, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Equality(None, None, None)):
-        print("BBBBBBBBBBBBBB")
-        print(type(stmt.left_expr))
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        print("AAAAAAAA")
-        print(outcome_1[1])
-        print("AAAAAAAA")
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(eq, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(eq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Disquality(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(neq, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(neq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(LessThan(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(lt, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(lt, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(LessThanEqual(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(leq, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(leq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(GreaterThan(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(gt, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(gt, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(GreaterThanEqual(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(geq, {outcome_1}, {outcome_2})", outcome_2[1], outcome_2[2]]
+        outcome_3 = [f"Binary(geq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3        
     outcome = [None, None, None]
-    print("ERROROROROROROROROR")
     return outcome
 
 class Node():
@@ -243,7 +224,6 @@ class Program(Node):
                         constructor_param_list_counter = outcome[2]
                     
                     constructor_body = f"\nBlock ([\n{constructor_body_stuff}])"
-                    print(variable_table)
                     constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
                     constructor = constructor + f"\nConstructor Parameters: {str(constructor_param_list).strip('[]')}"
                     constructor = constructor + f"\nVariable Table: {variable_table}"
