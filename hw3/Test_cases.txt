@@ -1,0 +1,941 @@
+
+#For loop: single stmt body
+class A {
+    A (int a) {
+        int i;
+	i = 0;
+	int x;
+        for( x = 0; x <= 3; x++ ) {
+		i = i + 2;
+	}
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        int x;
+        for( x = 0; x <= 3; x++ ) {
+                    i = i + 2;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+VARIABLE 3, x, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), for(Expr( Assign(Variable(3), Constant(Integer-constant(0))) ), Binary(leq, Variable(3), Constant(Integer-constant(3))), Expr(Auto(Variable(3), inc, post) )) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ),
+])
+])
+Methods:
+--------------------------------------------------------------------------
+
+#For loop: decrement cond
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        int x;
+        for( x = 10; x >= 0; x-- ) {
+		i = i + 2;
+	}
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        int x;
+        for( x = 10; x >= 0; x-- ) {
+                i = i + 2;
+        }
+    }
+}
+
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+VARIABLE 3, x, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), for(Expr( Assign(Variable(3), Constant(Integer-constant(10))) ), Binary(geq, Variable(3), Constant(Integer-constant(0))), expr(Auto(Variable(3), dec, post) )) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ),
+])
+])
+Methods:
+--------------------------------------------------------------------------
+
+
+#For loop: block body
+class A {
+    A (int a) {
+        int i = -1;
+	boolean b = false;
+        for( int x = 0; x == 3; x++ ) {
+		i = i + 2;
+		b = true;
+		break;	
+	}
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = -1;
+            boolean b;
+        b = false;
+        int x;
+        for( x = 0; x == 3; x++ ) {
+                    i = i + 2;
+                    b = true;
+                    break;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+VARIABLE 3, b, local, boolean
+VARIABLE 4, x, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Unary-expression(MINUS, Constant(Integer-constant(1)))) ), Expr( Assign(Variable(3), Constant(False)) ), for(Expr( Assign(Variable(4), Constant(Integer-constant(0))) ), Binary(eq, Variable(4), Constant(Integer-constant(3))), Expr(Auto(Variable(4), inc, post) )) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ), Expr( Assign(Variable(3), Constant(True)) ), Constant(String-constant(break))
+])
+])
+Methods:
+--------------------------------------------------------------------------
+
+#For loop: empty body
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        int x;
+        for( x = 0; x < 3; x++ ) {
+		    ;
+	}
+    }
+}
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        int x;
+        for( x = 0; x < 3; x++ ) {
+                    ;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+empty
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+VARIABLE 3, x, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), for(Expr( Assign(Variable(3), Constant(Integer-constant(0))) ), Binary(lt, Variable(3), Constant(Integer-constant(3))), Expr(Auto(Variable(3), inc, post) )) Block ([
+Skip-stmt])
+])
+Methods:
+--------------------------------------------------------------------------
+#For loop: empty cond1 and cond2
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        for(; i < 2;) {
+		    i = i + 2;
+	    }
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        for(; i < 2;) {
+                    i = i + 2;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), for(Skip-stmt, Binary(lt, Variable(2), Constant(Integer-constant(2))), Skip-stmt, ) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ), ])
+])
+Methods:
+--------------------------------------------------------------------------
+
+#For loop: empty cond1 and cond3
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        for(; i < 2;) {
+		    i = i + 2;
+	    }
+    }
+}
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        for(; i < 2;) {
+                    i = i + 2;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), for(Skip-stmt, Binary(lt, Variable(2), Constant(Integer-constant(2))), Skip-stmt, ) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ), ])
+])
+Methods:
+--------------------------------------------------------------------------
+
+
+#For loop: multiple cond1 and cond3
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        int x;
+        int y;
+        for(x = 0, y = 1; i < 2; x++, y--) {
+		    i = i - 2;
+	    }
+    }
+}
+#INVALID
+
+
+#For loop: empty cond2
+class A {
+    A (int a, int b) {
+        int i;
+        i = 0;
+        int x;
+        for(x = 0; ; x++) {
+		    i = i * 2;
+	    }
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a, int b) {
+        int i;
+        i = 0;
+        int x;
+        for(x = 0; ; x++) {
+                    i = i * 2;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1, 2
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, b, formal, int
+VARIABLE 3, i, local, int
+VARIABLE 4, x, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(3), Constant(Integer-constant(0))) ), for(Expr( Assign(Variable(4), Constant(Integer-constant(0))) ), Skip-stmt, , Expr(Auto(Variable(4), inc, post) )) Block ([
+Expr( Assign(Variable(3), ( Binary(mul, Variable(3), Constant(Integer-constant(2))) )) ), ])
+])
+Methods:
+--------------------------------------------------------------------------
+
+#For loop: empty cond1, cond2, cond3
+class A {
+    A (int a) {
+        int i;
+        i = +10;
+        for(; ;) {
+		    i--;
+	    }
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = +10;
+        for(; ;) {
+                    i--;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(10))) ), for(Skip-stmt, Skip-stmt, , Skip-stmt, ) Block ([
+expr(Auto(Variable(2), dec, post) )])
+])
+Methods:
+--------------------------------------------------------------------------
+
+#For loop: empty cond1, cond2, cond3
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        for(; ;) {
+		    i = i + 2;
+	    }
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        for(; ;) {
+                    i = i + 2;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), for(Skip-stmt, Skip-stmt, , Skip-stmt, ) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ), ])
+])
+Methods:
+--------------------------------------------------------------------------
+
+#While loop: infinite loop
+class A {
+    A (int a) {
+        int i = 0;
+        while(true) {
+		i = i + 2;
+	}
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        while(true) {
+		    i = i + 2;
+	    }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), while(Constant(True)) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ), ])  Block ([
+Skip-stmt ])
+])
+Methods:
+--------------------------------------------------------------------------
+#While loop: normal case
+class A {
+    A (int a) {
+        int i = 0;
+        while(i < 10) {
+		i = i + 2;
+	}
+    }
+}
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = 0;
+        while(i < 10) {
+                    i = i + 2;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(0))) ), while(Binary(lt, Variable(2), Constant(Integer-constant(10)))) Block ([
+Expr( Assign(Variable(2), Binary(add, Variable(2), Constant(Integer-constant(2)))) ), ])  Block ([
+Skip-stmt ])
+])
+Methods:
+--------------------------------------------------------------------------
+#While loop: extended cond
+class A {
+    A (int a) {
+        int i;
+        i = -1;
+        while( i < 10 || i > -2) {
+		    i = i / 2;
+	    }
+    }
+}
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = -1;
+        while( i < 10 || i > -2) {
+                    i = i / 2;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Unary-expression(MINUS, Constant(Integer-constant(1)))) ), while(Binary(or, Binary(lt, Variable(2), Constant(Integer-constant(10))), Binary(gt, Variable(2), Unary-expression(MINUS, Constant(Integer-constant(2)))))) Block ([
+Expr( Assign(Variable(2), Binary(div, Variable(2), Constant(Integer-constant(2)))) ), ])  Block ([
+Skip-stmt ])
+])
+Methods:
+--------------------------------------------------------------------------
+#While loop: block body 
+class A {
+    A (int a) {
+        int i;
+        i = +10;
+	    boolean b;
+        b = false;
+        while( i < 10 && i > -1) {
+		    i = ++i;
+		    b = true; 
+	    }
+    }
+}
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = +10;
+            boolean b;
+        b = false;
+        while( i < 10 && i > -1) {
+                    i = ++i;
+                    b = true;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+VARIABLE 3, b, local, boolean
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(10))) ), Expr( Assign(Variable(3), Constant(False)) ), while(Binary(and, Binary(lt, Variable(2), Constant(Integer-constant(10))), Binary(gt, Variable(2), Unary-expression(MINUS, Constant(Integer-constant(1)))))) Block ([
+Expr( Assign(Variable(2), Expr(Auto(Variable(2), inc, pre) )) ), Expr( Assign(Variable(3), Constant(True)) ), ])  Block ([
+Skip-stmt ])
+])
+Methods:
+--------------------------------------------------------------------------
+
+#While loop: block body 
+class A {
+    A (int a) {
+        int i;
+        i = +10;
+	    boolean b;
+        b = false;
+        while( i != -1) {
+		    i = i--;
+		    b = true; 
+	    }
+    }
+}
+
+YES
+
+SOURCE:
+class A {
+    A (int a) {
+        int i;
+        i = +10;
+            boolean b;
+        b = false;
+        while( i != -1) {
+                    i = i--;
+                    b = true;
+            }
+    }
+}
+
+RESULT: <class 'decaf_ast.Program'>
+
+Class Name: A
+Superclass Name:
+Fields:
+Constructors:
+CONSTRUCTOR: 1, private
+Constructor Parameters: 1
+Variable Table:
+VARIABLE 1, a, formal, int
+VARIABLE 2, i, local, int
+VARIABLE 3, b, local, boolean
+Constructor Body:
+Block([
+Expr( Assign(Variable(2), Constant(Integer-constant(10))) ), Expr( Assign(Variable(3), Constant(False)) ), while(Binary(neq, Variable(2), Unary-expression(MINUS, Constant(Integer-constant(1))))) Block ([
+Expr( Assign(Variable(2), expr(Auto(Variable(2), dec, post) )) ), Expr( Assign(Variable(3), Constant(True)) ), ])  Block ([
+Skip-stmt ])
+])
+Methods:
+--------------------------------------------------------------------------
+#Error checking: same method name with multiple arguments 
+class A {
+    int x;
+    A () {	    
+        this.x = 0;
+    }
+
+    int f(int a, int b) {	    
+        return (this.x + a - b);
+    }
+ 
+    public int f(int a, int b) {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+#Error checking: same class name with multiple arguments 
+class A {
+    int x;
+    A () {	    
+        this.x = 0;
+    }
+
+    int f(int a, int b) {	    
+        return (this.x + a - b);
+    }
+ 
+    public int f(int a, int b) {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+class A {
+    int x;
+    A () {	    
+        this.x = 0;
+    }
+
+    int f(int a, int b) {	    
+        return (this.x + a - b);
+    }
+ 
+    public int f(int a, int b) {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+#Error checking: same field name  
+class A {
+    int x;
+    boolean x;
+    A () {	    
+        this.x = 0;
+    }
+
+    int f() {	    
+        return (this.x + 1);
+    }
+ 
+    public int f() {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+#Error checking: same field name not in same scope with empty if else
+class A {
+    int x;
+    A () {	    
+        this.x = 0;
+    }
+
+    int f() {	    
+        return (this.x + 1);
+    }
+ 
+    public int f() {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+class B extends A{
+    string x;
+    A () {	    
+        this.x = "";
+    }
+
+    int f() {	
+	this. x = "F";    
+        return this.x;
+    }
+ 
+    public int f() {	    
+        if( this.x == "F") {
+		return 1;
+	}
+	else {}
+    }
+}
+
+#Error checking: same var name in same scope
+class A {
+    int x;
+    A () {	    
+        this.x = 0;
+    }
+
+    private int f() {	    
+        return (this.x + 1);
+    }
+ 
+    public int f() {	    
+        int i;
+	string i;
+        i = this.f();
+        i--;
+ 	return i;
+    }
+}
+
+#Error checking: multiple constructor param with multiple super calls
+class A {
+    int x;
+    string y;
+    A (int a, string b) {	    
+        this.x = a;
+	this.y = b;
+    }
+
+    public int incrementx() {	    
+        return (this.x++);
+    }
+ 
+    public int f() {	    
+        return this.x + 3;
+    }
+}
+
+class B extends A {
+    int n;
+    A () {	    
+        this.n = 1;
+    }
+
+    int printn() {	    
+        return this.n;
+    }
+ 
+    public int increment(int k) {
+	super.incrementx();	    
+        return super.f() + k;
+    }
+}
+
+#Missing method return type  
+class A {
+    int x;
+    boolean y;
+    A () {	    
+        this.x = 0;
+    }
+
+    f() {	    
+        return (this.x + 1);
+    }
+ 
+    public f() {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+#Missing class name  
+class {
+    int x;
+    boolean y;
+    A () {	    
+        this.x = 0;
+    }
+
+    int f() {	    
+        return (this.x + 1);
+    }
+ 
+    public int f() {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+#Missing var name  
+class A{
+    int;
+    boolean;
+    A () {	    
+        this.x = 0;
+    }
+
+    int f() {	    
+        return (this.x + 1);
+    }
+ 
+    public int f() {	    
+        int i;
+        i = this.f();
+        i =  i + a / b;
+ 	return i;
+    }
+}
+
+#Testing other return types with method overloading 
+class Aname{
+    int x;
+    boolean y;
+    A () {	    
+        this.x = 0;
+    }
+
+    public boolean f() {	    
+        return (this.x > 2);
+    }
+
+    public float addfloat(float a) {	    
+        return (this.x + a);
+    }
+ 
+    public string f() {	    
+        if(this.f() == true) {
+		string t = "true";
+		return t;
+	} 
+	else {
+		string f = "false";
+		return f;
+	}
+    }
+}
+
+#Missing brackets 
+class Aname{
+    int x;
+    boolean y;
+    A () {	    
+        this.x = 0;
+    }
+
+    public boolean f() {	    
+        return (this.x > 2);
+    
+
+    public float addfloat(float a) {	    
+        return (this.x + a);
+    
+ 
+    public string f() {	    
+        if(this.f() == true) {
+		string t = "true";
+		return t;
+	} 
+	else {
+		string f = "false";
+		return f;
+	}
+    }
+
+
+
+
+
