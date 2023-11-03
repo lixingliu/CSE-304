@@ -257,7 +257,7 @@ def p_arguments(p):
     ''' arguments : expr arguments_cont
             | empty '''
     if len(p) == 2:
-        p[0] = ""
+        p[0] = Arguments(None)
     else:
         p[2].things.append(p[1])
         p[0] = Arguments(p[2])
@@ -289,7 +289,7 @@ def p_field_access(p):
 
 def p_method_invocation(p):
     ''' method_invocation : field_access LEFTPAREN arguments RIGHTPAREN '''
-    
+    p[0] = Method_invocation(p[1], p[3])
     pass
 
 def p_expr(p):

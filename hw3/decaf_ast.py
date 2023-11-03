@@ -5,12 +5,12 @@ CONSTRUCTOR_COUNTER = 0
 METHOD_COUNTER = 0
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
+    print(type(stmt))
     if type(stmt) == type(Stmt(None, None)):
         x = create_body(stmt.component, variable_table, constructor_param_list_counter)
-        print(x)
         outcome = [None, x[1], x[2]]
-        outcome[0] = f"{stmt.type}({x[0]})"
-        return outcome
+        outcome[0] = f"{stmt.type}( {x[0]} )"
+        return outcome 
     if type(stmt) == type(Ifelsewhile_stmt(None, None, None, None)):
         if_body_stuff = ""
         else_body_stuff = ""
@@ -70,14 +70,14 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
         if (stmt.pre != None):
             if (stmt.pre == "++"):
-                return [f"Auto(Variable({variable_number}), inc, pre)", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, pre) ), ", variable_table, constructor_param_list_counter]
             if (stmt.pre == "--"):
-                return [f"Auto(Variable({variable_number}), dec, pre)", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), dec, pre) ), ", variable_table, constructor_param_list_counter]
         if (stmt.post != None):
             if (stmt.post == "++"):
-                return [f"Auto(Variable({variable_number}), inc, post)", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, post) ), ", variable_table, constructor_param_list_counter]
             if (stmt.post == "--"):
-                return [f"Auto(Variable({variable_number}), dec, post)", variable_table, constructor_param_list_counter]
+                return [f"expr(Auto(Variable({variable_number}), dec, post) ), ", variable_table, constructor_param_list_counter]
         return "AAAA"
     if type(stmt) == type(Var_decl(None, None)):
         constructor_param_list_counter = constructor_param_list_counter + 1
@@ -93,15 +93,11 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             variable_value = f", {stmt.lhs.id},"
             variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
             left = f"Variable({variable_number})"
-        print("AAAA")
-        print(variable_table)
-        print(type(stmt.expr))
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         variable_table = right[1]
         constructor_param_list_counter = right[2]
-        result = f"Expr( Assign({left}, {right[0]}) )"
+        result = f"Expr( Assign({left}, {right[0]}) ), "
         outcome = [result, variable_table, constructor_param_list_counter]
-        print(variable_table)
         return outcome
     if stmt == "true":
         return [f"Constant({True})", variable_table, constructor_param_list_counter]
@@ -114,6 +110,14 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[0] = f"Unary-expression(MINUS, {outcome[0]})"
         return outcome
     if type(stmt) == type(Field_access(None, None, None)):
+        outcome  = None
+        if type(stmt.primary) == type(Field_access(None, None, None)):
+            outcome = create_body(stmt.primary, variable_table, constructor_param_list_counter)
+            stmt.primary = outcome[0]
+            variable_table = outcome[1]
+            constructor_param_list_counter = outcome[2]
+        if stmt.primary == None:
+            return[stmt.id, variable_table, constructor_param_list_counter]
         return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
         find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
         variable_value = f", {stmt.id},"
@@ -184,7 +188,22 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
         outcome_3 = [f"Binary(geq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3        
+        return outcome_3
+    if type(stmt) == type(Method_invocation(None, None)):
+        if (stmt.argument_list.arguments != None):
+            find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+            argument_list = []
+            for argument in stmt.argument_list.arguments.things:
+                variable_value = f", {argument.id},"
+                variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
+                argument_list.append(f"Variable({variable_number})")
+        result = f"Method-call({stmt.field_access.primary}, {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
+        print("PPP")
+        print(variable_table)
+        print("PPP")
+        outcome = [result, variable_table, constructor_param_list_counter]
+        return outcome
+    print("I WANNA DIE")
     outcome = [None, None, None]
     return outcome
 
@@ -233,8 +252,8 @@ class Program(Node):
                         variable_table = outcome[1]
                         constructor_param_list_counter = outcome[2]
                     
-                    constructor_body = f"\nBlock ([\n{constructor_body_stuff}])"
-                    constructor = constructor + f"\nCONSTRUCTOR {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
+                    constructor_body = f"\nBlock([\n{constructor_body_stuff}\n])"
+                    constructor = constructor + f"\nCONSTRUCTOR: {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
                     constructor = constructor + f"\nConstructor Parameters: {str(constructor_param_list).strip('[]')}"
                     constructor = constructor + f"\nVariable Table: {variable_table}"
                     constructor = constructor + f"\nConstructor Body: {constructor_body}"
@@ -248,14 +267,12 @@ class Program(Node):
                 if type(stuff) == type(Method_decl(None, None, None, None, None)):
                     global METHOD_COUNTER
                     METHOD_COUNTER = METHOD_COUNTER + 1
-                    print("BBB")
                     method_param_list = []
                     method_param_list_counter = 0
                     variable_table = ""
                     method_body = ""
                     if (hasattr(stuff.formals.formal_param, "things")):
                         for method_stuff in stuff.formals.formal_param.things[::-1]:
-                            print(type(method_stuff))
                             method_param_list_counter = method_param_list_counter + 1
                             method_param_list.append(method_param_list_counter)
                             variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, formal, {method_stuff.type.type_value}"
@@ -267,7 +284,7 @@ class Program(Node):
                         constructor_param_list_counter = outcome[2]
                         method_body_stuff = method_body_stuff + outcome[0]
 
-                    method_body = f"\nBlock ([\n{method_body_stuff}])"
+                    method_body = f"\nBlock([\n{method_body_stuff}\n])"
                     method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(stuff.method_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.type)}"
                     method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
                     method = method + f"\nVariable Table:  {variable_table}"
@@ -612,5 +629,13 @@ class Auto(Node):
         self.post = post
         self.pre = pre
         self.lhs = lhs
+    def __str__(self):
+        pass
+
+class Method_invocation(Node):
+    def __init__(self, field_access, argument_list):
+        super().__init__()
+        self.field_access = field_access
+        self.argument_list = argument_list
     def __str__(self):
         pass
