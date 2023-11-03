@@ -250,7 +250,12 @@ def p_primary(p):
                 | NEW ID LEFTPAREN arguments RIGHTPAREN
                 | lhs
                 | method_invocation '''
-    p[0] = p[1]
+    if len(p) == 4:
+        p[0] = Paren(p[2])
+    elif len(p) == 6:
+        p[0] = NewObject(p[2], p[4])
+    else:
+        p[0] = p[1]
     pass
 
 def p_arguments(p):

@@ -8,9 +8,19 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
     print(type(stmt))
     if type(stmt) == type(Stmt(None, None)):
         x = create_body(stmt.component, variable_table, constructor_param_list_counter)
+        if stmt.type == 'return' and type(stmt.component) == type(Field_access(None, None, None)):
+            print("LLL")
+            print(type(stmt.component.primary))
+            print(type(x[0]))
+            print(x[0])
+            # find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+            # variable_value = f", {x[0]},"
+            # variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
+            return [f"{stmt.type}( {x[0]} )", x[1], x[2]]
+
         outcome = [None, x[1], x[2]]
         outcome[0] = f"{stmt.type}( {x[0]} )"
-        return outcome 
+        return outcome
     if type(stmt) == type(Ifelsewhile_stmt(None, None, None, None)):
         if_body_stuff = ""
         else_body_stuff = ""
@@ -117,12 +127,12 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             variable_table = outcome[1]
             constructor_param_list_counter = outcome[2]
         if stmt.primary == None:
+            find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+            variable_value = f", {stmt.id},"
+            variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
+            return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
             return[stmt.id, variable_table, constructor_param_list_counter]
         return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
-        find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-        variable_value = f", {stmt.id},"
-        variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
-        return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
     if type(stmt) == type(0.0):
         return [f"Constant(Float-constant({stmt}))", variable_table, constructor_param_list_counter]
     if type(stmt) == type(0):
@@ -190,9 +200,9 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome_3 = [f"Binary(geq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
     if type(stmt) == type(Method_invocation(None, None)):
+        argument_list = []
         if (stmt.argument_list.arguments != None):
             find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-            argument_list = []
             for argument in stmt.argument_list.arguments.things:
                 variable_value = f", {argument.id},"
                 variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
@@ -637,5 +647,20 @@ class Method_invocation(Node):
         super().__init__()
         self.field_access = field_access
         self.argument_list = argument_list
+    def __str__(self):
+        pass
+
+class NewObject(Node):
+    def __init__(self, id, argument_list):
+        super().__init__()
+        self.id = id
+        self.argument_list = argument_list
+    def __str__(self):
+        pass
+
+class Paren(Node):
+    def __init__(self, expr):
+        super().__init__()
+        self.expr = expr
     def __str__(self):
         pass
