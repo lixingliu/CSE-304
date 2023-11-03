@@ -10,19 +10,3 @@ class A {
         return i;
     }
 }
-
-class A {
-    int x;
-    A () {
-        this.x = 0;
-    }
-    int f() {
-        return this.x + 1;
-    }
-    public int g() {
-        int i;
-        i = this.f();
-        i++;
-        return i;
-    }
-}

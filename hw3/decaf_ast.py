@@ -2,7 +2,7 @@ class_body = dict()
 
 FIELD_COUNTER = 0
 CONSTRUCTOR_COUNTER = 0
-METHOD_COUNTER = 0
+METHOD_COUNTER = 6
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
     print(type(stmt))
@@ -275,8 +275,9 @@ class Program(Node):
 
         self.classes.append(class_in)
         self.classes.append(class_out) #Append predefined In and Out class to class table
-
         for thing in self.classes[::-1]:
+            if (thing.class_name == 'Out' or thing.class_name == 'In'):
+                continue
             field = ""
             constructor = ""
             method = ""
@@ -331,7 +332,7 @@ class Program(Node):
                     for method_stmt in stuff.body.stmt_list.things[::-1]:
                         outcome = create_body(method_stmt, variable_table, method_param_list_counter)
                         variable_table = outcome[1]
-                        constructor_param_list_counter = outcome[2]
+                        method_param_list_counter = outcome[2]
                         method_body_stuff = method_body_stuff + outcome[0]
 
                     method_body = f"\nBlock([\n{method_body_stuff}\n])"
