@@ -195,9 +195,9 @@ def p_stmt(p):
     if(p[1] == 'return' and len(p) == 4):
         p[0] = Stmt(p[1], p[2])
     if(p[1] == 'break' and len(p) == 3):
-        p[0] = Stmt(p[1], [])
+        p[0] = Stmt(p[1], p[1])
     if(p[1] == 'continue' and len(p) == 3):
-        p[0] = Stmt(p[1])
+        p[0] = Stmt(p[1], p[1])
     elif(len(p) == 3):
         p[0] = p[1]
     if(type(p[1]) == type(Block(None)) and len(p) == 2):
@@ -205,7 +205,7 @@ def p_stmt(p):
     if(type(p[1]) == type(Var_decl(None, None)) and len(p) == 2):
         p[0] = p[1]
     if(p[1] == ';' and len(p) == 2):
-        p[0] = Stmt('empty', [])
+        p[0] = Stmt('empty', 'empty')
     pass
 
 def p_for_cond_1(p):

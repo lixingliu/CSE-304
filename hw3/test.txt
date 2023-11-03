@@ -1,12 +1,12 @@
 class A {
-    int f(int y) {
-        return y;
-    }
-    public int g() {
+    A (int a) {
         int i;
-        int y;
-        y = 10;
-        i = this.f(y);
-        return i;
+        i = +10;
+	    boolean b;
+        b = false;
+        while( i != -1) {
+		    i = i--;
+		    b = true; 
+	    }
     }
 }
