@@ -9,10 +9,10 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
     if type(stmt) == type(Stmt(None, None)):
         x = create_body(stmt.component, variable_table, constructor_param_list_counter)
         if stmt.type == 'return' and type(stmt.component) == type(Field_access(None, None, None)):
-            print("LLL")
-            print(type(stmt.component.primary))
-            print(type(x[0]))
-            print(x[0])
+            # print("LLL")
+            # print(type(stmt.component.primary))
+            # print(type(x[0]))
+            # print(x[0])
             # find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
             # variable_value = f", {x[0]},"
             # variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
