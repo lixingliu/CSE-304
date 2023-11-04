@@ -250,7 +250,7 @@ class Program(Node):
         class_in_body_decl = Class_body_decl()
         class_in_body_decl.things.append(scan_int)
         class_in_body_decl.things.append(scan_float)
-        class_in = Class_decl("In", "", class_in_body_decl)
+        class_in = Class_decl("In", "", class_in_body_decl) #Append the two methods to In's class_body_decl
 
         #Out class intialization
         print_int_formal_cont = Formals_cont()
@@ -282,9 +282,16 @@ class Program(Node):
 
         self.classes.append(class_in)
         self.classes.append(class_out) #Append predefined In and Out class to class table
+
+        class_name_list = []
         for thing in self.classes[::-1]:
             if (thing.class_name == 'Out' or thing.class_name == 'In'):
                 continue
+            elif (thing.name in class_name_list): #If class name is not unique, throw error
+                res = "Error: Class name not unique"
+                return res
+            class_name_list.append(thing.name) #Add class name to list
+
             field = ""
             constructor = ""
             method = ""
@@ -298,7 +305,12 @@ class Program(Node):
                     variable_table = ""
                     constructor_body = ""
                     if (hasattr(stuff.formals.formal_param, "things")):
+                        constructor_var_name_list = []
                         for constructor_stuff in stuff.formals.formal_param.things[::-1]:
+                            if(constructor_stuff.variable.variable_name in constructor_var_name_list): #If var name is not unique, throw error
+                                res = "Error: constructor variable name not unique"
+                                return res
+                            constructor_var_name_list.append(constructor_stuff.variable.variable_name) #Add var name to list
                             constructor_param_list_counter = constructor_param_list_counter + 1
                             constructor_param_list.append(constructor_param_list_counter)
                             variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, formal, {constructor_stuff.type.type_value}"
@@ -317,8 +329,13 @@ class Program(Node):
                     constructor = constructor + f"\nConstructor Body: {constructor_body}"
 
                 if type(stuff) == type(Field_decl(None, None)):
+                    field_name_list = []
                     for field_stuff in stuff.var_decl.variables.variable.things[::-1]:
                         global FIELD_COUNTER
+                        if (field_stuff.variable_name in field_name_list): #If field name is not unique, throw error
+                            res = "Error: field name not unique"
+                            return res
+                        field_name_list.append(field_stuff.variable_name) #Add field name to list
                         FIELD_COUNTER = FIELD_COUNTER + 1
                         field = field + f"\nFIELD {FIELD_COUNTER}, {str(field_stuff.variable_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.var_decl.type.type_value)}"
 
@@ -330,7 +347,12 @@ class Program(Node):
                     variable_table = ""
                     method_body = ""
                     if (hasattr(stuff.formals.formal_param, "things")):
+                        method_var_name_list = []
                         for method_stuff in stuff.formals.formal_param.things[::-1]:
+                            if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
+                                res = "Error: method variable name not unique"
+                                return res
+                            method_var_name_list.append(method_stuff.variable.variable_name) #Add var name to list
                             method_param_list_counter = method_param_list_counter + 1
                             method_param_list.append(method_param_list_counter)
                             variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, formal, {method_stuff.type.type_value}"
