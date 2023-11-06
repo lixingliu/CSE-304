@@ -1,12 +1,8 @@
 class A {
-	int id;
+    A() {
+        if (true) {
+            return true;
+        }
 
-	static int give_int() {
-		return 10;
-	}
-
-	A() {
-		// interested in this portion
-		this.id = A.give_int();
-	}
+    }
 }

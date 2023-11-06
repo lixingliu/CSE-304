@@ -5,20 +5,15 @@ CONSTRUCTOR_COUNTER = 0
 METHOD_COUNTER = 6
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
-    # print(type(stmt))
+    print(type(stmt))
+    if type(stmt) == type(Paren(None)):
+        outcome = create_body(stmt.expr, variable_table, constructor_param_list_counter)
+        return(outcome)
     if type(stmt) == type(None):
         return ["Skip-stmt, ", variable_table, constructor_param_list_counter]
     if type(stmt) == type(Stmt(None, None)):
-        # print(stmt.component)
         x = create_body(stmt.component, variable_table, constructor_param_list_counter)
         if stmt.type == 'return' and type(stmt.component) == type(Field_access(None, None, None)):
-            # print("LLL")
-            # print(type(stmt.component.primary))
-            # print(type(x[0]))
-            # print(x[0])
-            # find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
-            # variable_value = f", {x[0]},"
-            # variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
             return [f"{stmt.type}( {x[0]} )", x[1], x[2]]
 
         outcome = [None, x[1], x[2]]
@@ -42,12 +37,11 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         if_condition = create_body(stmt.cond, variable_table, constructor_param_list_counter)
         variable_table = if_condition[1]
         constructor_param_list_counter = if_condition[2]
-        outcome[0] = f"{stmt.type}({if_condition[0]}) Block ([\n{if_body_stuff}])"
+        outcome[0] = f"{stmt.type}({if_condition[0]}) Block ([\n{if_body_stuff}]) else"
         if else_body_stuff == '':
             else_body_stuff = "Skip-stmt"
         if else_body_stuff != "":
-            # outcome = create_body(else_stuff, variable_table, constructor_param_list_counter)
-            outcome[0] = outcome[0] + f" {stmt.type_2} Block ([\n{else_body_stuff} ])"
+            outcome[0] = outcome[0] + f" Block ([\n{else_body_stuff} ])"
             variable_table = outcome[1]
             variable_table = outcome[2]
             return outcome
@@ -88,14 +82,14 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
         if (stmt.pre != None):
             if (stmt.pre == "++"):
-                return [f"Expr(Auto(Variable({variable_number}), inc, pre) )", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, pre) ),\n", variable_table, constructor_param_list_counter]
             if (stmt.pre == "--"):
-                return [f"Expr(Auto(Variable({variable_number}), dec, pre) )", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), dec, pre) ),\n", variable_table, constructor_param_list_counter]
         if (stmt.post != None):
             if (stmt.post == "++"):
-                return [f"Expr(Auto(Variable({variable_number}), inc, post) )", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, post) ),\n", variable_table, constructor_param_list_counter]
             if (stmt.post == "--"):
-                return [f"expr(Auto(Variable({variable_number}), dec, post) )", variable_table, constructor_param_list_counter]
+                return [f"expr(Auto(Variable({variable_number}), dec, post) ),\n", variable_table, constructor_param_list_counter]
         return "AAAA"
     if type(stmt) == type(Var_decl(None, None)):
         constructor_param_list_counter = constructor_param_list_counter + 1
@@ -114,7 +108,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         variable_table = right[1]
         constructor_param_list_counter = right[2]
-        result = f"Expr( Assign({left}, {right[0]}) ), "
+        result = f"Expr( Assign({left}, {right[0]}) ), \n"
         outcome = [result, variable_table, constructor_param_list_counter]
         return outcome
     if stmt == "true":
@@ -139,7 +133,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             variable_value = f", {stmt.id},"
             variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
             return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
-            return[stmt.id, variable_table, constructor_param_list_counter]
         return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
     if type(stmt) == type(0.0):
         return [f"Constant(Float-constant({stmt}))", variable_table, constructor_param_list_counter]
@@ -217,7 +210,10 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
                 variable_value = f", {argument.id},"
                 variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
                 argument_list.append(f"Variable({variable_number})")
-        result = f"Method-call({stmt.field_access.primary}, {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
+        if hasattr(stmt.field_access.primary, "id"):
+            result = f"Method-call(Class-reference({stmt.field_access.primary.id}), {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
+        else:
+            result = f"Method-call({stmt.field_access.primary}, {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
         outcome = [result, variable_table, constructor_param_list_counter]
         return outcome
     print("I WANNA DIE")
