@@ -1,8 +1,11 @@
 class A {
-    A() {
-        if (true) {
-            return true;
+    int id;
+    static int give_int() {
+        int x;
+        x = 1;
+        {
+            int x;
+            x = 1;
         }
-
     }
 }

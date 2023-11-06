@@ -216,7 +216,17 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             result = f"Method-call({stmt.field_access.primary}, {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
         outcome = [result, variable_table, constructor_param_list_counter]
         return outcome
-    print("I WANNA DIE")
+    if type(stmt) == type(Block(None)):
+        outcome = ['', variable_table, constructor_param_list_counter]
+        print(variable_table)
+        for element in stmt.stmt_list.things[::-1]:
+            result = create_body(element, outcome[1], outcome[2])
+            outcome[0] = outcome[0] + result[0]
+            outcome[1] = result[1]
+            outcome[2] = result[2]
+        outcome[0] = f'Block([\n{outcome[0]}])'
+        return outcome
+    print("sadsadsadsadsadsad")
     outcome = [None, None, None]
     return outcome
 
