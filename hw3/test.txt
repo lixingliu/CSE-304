@@ -1,12 +1,12 @@
 class A {
-    A (int a) {
-        int i;
-        i = +10;
-	    boolean b;
-        b = false;
-        while( i != -1) {
-		    i = i--;
-		    b = true; 
-	    }
-    }
+	int id;
+
+	static int give_int() {
+		return 10;
+	}
+
+	A() {
+		// interested in this portion
+		this.id = A.give_int();
+	}
 }

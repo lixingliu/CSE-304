@@ -287,10 +287,10 @@ class Program(Node):
         for thing in self.classes[::-1]:
             if (thing.class_name == 'Out' or thing.class_name == 'In'):
                 continue
-            elif (thing.name in class_name_list): #If class name is not unique, throw error
+            elif (thing.class_name in class_name_list): #If class name is not unique, throw error
                 res = "Error: Class name not unique"
                 return res
-            class_name_list.append(thing.name) #Add class name to list
+            class_name_list.append(thing.class_name) #Add class name to list
 
             field = ""
             constructor = ""
