@@ -4,144 +4,278 @@ FIELD_COUNTER = 0
 CONSTRUCTOR_COUNTER = 0
 METHOD_COUNTER = 6
 
-def create_body(stmt, variable_table, constructor_param_list_counter):
-    print(type(stmt))
-    if type(stmt) == type(Paren(None)):
-        outcome = create_body(stmt.expr, variable_table, constructor_param_list_counter)
-        return(outcome)
-    if type(stmt) == type(None):
-        return ["Skip-stmt, ", variable_table, constructor_param_list_counter]
-    if type(stmt) == type(Stmt(None, None)):
-        x = create_body(stmt.component, variable_table, constructor_param_list_counter)
-        if stmt.type == 'return' and type(stmt.component) == type(Field_access(None, None, None)):
-            return [f"{stmt.type}( {x[0]} )", x[1], x[2]]
+def create_in_class():
+    pub_sta_mod = Modifier("public", "static")
+    scan_int = Method_decl("scan_int", pub_sta_mod, Type("int"), Formals(Formals_cont()), Stmt_list()) #Initializing scan_int
+    scan_float = Method_decl("scan_float", pub_sta_mod, Type("float"), Formals(Formals_cont()), Stmt_list()) #Initializing scan_float
+    class_in_body_decl = Class_body_decl()
+    class_in_body_decl.things.append(scan_int)
+    class_in_body_decl.things.append(scan_float)
+    class_in = Class_decl("In", "", class_in_body_decl) #Append the two methods to In's class_body_decl
+    return class_in
 
-        outcome = [None, x[1], x[2]]
-        outcome[0] = f"{stmt.type}( {x[0]} )"
+def create_out_class():
+    pub_sta_mod = Modifier("public", "static")
+    print_int_formal_cont = Formals_cont()
+    print_int_formal_cont.things.append(Formal_param(Type("int"), Variable("i")))
+    print_int_formal = Formals(print_int_formal_cont)
+    print_int = Method_decl("print", pub_sta_mod, None, print_int_formal, Stmt_list()) #Initializing print_int
+
+    print_float_formal_cont = Formals_cont()
+    print_float_formal_cont.things.append(Formal_param(Type("float"), Variable("f")))
+    print_float_formal = Formals(print_float_formal_cont)
+    print_float = Method_decl("print", pub_sta_mod, None, print_float_formal, Stmt_list()) #Initializing print_float
+
+    print_boolean_formal_cont = Formals_cont()
+    print_boolean_formal_cont.things.append(Formal_param(Type("boolean"), Variable("b")))
+    print_boolean_formal = Formals(print_boolean_formal_cont)
+    print_boolean = Method_decl("print", pub_sta_mod, None, print_boolean_formal, Stmt_list()) #Initializing print_boolean
+
+    print_string_formal_cont = Formals_cont()
+    print_string_formal_cont.things.append(Formal_param(Type("string"), Variable("s")))
+    print_string_formal = Formals(print_string_formal_cont)
+    print_string = Method_decl("print", pub_sta_mod, None, print_string_formal, Stmt_list()) #Initializing print_string
+
+    class_out_body_decl = Class_body_decl()
+    class_out_body_decl.things.append(print_int)
+    class_out_body_decl.things.append(print_float)
+    class_out_body_decl.things.append(print_boolean)
+    class_out_body_decl.things.append(print_string)
+    class_out = Class_decl("Out", "", class_out_body_decl) #Append the four methods to Out's class_body_decl
+    return class_out
+
+def create_constructor(line):
+    global CONSTRUCTOR_COUNTER
+    CONSTRUCTOR_COUNTER = CONSTRUCTOR_COUNTER + 1
+    constructor = ""
+
+    constructor_parameters_counter = 0
+    variable_table = ""
+    constructor_body = ""
+    constructor_body_stuff = ""
+    constructor_parameters = []
+
+    if (hasattr(line.formals.formal_param, "things")):
+        constructor_parameters = []
+        for constructor_stuff in line.formals.formal_param.things[::-1]:
+            if(constructor_stuff.variable.variable_name in constructor_parameters):
+                return "Error: constructor variable name not unique"
+            constructor_parameters.append(constructor_stuff.variable.variable_name) 
+            constructor_parameters_counter = constructor_parameters_counter + 1
+            constructor_parameters.append(constructor_parameters_counter)
+            variable_table = variable_table + f"\nVARIABLE {constructor_parameters_counter}, {constructor_stuff.variable.variable_name}, formal, {constructor_stuff.type.type_value}"
+    for constructor_stmt in line.body.stmt_list.things[::-1]:
+        outcome = create_body(constructor_stmt, variable_table, constructor_parameters_counter)
+        constructor_body_stuff = constructor_body_stuff + outcome[0]
+        variable_table = outcome[1]
+        constructor_parameters_counter = outcome[2]
+    
+    constructor_body = f"\nBlock([\n{constructor_body_stuff}\n])"
+    constructor = constructor + f"\nCONSTRUCTOR: {CONSTRUCTOR_COUNTER}, {str(line.modifier.visibility)}"
+    constructor = constructor + f"\nConstructor Parameters: {str(constructor_parameters).strip('[]')}"
+    constructor = constructor + f"\nVariable Table: {variable_table}"
+    constructor = constructor + f"\nConstructor Body: {constructor_body}"
+
+    return constructor
+
+def create_field(line, class_object):
+    field = ""
+    field_name_list = []
+    for field_stuff in line.var_decl.variables.variable.things[::-1]:
+        global FIELD_COUNTER
+        if (field_stuff.variable_name in field_name_list): #If field name is not unique, throw error
+            res = "Error: field name not unique"
+            return res
+        field_name_list.append(field_stuff.variable_name) #Add field name to list
+        FIELD_COUNTER = FIELD_COUNTER + 1
+        field = field + f"\nFIELD {FIELD_COUNTER}, {str(field_stuff.variable_name)}, {str(class_object.class_name)}, {str(line.modifier.visibility)}, {str(line.modifier.applicability)}, {str(line.var_decl.type.type_value)}"
+
+    return field
+
+def create_method(line, class_object):
+    method = ""
+    global METHOD_COUNTER
+    METHOD_COUNTER = METHOD_COUNTER + 1
+    method_param_list = []
+    method_param_list_counter = 0
+    variable_table = ""
+    method_body = ""
+    if (hasattr(line.formals.formal_param, "things")):
+        method_var_name_list = []
+        for method_stuff in line.formals.formal_param.things[::-1]:
+            if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
+                res = "Error: method variable name not unique"
+                return res
+            method_var_name_list.append(method_stuff.variable.variable_name) #Add var name to list
+            method_param_list_counter = method_param_list_counter + 1
+            method_param_list.append(method_param_list_counter)
+            variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, formal, {method_stuff.type.type_value}"
+
+    method_body_stuff = ""
+    for method_stmt in line.body.stmt_list.things[::-1]:
+        outcome = create_body(method_stmt, variable_table, method_param_list_counter)
+        variable_table = outcome[1]
+        method_param_list_counter = outcome[2]
+        method_body_stuff = method_body_stuff + outcome[0]
+
+    method_body = f"\nBlock([\n{method_body_stuff}\n])"
+    method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(line.method_name)}, {str(class_object.class_name)}, {str(line.modifier.visibility)}, {str(line.modifier.applicability)}, {str(line.type)}"
+    method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
+    method = method + f"\nVariable Table:  {variable_table}"
+    method = method + f"\nMethod Body:   {method_body}"
+
+    return method
+
+def create_body(stmt, variable_table, constructor_param_list_counter):
+    if isinstance(stmt, Paren):
+        return create_body(stmt.expr, variable_table, constructor_param_list_counter)
+    
+    if stmt is None:
+        return ["Skip-stmt, ", variable_table, constructor_param_list_counter]
+    
+    if isinstance(stmt, Stmt):
+        result = create_body(stmt.component, variable_table, constructor_param_list_counter)
+        if stmt.type == 'return' and isinstance(stmt.component, Field_access):
+            result[0] = f"{stmt.type}( {result[0]} )"
+            return result
+
+        outcome = result
+        outcome[0] = f"{stmt.type}( {result[0]} )"
         return outcome
-    if type(stmt) == type(Ifelsewhile_stmt(None, None, None, None)):
+    
+    if isinstance(stmt, Ifelsewhile_stmt):
         if_body_stuff = ""
         else_body_stuff = ""
-        outcome = [None, None, None]
+        outcome = [None, variable_table, constructor_param_list_counter]
         for if_stuff in stmt.then.stmt_list.things[::-1]:
-            outcome = create_body(if_stuff, variable_table, constructor_param_list_counter)
+            outcome = create_body(if_stuff, outcome[1], outcome[2])
             if_body_stuff = if_body_stuff + outcome[0]
-            variable_table = outcome[1]
-            constructor_param_list_counter = outcome[2]
-        if stmt.els != "":
+            
+        if stmt.els:
             for else_stuff in stmt.els.stmt_list.things[::-1]:
                 outcome = create_body(else_stuff, variable_table, constructor_param_list_counter)
-                variable_table = outcome[1]
-                constructor_param_list_counter = outcome[2]
                 else_body_stuff = else_body_stuff + outcome[0]
-        if_condition = create_body(stmt.cond, variable_table, constructor_param_list_counter)
-        variable_table = if_condition[1]
-        constructor_param_list_counter = if_condition[2]
-        outcome[0] = f"{stmt.type}({if_condition[0]}) Block ([\n{if_body_stuff}]) else"
+
+        if_condition = create_body(stmt.cond, outcome[1], outcome[2])
+        outcome = [f"{stmt.type}({if_condition[0]}) Block ([\n{if_body_stuff}]) else", outcome[1], outcome[2]]
+
         if else_body_stuff == '':
             else_body_stuff = "Skip-stmt"
+
         if else_body_stuff != "":
-            outcome[0] = outcome[0] + f" Block ([\n{else_body_stuff} ])"
-            variable_table = outcome[1]
-            variable_table = outcome[2]
-            return outcome
-        else:
-            return outcome
-    if type(stmt) == type(For_stmt(None, None, None, None, None)):
+            outcome[0] += f" Block ([\n{else_body_stuff} ])"
+
+        return outcome
+    
+    if isinstance(stmt, For_stmt):
         for_body_stuff = ""
-        outcome = [None, None, None]
+        outcome = [None, variable_table, constructor_param_list_counter]
         for for_stuff in stmt.then.stmt_list.things[::-1]:
-            outcome = create_body(for_stuff, variable_table, constructor_param_list_counter)
+            outcome = create_body(for_stuff, outcome[1], outcome[2])
             if outcome[0] == 'empty( Skip-stmt )':
                 for_body_stuff = 'Skip-stmt'
-                break;
+                break
             for_body_stuff = for_body_stuff + outcome[0]
-            variable_table = outcome[1]
-            constructor_param_list_counter = outcome[2]
             
-        for_cond_1 = create_body(stmt.cond1, variable_table, constructor_param_list_counter)
-        variable_table = for_cond_1[1]
-        constructor_param_list_counter = for_cond_1[2]
+        for_cond_1 = create_body(stmt.cond1, outcome[1], outcome[2])
+        outcome[1] = for_cond_1[1]
+        outcome[2] = for_cond_1[2]
 
-        for_cond_2 = create_body(stmt.cond2, variable_table, constructor_param_list_counter)
-        variable_table = for_cond_2[1]
-        constructor_param_list_counter = for_cond_2[2]    
+        for_cond_2 = create_body(stmt.cond2, outcome[1], outcome[2])
+        outcome[1] = for_cond_2[1]
+        outcome[2] = for_cond_2[2]    
 
-        for_cond_3 = create_body(stmt.cond3, variable_table, constructor_param_list_counter)
-        variable_table = for_cond_3[1]
-        constructor_param_list_counter = for_cond_3[2]
+        for_cond_3 = create_body(stmt.cond3, outcome[1], outcome[2])
+        outcome[1] = for_cond_3[1]
+        outcome[2] = for_cond_3[2]
 
-        result = f"{stmt.type}({for_cond_1[0]}{for_cond_2[0]}, {for_cond_3[0]}) Block ([\n{for_body_stuff}])"
-        outcome[0] = result
-        outcome[1] = variable_table
-        outcome[2] = constructor_param_list_counter
+        outcome[0] = f"{stmt.type}({for_cond_1[0]}{for_cond_2[0]}, {for_cond_3[0]}) Block ([\n{for_body_stuff}])"
         return outcome
-    if type(stmt) == type(Auto(None, None, None)):
-        find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+    
+    if isinstance(stmt, Auto):
+        find_indices = lambda strings, substring: next((i for i, s in enumerate(strings) if substring in s), None)
         variable_value = f", {stmt.lhs.id},"
-        variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
-        if (stmt.pre != None):
+        variable_number = find_indices(variable_table.split("\n"), variable_value)
+
+        if variable_number is not None:
             if (stmt.pre == "++"):
                 return [f"Expr(Auto(Variable({variable_number}), inc, pre) ),\n", variable_table, constructor_param_list_counter]
-            if (stmt.pre == "--"):
+            elif (stmt.pre == "--"):
                 return [f"Expr(Auto(Variable({variable_number}), dec, pre) ),\n", variable_table, constructor_param_list_counter]
-        if (stmt.post != None):
-            if (stmt.post == "++"):
+            elif (stmt.post == "++"):
                 return [f"Expr(Auto(Variable({variable_number}), inc, post) ),\n", variable_table, constructor_param_list_counter]
-            if (stmt.post == "--"):
-                return [f"expr(Auto(Variable({variable_number}), dec, post) ),\n", variable_table, constructor_param_list_counter]
+            elif (stmt.post == "--"):
+                return [f"Expr(Auto(Variable({variable_number}), dec, post) ),\n", variable_table, constructor_param_list_counter]
         return "AAAA"
-    if type(stmt) == type(Var_decl(None, None)):
-        constructor_param_list_counter = constructor_param_list_counter + 1
-        variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
+    
+    if isinstance(stmt, Var_decl):
+        constructor_param_list_counter +=  1
+        variable_table +=  f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
         return ['', variable_table, constructor_param_list_counter]
-    if type(stmt) == type(Assign(None, None)):
+    
+    if isinstance(stmt, Assign):
         left = ""
         right = ""
+
         if stmt.lhs.type == ".":
             left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
-        if stmt.lhs.type == None:
-            find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+        elif stmt.lhs.type is None:
+            find_indices = lambda strings, substring: next((i for i, s in enumerate(strings) if substring in s), None)
             variable_value = f", {stmt.lhs.id},"
-            variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
-            left = f"Variable({variable_number})"
+            variable_number = find_indices(variable_table.split("\n"), variable_value)
+
+            if variable_number is not None:
+                left = f"Variable({variable_number})"
+            else:
+                return ["Variable not found", variable_table, constructor_param_list_counter] #here
+
+
         right = create_body(stmt.expr, variable_table, constructor_param_list_counter)
         variable_table = right[1]
         constructor_param_list_counter = right[2]
+
         result = f"Expr( Assign({left}, {right[0]}) ), \n"
         outcome = [result, variable_table, constructor_param_list_counter]
+
         return outcome
+    
     if stmt == "true":
         return [f"Constant({True})", variable_table, constructor_param_list_counter]
     if stmt == "false":
         return [f"Constant({False})", variable_table, constructor_param_list_counter]
     if stmt == "null":
         return [f"Constant(Null)", variable_table, constructor_param_list_counter]
-    if type(stmt) == type(Uminus(None, None)):
+    
+    if isinstance(stmt, Uminus):
         outcome = create_body(stmt.expr, variable_table, constructor_param_list_counter)
-        outcome[0] = f"Unary-expression(MINUS, {outcome[0]})"
-        return outcome
-    if type(stmt) == type(Field_access(None, None, None)):
+        result = f"Unary-expression(MINUS, {outcome[0]})"
+        return [result, outcome[1], outcome[2]]
+    
+    if isinstance(stmt, Field_access):
         outcome  = None
-        if type(stmt.primary) == type(Field_access(None, None, None)):
+        if isinstance(stmt.primary, Field_access):
             outcome = create_body(stmt.primary, variable_table, constructor_param_list_counter)
             stmt.primary = outcome[0]
             variable_table = outcome[1]
             constructor_param_list_counter = outcome[2]
-        if stmt.primary == None:
-            find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+        if stmt.primary is None:
             variable_value = f", {stmt.id},"
-            variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
-            return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
+            variable_number = next((i for i, s in enumerate(variable_table.split("\n")) if variable_value in s), None)
+
+            if variable_number is not None:
+                return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
+            
         return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
-    if type(stmt) == type(0.0):
+    
+    if isinstance(stmt, float):
         return [f"Constant(Float-constant({stmt}))", variable_table, constructor_param_list_counter]
-    if type(stmt) == type(0):
+    if isinstance(stmt, int):
         return [f"Constant(Integer-constant({stmt}))", variable_table, constructor_param_list_counter]
-    if type(stmt) == type(""):
+    if isinstance(stmt, str):
         if stmt == 'empty':
             return ["Skip-stmt", variable_table, constructor_param_list_counter]
         return [f"Constant(String-constant({stmt}))", variable_table, constructor_param_list_counter]
+    
     if type(stmt) == type(Addition(None, None, None)):
         outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
@@ -202,30 +336,34 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
         outcome_3 = [f"Binary(geq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
         return outcome_3
-    if type(stmt) == type(Method_invocation(None, None)):
+    
+    if isinstance(stmt, Method_invocation):
         argument_list = []
-        if (stmt.argument_list.arguments != None):
-            find_indices = lambda strings, substring: list(filter(lambda x: substring in strings[x], range(len(strings))))
+        if stmt.argument_list.arguments is not None:
+            find_indices = lambda strings, substring: next((i for i, s in enumerate(strings) if substring in s), None)
             for argument in stmt.argument_list.arguments.things:
                 variable_value = f", {argument.id},"
-                variable_number = find_indices(variable_table.split("\n"), variable_value)[0]
-                argument_list.append(f"Variable({variable_number})")
+                variable_number = find_indices(variable_table.split("\n"), variable_value)
+                if variable_number is not None:
+                    argument_list.append(f"Variable({variable_number})")                
         if hasattr(stmt.field_access.primary, "id"):
             result = f"Method-call(Class-reference({stmt.field_access.primary.id}), {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
         else:
             result = f"Method-call({stmt.field_access.primary}, {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
         outcome = [result, variable_table, constructor_param_list_counter]
         return outcome
-    if type(stmt) == type(Block(None)):
+    
+    if isinstance(stmt, Block):
         outcome = ['', variable_table, constructor_param_list_counter]
-        print(variable_table)
         for element in stmt.stmt_list.things[::-1]:
             result = create_body(element, outcome[1], outcome[2])
-            outcome[0] = outcome[0] + result[0]
+            outcome[0] += result[0]
             outcome[1] = result[1]
             outcome[2] = result[2]
+            
         outcome[0] = f'Block([\n{outcome[0]}])'
         return outcome
+    
     print("sadsadsadsadsadsad")
     outcome = [None, None, None]
     return outcome
@@ -249,136 +387,34 @@ class Program(Node):
         
     def __str__(self):
         res = ""
-        #In class intialization
-        pub_sta_mod = Modifier("public", "static")
-        scan_int = Method_decl("scan_int", pub_sta_mod, Type("int"), Formals(Formals_cont()), Stmt_list()) #Initializing scan_int
-        scan_float = Method_decl("scan_float", pub_sta_mod, Type("float"), Formals(Formals_cont()), Stmt_list()) #Initializing scan_float
-        class_in_body_decl = Class_body_decl()
-        class_in_body_decl.things.append(scan_int)
-        class_in_body_decl.things.append(scan_float)
-        class_in = Class_decl("In", "", class_in_body_decl) #Append the two methods to In's class_body_decl
-
-        #Out class intialization
-        print_int_formal_cont = Formals_cont()
-        print_int_formal_cont.things.append(Formal_param(Type("int"), Variable("i")))
-        print_int_formal = Formals(print_int_formal_cont)
-        print_int = Method_decl("print", pub_sta_mod, None, print_int_formal, Stmt_list()) #Initializing print_int
-
-        print_float_formal_cont = Formals_cont()
-        print_float_formal_cont.things.append(Formal_param(Type("float"), Variable("f")))
-        print_float_formal = Formals(print_float_formal_cont)
-        print_float = Method_decl("print", pub_sta_mod, None, print_float_formal, Stmt_list()) #Initializing print_float
-
-        print_boolean_formal_cont = Formals_cont()
-        print_boolean_formal_cont.things.append(Formal_param(Type("boolean"), Variable("b")))
-        print_boolean_formal = Formals(print_boolean_formal_cont)
-        print_boolean = Method_decl("print", pub_sta_mod, None, print_boolean_formal, Stmt_list()) #Initializing print_boolean
-
-        print_string_formal_cont = Formals_cont()
-        print_string_formal_cont.things.append(Formal_param(Type("string"), Variable("s")))
-        print_string_formal = Formals(print_string_formal_cont)
-        print_string = Method_decl("print", pub_sta_mod, None, print_string_formal, Stmt_list()) #Initializing print_string
-
-        class_out_body_decl = Class_body_decl()
-        class_out_body_decl.things.append(print_int)
-        class_out_body_decl.things.append(print_float)
-        class_out_body_decl.things.append(print_boolean)
-        class_out_body_decl.things.append(print_string)
-        class_out = Class_decl("Out", "", class_out_body_decl) #Append the four methods to Out's class_body_decl
-
-        self.classes.append(class_in)
-        self.classes.append(class_out) #Append predefined In and Out class to class table
+        self.classes.append(create_in_class())
+        self.classes.append(create_out_class())
 
         class_name_list = []
-        for thing in self.classes[::-1]:
-            if (thing.class_name == 'Out' or thing.class_name == 'In'):
+        for class_object in self.classes[::-1]:
+            if (class_object.class_name == 'Out' or class_object.class_name == 'In'):
                 continue
-            elif (thing.class_name in class_name_list): #If class name is not unique, throw error
-                res = "Error: Class name not unique"
-                return res
-            class_name_list.append(thing.class_name) #Add class name to list
+            elif (class_object.class_name in class_name_list): #If class name is not unique, throw error
+                return "Error: Class name not unique"
+            class_name_list.append(class_object.class_name) #Add class name to list
 
             field = ""
             constructor = ""
             method = ""
-            for stuff in thing.class_body_decl.things:
-                if type(stuff) == type(Constructor_decl(None, None, None)):
-                    global CONSTRUCTOR_COUNTER
-                    CONSTRUCTOR_COUNTER = CONSTRUCTOR_COUNTER + 1
 
-                    constructor_param_list = []
-                    constructor_param_list_counter = 0
-                    variable_table = ""
-                    constructor_body = ""
-                    if (hasattr(stuff.formals.formal_param, "things")):
-                        constructor_var_name_list = []
-                        for constructor_stuff in stuff.formals.formal_param.things[::-1]:
-                            if(constructor_stuff.variable.variable_name in constructor_var_name_list): #If var name is not unique, throw error
-                                res = "Error: constructor variable name not unique"
-                                return res
-                            constructor_var_name_list.append(constructor_stuff.variable.variable_name) #Add var name to list
-                            constructor_param_list_counter = constructor_param_list_counter + 1
-                            constructor_param_list.append(constructor_param_list_counter)
-                            variable_table = variable_table + f"\nVARIABLE {constructor_param_list_counter}, {constructor_stuff.variable.variable_name}, formal, {constructor_stuff.type.type_value}"
+            for line in class_object.class_body_decl.things:
+                if isinstance(line, Constructor_decl):
+                    constructor = constructor + create_constructor(line)
 
-                    constructor_body_stuff = ""
-                    for constructor_stmt in stuff.body.stmt_list.things[::-1]:
-                        outcome = create_body(constructor_stmt, variable_table, constructor_param_list_counter)
-                        constructor_body_stuff = constructor_body_stuff + outcome[0]
-                        variable_table = outcome[1]
-                        constructor_param_list_counter = outcome[2]
-                    
-                    constructor_body = f"\nBlock([\n{constructor_body_stuff}\n])"
-                    constructor = constructor + f"\nCONSTRUCTOR: {CONSTRUCTOR_COUNTER}, {str(stuff.modifier.visibility)}"
-                    constructor = constructor + f"\nConstructor Parameters: {str(constructor_param_list).strip('[]')}"
-                    constructor = constructor + f"\nVariable Table: {variable_table}"
-                    constructor = constructor + f"\nConstructor Body: {constructor_body}"
+                if isinstance(line, Field_decl):
+                    field = field + create_field(line, class_object)
 
-                if type(stuff) == type(Field_decl(None, None)):
-                    field_name_list = []
-                    for field_stuff in stuff.var_decl.variables.variable.things[::-1]:
-                        global FIELD_COUNTER
-                        if (field_stuff.variable_name in field_name_list): #If field name is not unique, throw error
-                            res = "Error: field name not unique"
-                            return res
-                        field_name_list.append(field_stuff.variable_name) #Add field name to list
-                        FIELD_COUNTER = FIELD_COUNTER + 1
-                        field = field + f"\nFIELD {FIELD_COUNTER}, {str(field_stuff.variable_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.var_decl.type.type_value)}"
-
-                if type(stuff) == type(Method_decl(None, None, None, None, None)):
-                    global METHOD_COUNTER
-                    METHOD_COUNTER = METHOD_COUNTER + 1
-                    method_param_list = []
-                    method_param_list_counter = 0
-                    variable_table = ""
-                    method_body = ""
-                    if (hasattr(stuff.formals.formal_param, "things")):
-                        method_var_name_list = []
-                        for method_stuff in stuff.formals.formal_param.things[::-1]:
-                            if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
-                                res = "Error: method variable name not unique"
-                                return res
-                            method_var_name_list.append(method_stuff.variable.variable_name) #Add var name to list
-                            method_param_list_counter = method_param_list_counter + 1
-                            method_param_list.append(method_param_list_counter)
-                            variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, formal, {method_stuff.type.type_value}"
-                    
-                    method_body_stuff = ""
-                    for method_stmt in stuff.body.stmt_list.things[::-1]:
-                        outcome = create_body(method_stmt, variable_table, method_param_list_counter)
-                        variable_table = outcome[1]
-                        method_param_list_counter = outcome[2]
-                        method_body_stuff = method_body_stuff + outcome[0]
-
-                    method_body = f"\nBlock([\n{method_body_stuff}\n])"
-                    method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(stuff.method_name)}, {str(thing.class_name)}, {str(stuff.modifier.visibility)}, {str(stuff.modifier.applicability)}, {str(stuff.type)}"
-                    method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
-                    method = method + f"\nVariable Table:  {variable_table}"
-                    method = method + f"\nMethod Body:   {method_body}"
+                if isinstance(line, Method_decl):
+                    method = method + create_method(line, class_object)
                     
 
-            res = res +f"\nClass Name: {str(thing.class_name)}"
-            res = res + f"\nSuperclass Name: {str(thing.superclass_name)}"
+            res = res +f"\nClass Name: {str(class_object.class_name)}"
+            res = res + f"\nSuperclass Name: {str(class_object.superclass_name)}"
             res = res + "\nFields:"
             res = res + field
             res = res + f"\nConstructors: "
@@ -386,6 +422,7 @@ class Program(Node):
             res = res + f"\nMethods: "
             res = res + method 
             res = res + "\n--------------------------------------------------------------------------"
+
         return res
 
 class Class_decl_list(Node):
@@ -431,7 +468,7 @@ class Modifier(Node):
         return str(self.visibility) + str(self.applicability)
 
 class Var_decl(Node):
-    def __init__(self, type, variables):
+    def __init__(self, type = None, variables = None):
         super().__init__()
         self.type = type
         self.variables = variables
@@ -471,7 +508,7 @@ class Variables_cont(Node):
         pass
 
 class Constructor_decl(Node):
-    def __init__(self, modifier, formals, body):
+    def __init__(self, modifier = None, formals = None, body = None):
         super().__init__()
         self.modifier = modifier
         self.formals = formals
@@ -516,7 +553,7 @@ class Method_decl(Node):
         pass
 
 class Block(Node):
-    def __init__(self, stmt_list):
+    def __init__(self, stmt_list = None):
         super().__init__()
         self.stmt_list = stmt_list
     def __str__(self):
@@ -530,7 +567,7 @@ class Stmt_list(Node):
         pass
 
 class Stmt(Node):
-    def __init__(self, type, component = ''):
+    def __init__(self, type = None, component = ''):
         super().__init__()
         self.type = type
         if component == None:
@@ -541,7 +578,7 @@ class Stmt(Node):
         pass
 
 class Ifelsewhile_stmt(Node):
-    def __init__(self, type, cond, then, els = '', type_2 = ''):
+    def __init__(self, type = None, cond = None, then = None, els = '', type_2 = ''):
         super().__init__()
         self.type = type
         self.cond = cond
@@ -552,7 +589,7 @@ class Ifelsewhile_stmt(Node):
         pass
 
 class For_stmt(Node):
-    def __init__(self, cond1, cond2, cond3, body, type):
+    def __init__(self, cond1 = None, cond2 = None, cond3 = None, body = None, type = None):
         super().__init__()
         self.cond1 = cond1
         self.cond2 = cond2
@@ -576,7 +613,7 @@ class Arguments_cont(Node):
         pass
 
 class Assign(Node):
-    def __init__(self, lhs, expr):
+    def __init__(self, lhs = None, expr = None):
         super().__init__()
         self.lhs = lhs
         self.expr = expr
@@ -693,7 +730,7 @@ class GreaterThanEqual(Node):
 
 
 class Field_access(Node):
-    def __init__(self, primary, id, type):
+    def __init__(self, primary = None, id = None, type = None):
         super().__init__()
         self.primary = primary
         self.id = id
@@ -702,7 +739,7 @@ class Field_access(Node):
         pass
 
 class Uminus(Node):
-    def __init__(self, type, expr):
+    def __init__(self, type = None, expr = None):
         super().__init__()
         self.type = type
         self.expr = expr
@@ -710,7 +747,7 @@ class Uminus(Node):
         pass
 
 class Auto(Node):
-    def __init__(self, post, pre, lhs):
+    def __init__(self, post = None, pre = None, lhs = None):
         super().__init__()
         self.post = post
         self.pre = pre
@@ -719,7 +756,7 @@ class Auto(Node):
         pass
 
 class Method_invocation(Node):
-    def __init__(self, field_access, argument_list):
+    def __init__(self, field_access = None, argument_list = None):
         super().__init__()
         self.field_access = field_access
         self.argument_list = argument_list
@@ -735,7 +772,7 @@ class NewObject(Node):
         pass
 
 class Paren(Node):
-    def __init__(self, expr):
+    def __init__(self, expr = None):
         super().__init__()
         self.expr = expr
     def __str__(self):
