@@ -127,6 +127,9 @@ def create_method(line, class_object):
     return method
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
+    if isinstance(stmt, NewObject):
+        return [str(stmt), variable_table, constructor_param_list_counter]
+
     if isinstance(stmt, Paren):
         return create_body(stmt.expr, variable_table, constructor_param_list_counter)
     
@@ -199,13 +202,13 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
 
         if variable_number is not None:
             if (stmt.pre == "++"):
-                return [f"Expr(Auto(Variable({variable_number}), inc, pre) ),\n", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, pre) ),", variable_table, constructor_param_list_counter]
             elif (stmt.pre == "--"):
-                return [f"Expr(Auto(Variable({variable_number}), dec, pre) ),\n", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), dec, pre) ),", variable_table, constructor_param_list_counter]
             elif (stmt.post == "++"):
-                return [f"Expr(Auto(Variable({variable_number}), inc, post) ),\n", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, post) ),", variable_table, constructor_param_list_counter]
             elif (stmt.post == "--"):
-                return [f"Expr(Auto(Variable({variable_number}), dec, post) ),\n", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), dec, post) ),", variable_table, constructor_param_list_counter]
         return "AAAA"
     
     if isinstance(stmt, Var_decl):
@@ -251,6 +254,9 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         result = f"Unary-expression(MINUS, {outcome[0]})"
         return [result, outcome[1], outcome[2]]
     
+    if isinstance(stmt, Literal):
+        return create_body(stmt.value, variable_table, constructor_param_list_counter)
+
     if isinstance(stmt, Field_access):
         outcome  = None
         if isinstance(stmt.primary, Field_access):
@@ -267,6 +273,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             
         return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
     
+    
     if isinstance(stmt, float):
         return [f"Constant(Float-constant({stmt}))", variable_table, constructor_param_list_counter]
     if isinstance(stmt, int):
@@ -276,66 +283,35 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             return ["Skip-stmt", variable_table, constructor_param_list_counter]
         return [f"Constant(String-constant({stmt}))", variable_table, constructor_param_list_counter]
     
+
     if type(stmt) == type(Addition(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(add, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(Subtraction(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(sub, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(Multiplication(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"( Binary(mul, {outcome_1[0]}, {outcome_2[0]}) )", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(Division(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(div, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(Conjection(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(and, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(Disjunction(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(or, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(Equality(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(eq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(Disquality(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(neq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(LessThan(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(lt, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(LessThanEqual(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(leq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(GreaterThan(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(gt, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
-    if type(stmt) == type(GreaterThanEqual(None, None, None)):
-        outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        outcome_3 = [f"Binary(geq, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return outcome_3
+        # print(str(stmt))
+        # outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
+        # outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
+        # outcome_3 = [f"Binary(add, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
+        return [str(stmt), variable_table, constructor_param_list_counter]
+
+
+    binary_expr_map = {
+        # "Addition": "add",
+        "Subtraction": "sub",
+        "Multiplication": "mul",
+        "Division": "div",
+        "Conjection": "and",
+        "Disjunction": "or",
+        "Equality": "eq",
+        "Disquality": "neq",
+        "LessThan": "lt",
+        "LessThanEqual": "leq",
+        "GreaterThan": "gt",
+        "GreaterThanEqual": "geq",
+    }
+    for expr_type, operation in binary_expr_map.items():
+        if isinstance(stmt, globals()[expr_type]):
+            outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
+            outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
+            outcome_3 = [f"Binary({operation}, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
+            return outcome_3
     
     if isinstance(stmt, Method_invocation):
         argument_list = []
@@ -363,7 +339,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             
         outcome[0] = f'Block([\n{outcome[0]}])'
         return outcome
-    
     print("sadsadsadsadsadsad")
     outcome = [None, None, None]
     return outcome
@@ -604,13 +579,17 @@ class Arguments(Node):
         super().__init__()
         self.arguments = arguments
     def __str__(self):
-        pass
+        if self.arguments is None:
+            return '[]'
+        else:
+            return str(self.arguments)
+        
 class Arguments_cont(Node):
     def __init__(self):
         super().__init__()
         self.things = []
     def __str__(self):
-        pass
+        return str(self.things[::-1])
 
 class Assign(Node):
     def __init__(self, lhs = None, expr = None):
@@ -627,7 +606,17 @@ class Addition(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
-        pass
+        left_side = ''
+        right_side = ''
+        print(type(self.left_expr))
+        if isinstance(self.left_expr, Literal):
+            left_side = str(self.left_expr.value)
+        if isinstance(self.right_expr, Literal):
+            right_side = str(self.right_expr.value)
+
+        # if isinstance(self.left_expr, Field_access):
+        #     left_side = str(self.left_expr)
+        return f"Binary(add, {left_side}, {right_side})"
 
 class Subtraction(Node):
     def __init__(self, type, left_expr, right_expr):
@@ -636,6 +625,7 @@ class Subtraction(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
 
 class Multiplication(Node):
@@ -645,6 +635,7 @@ class Multiplication(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
 
 class Division(Node):
@@ -654,6 +645,7 @@ class Division(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
 
 class Conjection(Node):
@@ -663,6 +655,7 @@ class Conjection(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
 
 class Disjunction(Node):
@@ -672,6 +665,7 @@ class Disjunction(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
 
 class Equality(Node):
@@ -681,8 +675,9 @@ class Equality(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
-
+    
 class Disquality(Node):
     def __init__(self, type, left_expr, right_expr):
         super().__init__()
@@ -690,8 +685,9 @@ class Disquality(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
-
+    
 class LessThan(Node):
     def __init__(self, type, left_expr, right_expr):
         super().__init__()
@@ -699,8 +695,9 @@ class LessThan(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
-
+    
 class LessThanEqual(Node):
     def __init__(self, type, left_expr, right_expr):
         super().__init__()
@@ -708,8 +705,9 @@ class LessThanEqual(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
-
+    
 class GreaterThan(Node):
     def __init__(self, type, left_expr, right_expr):
         super().__init__()
@@ -717,8 +715,9 @@ class GreaterThan(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
-
+    
 class GreaterThanEqual(Node):
     def __init__(self, type, left_expr, right_expr):
         super().__init__()
@@ -726,8 +725,8 @@ class GreaterThanEqual(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
+        return "DDDDDDDDDDD"
         pass
-
 
 class Field_access(Node):
     def __init__(self, primary = None, id = None, type = None):
@@ -764,16 +763,25 @@ class Method_invocation(Node):
         pass
 
 class NewObject(Node):
-    def __init__(self, id, argument_list):
+    def __init__(self, id = None, argument_list = ''):
         super().__init__()
         self.id = id
         self.argument_list = argument_list
     def __str__(self):
-        pass
+        return f"New-Object({self.id}, {str(self.argument_list)})"
 
 class Paren(Node):
     def __init__(self, expr = None):
         super().__init__()
         self.expr = expr
     def __str__(self):
+        return "aaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooooooooooaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         pass
+
+class Literal(Node):
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+    def __str__(self):
+        return str(self.value)
+    

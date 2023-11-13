@@ -1,7 +1,7 @@
 class A {
     int x;
     A () {
-        this.x = 0;
+        this.x = (true + 5);
     }
 
     public int g() {
@@ -10,6 +10,7 @@ class A {
         for ( y = 0; y < 5; y++) {
             i++;
         }
+        y = this.x + 1;
         i = this.f();
         i++;
         return i;
@@ -20,9 +21,9 @@ class B extends A {
     public A s;
     B () {
         this.y = -2;
-        this.s = new A();
+        this.s = new A(9, 5, 5, 5);
     }
     public int f(int k) {
-        return super.f() + k;
+        //return super.f() + k;
     }   
 }
