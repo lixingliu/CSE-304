@@ -59,9 +59,10 @@ def create_constructor(line):
     if (hasattr(line.formals.formal_param, "things")):
         constructor_parameters = []
         for constructor_stuff in line.formals.formal_param.things[::-1]:
-            if(constructor_stuff.variable.variable_name in constructor_parameters):
-                return "Error: constructor variable name not unique"
-            constructor_parameters.append(constructor_stuff.variable.variable_name) 
+            #need to fix
+            # if(constructor_stuff.variable.variable_name in constructor_parameters):
+            #     return "Error: constructor variable name not unique"
+            # constructor_parameters.append(constructor_stuff.variable.variable_name) 
             constructor_parameters_counter = constructor_parameters_counter + 1
             constructor_parameters.append(constructor_parameters_counter)
             variable_table = variable_table + f"\nVARIABLE {constructor_parameters_counter}, {constructor_stuff.variable.variable_name}, formal, {constructor_stuff.type.type_value}"
@@ -82,6 +83,7 @@ def create_constructor(line):
 def create_field(line, class_object, field_name_list):
     field = ""
     for field_stuff in line.var_decl.variables.variable.things[::-1]:
+        #li fixed
         global FIELD_COUNTER
         if (field_stuff.variable_name in field_name_list): #If field name is not unique, throw error
             print("Error: field name not unique")
@@ -102,7 +104,7 @@ def create_method(line, class_object, method_var_name_list):
     method_body = ""
     if (hasattr(line.formals.formal_param, "things")):
         for method_stuff in line.formals.formal_param.things[::-1]:
-            print(method_var_name_list)
+            # need to fix
             # if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
             #     print("Error: method variable name not unique")
             #     sys.exit()
@@ -124,7 +126,6 @@ def create_method(line, class_object, method_var_name_list):
     method = method + f"\nVariable Table:  {variable_table}"
     method = method + f"\nMethod Body:   {method_body}"
     
-    print(method_var_name_list)
     return method, method_var_name_list
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
