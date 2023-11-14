@@ -1,3 +1,4 @@
+import sys
 class_body = dict()
 
 FIELD_COUNTER = 0
@@ -78,21 +79,20 @@ def create_constructor(line):
 
     return constructor
 
-def create_field(line, class_object):
+def create_field(line, class_object, field_name_list):
     field = ""
-    field_name_list = []
     for field_stuff in line.var_decl.variables.variable.things[::-1]:
         global FIELD_COUNTER
         if (field_stuff.variable_name in field_name_list): #If field name is not unique, throw error
-            res = "Error: field name not unique"
-            return res
+            print("Error: field name not unique")
+            sys.exit()
         field_name_list.append(field_stuff.variable_name) #Add field name to list
         FIELD_COUNTER = FIELD_COUNTER + 1
         field = field + f"\nFIELD {FIELD_COUNTER}, {str(field_stuff.variable_name)}, {str(class_object.class_name)}, {str(line.modifier.visibility)}, {str(line.modifier.applicability)}, {str(line.var_decl.type.type_value)}"
 
-    return field
+    return field, field_name_list
 
-def create_method(line, class_object):
+def create_method(line, class_object, method_var_name_list):
     method = ""
     global METHOD_COUNTER
     METHOD_COUNTER = METHOD_COUNTER + 1
@@ -101,11 +101,11 @@ def create_method(line, class_object):
     variable_table = ""
     method_body = ""
     if (hasattr(line.formals.formal_param, "things")):
-        method_var_name_list = []
         for method_stuff in line.formals.formal_param.things[::-1]:
-            if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
-                res = "Error: method variable name not unique"
-                return res
+            print(method_var_name_list)
+            # if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
+            #     print("Error: method variable name not unique")
+            #     sys.exit()
             method_var_name_list.append(method_stuff.variable.variable_name) #Add var name to list
             method_param_list_counter = method_param_list_counter + 1
             method_param_list.append(method_param_list_counter)
@@ -123,8 +123,9 @@ def create_method(line, class_object):
     method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
     method = method + f"\nVariable Table:  {variable_table}"
     method = method + f"\nMethod Body:   {method_body}"
-
-    return method
+    
+    print(method_var_name_list)
+    return method, method_var_name_list
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
     if isinstance(stmt, NewObject):
@@ -215,7 +216,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
     if isinstance(stmt, Var_decl):
         constructor_param_list_counter +=  1
         variable_table +=  f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
-        print(variable_table)
         return ['', variable_table, constructor_param_list_counter]
     
     if isinstance(stmt, Assign):
@@ -227,9 +227,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             find_indices = lambda strings, substring: next((int(s.split(",")[0].split(" ")[1]) for i, s in enumerate(strings) if substring in s), None)
             variable_value = f", {stmt.lhs.id},"
             variable_number = find_indices(variable_table.split("\n")[::-1], variable_value)
-
-            print(variable_table)
-            print(variable_number)
             if variable_number is not None:
                 left = f"Variable({variable_number})"
             else:
@@ -350,13 +347,9 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             
         outcome[0] = f'Block([\n{outcome[0]}\n])'
         return outcome
-    print("sadsadsadsadsadsad")
     outcome = [None, None, None]
     return outcome
     
-    print("sadsadsadsadsadsad")
-    outcome = [None, None, None]
-    return outcome
 
 class Node():
     def __init__(self):
@@ -391,17 +384,22 @@ class Program(Node):
             field = ""
             constructor = ""
             method = ""
+            field_name_list = []
+            method_var_name_list = []
 
             for line in class_object.class_body_decl.things:
                 if isinstance(line, Constructor_decl):
                     constructor = constructor + create_constructor(line)
 
                 if isinstance(line, Field_decl):
-                    field = field + create_field(line, class_object)
-
+                    # field_name_list.append(line.)
+                    result, field_names = create_field(line, class_object, field_name_list)
+                    field = field + result
+                    field_name_list = field_names
                 if isinstance(line, Method_decl):
-                    method = method + create_method(line, class_object)
-                    
+                    result, method_names = create_method(line, class_object, method_var_name_list)
+                    method = method + result
+                    method_var_name_list = method_names                    
 
             res = res +f"\nClass Name: {str(class_object.class_name)}"
             res = res + f"\nSuperclass Name: {str(class_object.superclass_name)}"

@@ -6,6 +6,9 @@ class A {
     int f() {
         return this.x + 1;
     }
+    int f() {
+        return true;
+    }
     public int g() {
         int i;
         i = this.f();
