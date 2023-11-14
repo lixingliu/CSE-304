@@ -1,29 +1,15 @@
 class A {
-    int x;
-    A () {
-        this.x = (true + 5);
-    }
-
-    public int g() {
-        int i;
-        int y;
-        for ( y = 0; y < 5; y++) {
-            i++;
+    int id;
+    static int give_int() {
+        int id;
+        id = 1;
+        {
+            int id;
+            id = 1;
+            {
+                int id;
+                id = 1;
+            }
         }
-        y = this.x + 1;
-        i = this.f();
-        i++;
-        return i;
     }
-}
-class B extends A {
-    int y;
-    public A s;
-    B () {
-        this.y = -2;
-        this.s = new A(9, 5, 5, 5);
-    }
-    public int f(int k) {
-        //return super.f() + k;
-    }   
 }

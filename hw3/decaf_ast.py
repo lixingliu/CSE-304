@@ -127,6 +127,7 @@ def create_method(line, class_object):
     return method
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
+    print(type(stmt))
     if isinstance(stmt, NewObject):
         return [str(stmt), variable_table, constructor_param_list_counter]
 
@@ -160,13 +161,13 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
                 else_body_stuff = else_body_stuff + outcome[0]
 
         if_condition = create_body(stmt.cond, outcome[1], outcome[2])
-        outcome = [f"{stmt.type}({if_condition[0]}) Block ([\n{if_body_stuff}]) else", outcome[1], outcome[2]]
+        outcome = [f"{stmt.type}({if_condition[0]}) Block ([\n{if_body_stuff}\n]) else", outcome[1], outcome[2]]
 
         if else_body_stuff == '':
             else_body_stuff = "Skip-stmt"
 
         if else_body_stuff != "":
-            outcome[0] += f" Block ([\n{else_body_stuff} ])"
+            outcome[0] += f" Block ([\n{else_body_stuff} \n])"
 
         return outcome
     
@@ -192,7 +193,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome[1] = for_cond_3[1]
         outcome[2] = for_cond_3[2]
 
-        outcome[0] = f"{stmt.type}({for_cond_1[0]}{for_cond_2[0]}, {for_cond_3[0]}) Block ([\n{for_body_stuff}])"
+        outcome[0] = f"{stmt.type}-stmt({for_cond_1[0]}{for_cond_2[0]}, {for_cond_3[0]}) Block ([\n{for_body_stuff}\n])\n"
         return outcome
     
     if isinstance(stmt, Auto):
@@ -202,13 +203,13 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
 
         if variable_number is not None:
             if (stmt.pre == "++"):
-                return [f"Expr(Auto(Variable({variable_number}), inc, pre) ),", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, pre) ), ", variable_table, constructor_param_list_counter]
             elif (stmt.pre == "--"):
-                return [f"Expr(Auto(Variable({variable_number}), dec, pre) ),", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), dec, pre) ), ", variable_table, constructor_param_list_counter]
             elif (stmt.post == "++"):
-                return [f"Expr(Auto(Variable({variable_number}), inc, post) ),", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), inc, post) ), ", variable_table, constructor_param_list_counter]
             elif (stmt.post == "--"):
-                return [f"Expr(Auto(Variable({variable_number}), dec, post) ),", variable_table, constructor_param_list_counter]
+                return [f"Expr(Auto(Variable({variable_number}), dec, post) ), ", variable_table, constructor_param_list_counter]
         return "AAAA"
     
     if isinstance(stmt, Var_decl):
@@ -237,7 +238,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         variable_table = right[1]
         constructor_param_list_counter = right[2]
 
-        result = f"Expr( Assign({left}, {right[0]}) ), \n"
+        result = f"Expr( Assign({left}, {right[0]}) ), "
         outcome = [result, variable_table, constructor_param_list_counter]
 
         return outcome
@@ -254,9 +255,6 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         result = f"Unary-expression(MINUS, {outcome[0]})"
         return [result, outcome[1], outcome[2]]
     
-    if isinstance(stmt, Literal):
-        return create_body(stmt.value, variable_table, constructor_param_list_counter)
-
     if isinstance(stmt, Field_access):
         outcome  = None
         if isinstance(stmt.primary, Field_access):
@@ -282,18 +280,9 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         if stmt == 'empty':
             return ["Skip-stmt", variable_table, constructor_param_list_counter]
         return [f"Constant(String-constant({stmt}))", variable_table, constructor_param_list_counter]
-    
-
-    if type(stmt) == type(Addition(None, None, None)):
-        # print(str(stmt))
-        # outcome_1 = create_body(stmt.left_expr, variable_table, constructor_param_list_counter)
-        # outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
-        # outcome_3 = [f"Binary(add, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
-        return [str(stmt), variable_table, constructor_param_list_counter]
-
 
     binary_expr_map = {
-        # "Addition": "add",
+        "Addition": "add",
         "Subtraction": "sub",
         "Multiplication": "mul",
         "Division": "div",
@@ -337,7 +326,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             outcome[1] = result[1]
             outcome[2] = result[2]
             
-        outcome[0] = f'Block([\n{outcome[0]}])'
+        outcome[0] = f'Block([\n{outcome[0]}\n])'
         return outcome
     print("sadsadsadsadsadsad")
     outcome = [None, None, None]
@@ -606,17 +595,8 @@ class Addition(Node):
         self.right_expr = right_expr
         self.type = type
     def __str__(self):
-        left_side = ''
-        right_side = ''
-        print(type(self.left_expr))
-        if isinstance(self.left_expr, Literal):
-            left_side = str(self.left_expr.value)
-        if isinstance(self.right_expr, Literal):
-            right_side = str(self.right_expr.value)
-
-        # if isinstance(self.left_expr, Field_access):
-        #     left_side = str(self.left_expr)
-        return f"Binary(add, {left_side}, {right_side})"
+        return str(self.left_expr)
+        pass
 
 class Subtraction(Node):
     def __init__(self, type, left_expr, right_expr):
@@ -775,13 +755,4 @@ class Paren(Node):
         super().__init__()
         self.expr = expr
     def __str__(self):
-        return "aaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooooooooooaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         pass
-
-class Literal(Node):
-    def __init__(self, value):
-        super().__init__()
-        self.value = value
-    def __str__(self):
-        return str(self.value)
-    

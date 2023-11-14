@@ -239,7 +239,7 @@ def p_literal(p):
                 | NULL
                 | TRUE
                 | FALSE''' 
-    p[0] = Literal(p[1])
+    p[0] = p[1]
     pass
     
 def p_primary(p):
