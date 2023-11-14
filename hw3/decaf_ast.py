@@ -127,7 +127,6 @@ def create_method(line, class_object):
     return method
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
-    print(type(stmt))
     if isinstance(stmt, NewObject):
         return [str(stmt), variable_table, constructor_param_list_counter]
 
@@ -197,9 +196,10 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         return outcome
     
     if isinstance(stmt, Auto):
-        find_indices = lambda strings, substring: next((i for i, s in enumerate(strings) if substring in s), None)
+        find_indices = lambda strings, substring: next((int(s.split(",")[0].split(" ")[1]) for i, s in enumerate(strings) if substring in s), None)
         variable_value = f", {stmt.lhs.id},"
-        variable_number = find_indices(variable_table.split("\n"), variable_value)
+        variable_number = find_indices(variable_table.split("\n")[::-1], variable_value)
+
 
         if variable_number is not None:
             if (stmt.pre == "++"):
@@ -215,19 +215,21 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
     if isinstance(stmt, Var_decl):
         constructor_param_list_counter +=  1
         variable_table +=  f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
+        print(variable_table)
         return ['', variable_table, constructor_param_list_counter]
     
     if isinstance(stmt, Assign):
         left = ""
         right = ""
-
         if stmt.lhs.type == ".":
             left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
         elif stmt.lhs.type is None:
-            find_indices = lambda strings, substring: next((i for i, s in enumerate(strings) if substring in s), None)
+            find_indices = lambda strings, substring: next((int(s.split(",")[0].split(" ")[1]) for i, s in enumerate(strings) if substring in s), None)
             variable_value = f", {stmt.lhs.id},"
-            variable_number = find_indices(variable_table.split("\n"), variable_value)
+            variable_number = find_indices(variable_table.split("\n")[::-1], variable_value)
 
+            print(variable_table)
+            print(variable_number)
             if variable_number is not None:
                 left = f"Variable({variable_number})"
             else:
@@ -301,16 +303,16 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             outcome_2 = create_body(stmt.right_expr, outcome_1[1], outcome_1[2])
             outcome_3 = [f"Binary({operation}, {outcome_1[0]}, {outcome_2[0]})", outcome_2[1], outcome_2[2]]
             return outcome_3
-    
+        
     if isinstance(stmt, Method_invocation):
         argument_list = []
         if stmt.argument_list.arguments is not None:
-            find_indices = lambda strings, substring: next((i for i, s in enumerate(strings) if substring in s), None)
+            find_indices = lambda strings, substring: next((int(s.split(",")[0].split(" ")[1]) for i, s in enumerate(strings) if substring in s), None)
             for argument in stmt.argument_list.arguments.things:
                 variable_value = f", {argument.id},"
-                variable_number = find_indices(variable_table.split("\n"), variable_value)
+                variable_number = find_indices(variable_table.split("\n")[::-1], variable_value)
                 if variable_number is not None:
-                    argument_list.append(f"Variable({variable_number})")                
+                    argument_list.append(f"Variable({variable_number})")            
         if hasattr(stmt.field_access.primary, "id"):
             result = f"Method-call(Class-reference({stmt.field_access.primary.id}), {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
         else:
@@ -318,6 +320,26 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         outcome = [result, variable_table, constructor_param_list_counter]
         return outcome
     
+    # if isinstance(stmt, Block):
+    #     outcome = ['', variable_table, constructor_param_list_counter]
+    #     temp_variable_table = ''
+    #     previous_variable_table = ''
+    #     for element in stmt.stmt_list.things[::-1]:
+    #         if isinstance(element, Block):
+    #             temp_variable_table = ''
+    #         if not isinstance(element, Var_decl) and temp_variable_table == '':
+    #             temp_variable_table = outcome[1]
+    #         result = create_body(element, temp_variable_table, outcome[2])
+    #         outcome[0] += result[0]
+
+    #         if temp_variable_table != result[1]:
+    #             outcome[1] += result[1]  # Append the changes to outcome[1]
+
+    #         temp_variable_table = result[1]
+    #         outcome[2] = result[2]
+    #     outcome[0] = f'Block([\n{outcome[0]}\n])'
+    #     return outcome
+
     if isinstance(stmt, Block):
         outcome = ['', variable_table, constructor_param_list_counter]
         for element in stmt.stmt_list.things[::-1]:
@@ -328,6 +350,10 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             
         outcome[0] = f'Block([\n{outcome[0]}\n])'
         return outcome
+    print("sadsadsadsadsadsad")
+    outcome = [None, None, None]
+    return outcome
+    
     print("sadsadsadsadsadsad")
     outcome = [None, None, None]
     return outcome
