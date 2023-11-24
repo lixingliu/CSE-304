@@ -3,7 +3,7 @@ class_body = dict()
 
 FIELD_COUNTER = 0
 CONSTRUCTOR_COUNTER = 0
-METHOD_COUNTER = 6
+METHOD_COUNTER = 0
 
 def create_in_class():
     pub_sta_mod = Modifier("public", "static")
@@ -59,22 +59,25 @@ def create_constructor(line):
     if (hasattr(line.formals.formal_param, "things")):
         constructor_parameters = []
         for constructor_stuff in line.formals.formal_param.things[::-1]:
-            #need to fix
-            # if(constructor_stuff.variable.variable_name in constructor_parameters):
-            #     return "Error: constructor variable name not unique"
-            # constructor_parameters.append(constructor_stuff.variable.variable_name) 
+            #Fixed
+            if(constructor_stuff.variable.variable_name in constructor_parameters): #If param name already exist in list of params, throw error
+                print("Error: constructor variable name not unique")
+                sys.exit()
+            constructor_parameters.append(constructor_stuff.variable.variable_name) 
             constructor_parameters_counter = constructor_parameters_counter + 1
-            constructor_parameters.append(constructor_parameters_counter)
             variable_table = variable_table + f"\nVARIABLE {constructor_parameters_counter}, {constructor_stuff.variable.variable_name}, formal, {constructor_stuff.type.type_value}"
+
     for constructor_stmt in line.body.stmt_list.things[::-1]:
         outcome = create_body(constructor_stmt, variable_table, constructor_parameters_counter)
         constructor_body_stuff = constructor_body_stuff + outcome[0]
         variable_table = outcome[1]
-        constructor_parameters_counter = outcome[2]
+        #constructor_parameters_counter = outcome[2]
     
     constructor_body = f"\nBlock([\n{constructor_body_stuff}\n])"
     constructor = constructor + f"\nCONSTRUCTOR: {CONSTRUCTOR_COUNTER}, {str(line.modifier.visibility)}"
-    constructor = constructor + f"\nConstructor Parameters: {str(constructor_parameters).strip('[]')}"
+    if constructor_parameters_counter == 0:
+        constructor_parameters_counter = ""
+    constructor = constructor + f"\nConstructor Parameters: {constructor_parameters_counter}"
     constructor = constructor + f"\nVariable Table: {variable_table}"
     constructor = constructor + f"\nConstructor Body: {constructor_body}"
 
@@ -98,31 +101,31 @@ def create_method(line, class_object, method_var_name_list):
     method = ""
     global METHOD_COUNTER
     METHOD_COUNTER = METHOD_COUNTER + 1
-    method_param_list = []
     method_param_list_counter = 0
     variable_table = ""
     method_body = ""
     if (hasattr(line.formals.formal_param, "things")):
         for method_stuff in line.formals.formal_param.things[::-1]:
-            # need to fix
-            # if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
-            #     print("Error: method variable name not unique")
-            #     sys.exit()
+            #Fixed
+            if(method_stuff.variable.variable_name in method_var_name_list): #If var name is not unique, throw error
+                print("Error: method variable name not unique")
+                sys.exit()
             method_var_name_list.append(method_stuff.variable.variable_name) #Add var name to list
             method_param_list_counter = method_param_list_counter + 1
-            method_param_list.append(method_param_list_counter)
             variable_table = variable_table + f"\nVARIABLE {method_param_list_counter}, {method_stuff.variable.variable_name}, formal, {method_stuff.type.type_value}"
 
     method_body_stuff = ""
     for method_stmt in line.body.stmt_list.things[::-1]:
         outcome = create_body(method_stmt, variable_table, method_param_list_counter)
         variable_table = outcome[1]
-        method_param_list_counter = outcome[2]
+        #method_param_list_counter = outcome[2]
         method_body_stuff = method_body_stuff + outcome[0]
 
     method_body = f"\nBlock([\n{method_body_stuff}\n])"
     method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(line.method_name)}, {str(class_object.class_name)}, {str(line.modifier.visibility)}, {str(line.modifier.applicability)}, {str(line.type)}"
-    method = method + f"\nMethod Parameters: {str(method_param_list).strip('[]')}"
+    if method_param_list_counter == 0:
+        method_param_list_counter = ""
+    method = method + f"\nMethod Parameters: {method_param_list_counter}"
     method = method + f"\nVariable Table:  {variable_table}"
     method = method + f"\nMethod Body:   {method_body}"
     
@@ -215,7 +218,13 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         return "AAAA"
     
     if isinstance(stmt, Var_decl):
-        constructor_param_list_counter +=  1
+        #constructor_param_list_counter +=  1
+        vars = variable_table.split("\n")
+        for var_str in vars:
+            parts = var_str.split(', ')
+            if len(parts) >= 2 and parts[1] == stmt.variables.variable.things[0].variable_name:
+                print("Error: Local variable name not unique")
+                sys.exit()
         variable_table +=  f"\nVARIABLE {constructor_param_list_counter}, {stmt.variables.variable.things[0].variable_name}, local, {stmt.type.type_value}"
         return ['', variable_table, constructor_param_list_counter]
     
