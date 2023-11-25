@@ -4,6 +4,8 @@ class_body = dict()
 FIELD_COUNTER = 0
 CONSTRUCTOR_COUNTER = 0
 METHOD_COUNTER = 0
+method_list = []
+class_name_list = []
 
 def create_in_class():
     pub_sta_mod = Modifier("public", "static")
@@ -99,11 +101,14 @@ def create_field(line, class_object, field_name_list):
 
 def create_method(line, class_object, method_var_name_list):
     method = ""
+    return_Exist = False
     global METHOD_COUNTER
     METHOD_COUNTER = METHOD_COUNTER + 1
     method_param_list_counter = 0
     variable_table = ""
-    method_body = ""
+    method_body = ""   
+    global method_list 
+    
     if (hasattr(line.formals.formal_param, "things")):
         for method_stuff in line.formals.formal_param.things[::-1]:
             #Fixed
@@ -116,10 +121,15 @@ def create_method(line, class_object, method_var_name_list):
 
     method_body_stuff = ""
     for method_stmt in line.body.stmt_list.things[::-1]:
+        if isinstance(method_stmt, Stmt):
+            if(method_stmt.type == "return"): #Check if there is a return stmt in the method
+                return_Exist = True
         outcome = create_body(method_stmt, variable_table, method_param_list_counter)
         variable_table = outcome[1]
-        #method_param_list_counter = outcome[2]
+        method_param_list_counter = outcome[2]
         method_body_stuff = method_body_stuff + outcome[0]
+
+    method_list.append([str(line.method_name), str(class_object.class_name), return_Exist]) #Add this method to global list of methods
 
     method_body = f"\nBlock([\n{method_body_stuff}\n])"
     method = method + f"\nMETHOD: {METHOD_COUNTER}, {str(line.method_name)}, {str(class_object.class_name)}, {str(line.modifier.visibility)}, {str(line.modifier.applicability)}, {str(line.type)}"
@@ -133,7 +143,11 @@ def create_method(line, class_object, method_var_name_list):
 
 def create_body(stmt, variable_table, constructor_param_list_counter):
     if isinstance(stmt, NewObject):
-        return [str(stmt), variable_table, constructor_param_list_counter]
+        if stmt.id in class_name_list:
+            return [str(stmt), variable_table, constructor_param_list_counter]
+        else:
+            print("Error: Class does not exist - " + str(stmt))
+            sys.exit()
 
     if isinstance(stmt, Paren):
         return create_body(stmt.expr, variable_table, constructor_param_list_counter)
@@ -218,7 +232,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         return "AAAA"
     
     if isinstance(stmt, Var_decl):
-        #constructor_param_list_counter +=  1
+        constructor_param_list_counter +=  1
         vars = variable_table.split("\n")
         for var_str in vars:
             parts = var_str.split(', ')
@@ -232,7 +246,11 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
         left = ""
         right = ""
         if stmt.lhs.type == ".":
-            left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
+            if stmt.lhs.id in field_name_list:
+                left = f"Field-access({stmt.lhs.primary}, {stmt.lhs.id})"
+            else: 
+                print("Error: field does not exist - " + stmt.lhs.id)
+                sys.exit()
         elif stmt.lhs.type is None:
             find_indices = lambda strings, substring: next((int(s.split(",")[0].split(" ")[1]) for i, s in enumerate(strings) if substring in s), None)
             variable_value = f", {stmt.lhs.id},"
@@ -277,8 +295,11 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
 
             if variable_number is not None:
                 return [f"Variable({variable_number})", variable_table, constructor_param_list_counter]
-            
-        return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
+        if stmt.id in field_name_list:
+            return[f"Field-access({stmt.primary}, {stmt.id})", variable_table, constructor_param_list_counter]
+        else:
+            print("Error: field does not exist - " + stmt.id)
+            sys.exit()
     
     
     if isinstance(stmt, float):
@@ -312,6 +333,7 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
             return outcome_3
         
     if isinstance(stmt, Method_invocation):
+        method_found = False
         argument_list = []
         if stmt.argument_list.arguments is not None:
             find_indices = lambda strings, substring: next((int(s.split(",")[0].split(" ")[1]) for i, s in enumerate(strings) if substring in s), None)
@@ -319,11 +341,18 @@ def create_body(stmt, variable_table, constructor_param_list_counter):
                 variable_value = f", {argument.id},"
                 variable_number = find_indices(variable_table.split("\n")[::-1], variable_value)
                 if variable_number is not None:
-                    argument_list.append(f"Variable({variable_number})")            
-        if hasattr(stmt.field_access.primary, "id"):
+                    argument_list.append(f"Variable({variable_number})")        
+
+        if hasattr(stmt.field_access.primary, "id") and ([stmt.field_access.id, stmt.field_access.primary.id, True] in method_list):
             result = f"Method-call(Class-reference({stmt.field_access.primary.id}), {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
         else:
-            result = f"Method-call({stmt.field_access.primary}, {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
+            for item in method_list:
+                if item[0] == stmt.field_access.id and item[2] is True:
+                    result = f"Method-call({stmt.field_access.primary}, {stmt.field_access.id}, [{str(argument_list).strip('[]')}])"
+                    method_found = True
+            if method_found == False:
+                print("Error: method does not exist - " + str(stmt.field_access.id))
+                sys.exit()
         outcome = [result, variable_table, constructor_param_list_counter]
         return outcome
     
@@ -382,8 +411,8 @@ class Program(Node):
         res = ""
         self.classes.append(create_in_class())
         self.classes.append(create_out_class())
+        global class_name_list 
 
-        class_name_list = []
         for class_object in self.classes[::-1]:
             if (class_object.class_name == 'Out' or class_object.class_name == 'In'):
                 continue
@@ -394,6 +423,7 @@ class Program(Node):
             field = ""
             constructor = ""
             method = ""
+            global field_name_list
             field_name_list = []
             method_var_name_list = []
 

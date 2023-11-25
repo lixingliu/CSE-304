@@ -24,6 +24,9 @@ class C {
     A () {
         this.y = 1;
     }
+    int get() {
+        return this.y;
+    }
 }
 class B extends A {
     int y;
@@ -33,7 +36,9 @@ class B extends A {
         this.s = new A();
     }
     public int f(int k) {
-        int z;
+        C z;
+        int y;
+        z = new C();
         return super.f() + k;
     }
 }
