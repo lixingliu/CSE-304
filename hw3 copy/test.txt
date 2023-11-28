@@ -1,5 +1,5 @@
-class A {
-    A (int i) {
-        p.f(x, y);
+class hello_world{
+    A(int i, int j, int k) {
+        int x, y, z;
     }
 }

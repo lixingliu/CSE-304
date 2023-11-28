@@ -113,7 +113,7 @@ def p_variable(p):
 def p_method_decl(p):
     '''method_decl : modifier type ID LEFTPAREN formals RIGHTPAREN block
 				| modifier VOID ID LEFTPAREN formals RIGHTPAREN block'''
-    pass #do this
+    p[0] = Method_Decl(p[1], p[2], p[3], p[5], p[7])
 
 def p_constructor_decl(p):
     '''constructor_decl : modifier ID LEFTPAREN formals RIGHTPAREN block'''

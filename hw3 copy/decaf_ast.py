@@ -14,8 +14,10 @@ METHOD_DICTIONARY = {}
 METHOD_KEY = 1
 METHOD_BLOCK = False
 
-GLOBAL_CONSTRUCTOR_VARIABLE_TABLE = []
+METHOD_PARAM_KEY = 1
 
+GLOBAL_CONSTRUCTOR_VARIABLE_TABLE = []
+GLOBAL_METHOD_VARIABLE_TABLE = []
 
 
 class Node():
@@ -56,12 +58,12 @@ class Class_decl(Node):
         self.classBody = classBody
         self.superClassName = superClassName
     def __str__(self):            
-        global CONSTRUCTOR_PARAM_KEY
-
+        global CONSTRUCTOR_PARAM_KEY, METHOD_PARAM_KEY
+# ============================================================================================
         field_result = "Fields:\n"
         for key, value in FIELD_DICTIONARY.items():
             field_result += f'FIELD {key}, {value["variableName"]}, {CLASS_NAME}, {value["fieldModifier"]}, {value["type"]}\n'
-
+# ============================================================================================
         constructor_result = "Constructors:\n"
         for key, value in CONSTRUCTOR_DICTIONARY.items():
             constructorParamsId = []
@@ -75,16 +77,37 @@ class Class_decl(Node):
                     'variableKind': 'formal',
                     'variableType': formal.type
                 }
-                variable_result = variable_result + f'VARIABLE {CONSTRUCTOR_PARAM_KEY}, {formal.variable}, formal, {formal.type}\n'
                 constructorParamsId.append(CONSTRUCTOR_PARAM_KEY)
                 CONSTRUCTOR_PARAM_KEY += 1
             GLOBAL_CONSTRUCTOR_VARIABLE_TABLE.append(variableTable)
+            str(value["block"])
+            for variableTable in GLOBAL_CONSTRUCTOR_VARIABLE_TABLE:
+                for key, stuff, in variableTable.items():
+                    variable_result = variable_result + f'VARIABLE {key}, {stuff["variableName"]}, {stuff["variableKind"]}, {stuff["variableType"]}\n'
             constructor_result = f'{constructor_result} {str(constructorParamsId)[1:-1]}\n{variable_result}Constructor Body:\n{str(value["block"])}\n'
-        
+# ============================================================================================
         method_result = "Methods:\n"
         for key, value in METHOD_DICTIONARY.items():
-            pass
+            methodParamsId = []
 
+            variableTable = {}
+            variable_result = "Variable Table:\n"
+            method_result += f'METHOD: {key}, {value["methodName"]}, {CLASS_NAME}, {value["type"]}\nMethod Parameters:'
+            for formal in value["formals"].formals[::-1]:
+                variableTable[METHOD_PARAM_KEY] = {
+                    'variableName': formal.variable,
+                    'variableKind': 'formal',
+                    'variableType': formal.type
+                }
+                methodParamsId.append(METHOD_PARAM_KEY)
+                METHOD_PARAM_KEY += 1
+            GLOBAL_METHOD_VARIABLE_TABLE.append(variableTable)
+            str(value['block'])
+            for variableTable in GLOBAL_METHOD_VARIABLE_TABLE:
+                for key, stuff in variableTable.items():
+                    variable_result = variable_result + f'VARIABLE {key}, {stuff["variableName"]}, {stuff["variableKind"]}, {stuff["variableType"]}\n'
+            method_result = f'{method_result} {str(methodParamsId)[1:-1]}\n{variable_result}Method Body:\n{str(value["block"])}\n'
+# ============================================================================================
         return f'Class Name: {self.className}\nSuperclass Name: {self.superClassName}\n{field_result}{constructor_result}{method_result}'
     
 class Class_Body_List(Node):
@@ -164,6 +187,27 @@ class Constructor_Decl(Node):
         }
         CONSTRUCTOR_KEY += 1
     
+class Method_Decl(Node):
+    def __init__(self, modifier, type, id, formals, block):
+        super().__init__()
+        self.modifier = modifier
+        self.methodName = id
+        self.type = type
+        self.formals = formals
+        self.block = block
+        global METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK
+        CONSTRUCTOR_BLOCK = False
+        METHOD_BLOCK = True
+
+        METHOD_DICTIONARY[METHOD_KEY] = {
+            'methodName': self.methodName,
+            'modifier': self.modifier,
+            'formals': self.formals,
+            'type': self.type,
+            'block': self.block
+        }
+        METHOD_KEY += 1
+    
 class Formals_const(Node):
     def __init__(self):
         super().__init__()
@@ -183,7 +227,7 @@ class Block(Node):
         global CONSTRUCTOR_PARAM_KEY, METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK
         currentKey = 0
         if METHOD_BLOCK:
-            currentKey = METHOD_KEY
+            currentKey = METHOD_PARAM_KEY
         else:
             currentKey = CONSTRUCTOR_PARAM_KEY
         variableTable = {}
@@ -200,7 +244,10 @@ class Block(Node):
                         'variableKind': 'local',
                         'variableType': stmt.type,
                     }
-                    currentKey += 1
+                if METHOD_BLOCK:
+                    GLOBAL_METHOD_VARIABLE_TABLE.append(variableTable)
+                else:
+                    GLOBAL_CONSTRUCTOR_VARIABLE_TABLE.append(variableTable)
             elif (stmt == ';'):
                 result += "Skip-stmt()\n"
             elif (isinstance(stmt, Block)):
@@ -271,7 +318,6 @@ class Literal(Node):
         super().__init__()
         self.literal = literal
     def __str__(self):
-        print(type(self.literal))
         if (self.literal == "true"):
             return f'Constant(True)'
         if (isinstance(self.literal, int)):
