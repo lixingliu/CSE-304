@@ -19,6 +19,39 @@ METHOD_PARAM_KEY = 1
 GLOBAL_CONSTRUCTOR_VARIABLE_TABLE = []
 GLOBAL_METHOD_VARIABLE_TABLE = []
 
+def create_in_class():
+    pub_sta_mod = Modifier("public", "static")
+    scan_int = Method_Decl("scan_int", pub_sta_mod, Type("int"), Formals_const(), Stmt_List()) #Initializing scan_int
+    scan_float = Method_Decl("scan_float", pub_sta_mod, Type("float"), Formals_const(), Stmt_List()) #Initializing scan_float
+    class_in_body_decl = Class_Body_List(scan_int)
+    class_in_body_decl.classBodyItems.append(scan_float)
+    class_in = Class_decl("In", "", class_in_body_decl) #Append the two methods to In's class_body_decl
+    return class_in
+
+def create_out_class():
+    pub_sta_mod = Modifier("public", "static")
+    print_int_formal_cont = Formals_const()
+    print_int_formal_cont.formals.append(Formal_param(Type("int"), Variable("i")))
+    print_int = Method_Decl("print", pub_sta_mod, None, print_int_formal_cont, Stmt_List()) #Initializing print_int
+
+    print_float_formal_cont = Formals_const()
+    print_float_formal_cont.formals.append(Formal_param(Type("float"), Variable("f")))
+    print_float = Method_Decl("print", pub_sta_mod, None, print_float_formal_cont, Stmt_List()) #Initializing print_float
+
+    print_boolean_formal_cont = Formals_const()
+    print_boolean_formal_cont.formals.append(Formal_param(Type("boolean"), Variable("b")))
+    print_boolean = Method_Decl("print", pub_sta_mod, None, print_boolean_formal_cont, Stmt_List()) #Initializing print_boolean
+
+    print_string_formal_cont = Formals_const()
+    print_string_formal_cont.formals.append(Formal_param(Type("string"), Variable("s")))
+    print_string = Method_Decl("print", pub_sta_mod, None, print_string_formal_cont, Stmt_List()) #Initializing print_string
+
+    class_out_body_decl = Class_Body_List(print_int)
+    class_out_body_decl.classBodyItems.append(print_float)
+    class_out_body_decl.classBodyItems.append(print_boolean)
+    class_out_body_decl.classBodyItems.append(print_string)
+    class_out = Class_decl("Out", "", class_out_body_decl) #Append the four methods to Out's class_body_decl
+    return class_out
 
 class Node():
     def __init__(self):
@@ -38,7 +71,11 @@ class Program(Node):
         self.classes = classes
     def __str__(self):
         result = ""
+        self.classes.classList.append(create_in_class())
+        self.classes.classList.append(create_out_class())
         for class_object in self.classes.classList[::-1]:
+            if (class_object.className == 'Out' or class_object.className == 'In'):
+                continue
             global CLASS_NAME
             CLASS_NAME = class_object.className
             result = result + (str(class_object) + "\n") + "----------------------\n"
@@ -390,4 +427,22 @@ class Method_Invocation(Node):
 class Arguments_cont(Node):
     def __init__(self):
         super().__init__()
-        self.args = []
+        self.args = []   
+
+class Type(Node):
+    def __init__(self, type_value):
+        super().__init__()
+        built_in_types = ["int", "float", "boolean", "string"]
+        if not type_value in built_in_types:
+            self.type_value = f"user({type_value})"
+        else:
+            self.type_value = type_value
+    def __str__(self):
+        return str(self.type_value)
+
+class Variable(Node):
+    def __init__(self, variable_name):
+        super().__init__()
+        self.variable_name = variable_name
+    def __str__(self):
+        return str(self.variable_name)
