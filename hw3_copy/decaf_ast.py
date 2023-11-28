@@ -19,6 +19,7 @@ METHOD_PARAM_KEY = 1
 GLOBAL_CONSTRUCTOR_VARIABLE_TABLE = []
 GLOBAL_METHOD_VARIABLE_TABLE = []
 
+
 def create_in_class():
     pub_sta_mod = Modifier("public", "static")
     scan_int = Method_Decl("scan_int", pub_sta_mod, Type("int"), Formals_const(), Stmt_List()) #Initializing scan_int
@@ -71,8 +72,8 @@ class Program(Node):
         self.classes = classes
     def __str__(self):
         result = ""
-        self.classes.classList.append(create_in_class())
-        self.classes.classList.append(create_out_class())
+        # self.classes.classList.append(create_in_class())
+        # self.classes.classList.append(create_out_class())
         for class_object in self.classes.classList[::-1]:
             if (class_object.className == 'Out' or class_object.className == 'In'):
                 continue
@@ -95,7 +96,7 @@ class Class_decl(Node):
         self.classBody = classBody
         self.superClassName = superClassName
     def __str__(self):            
-        global CONSTRUCTOR_PARAM_KEY, METHOD_PARAM_KEY
+        global CONSTRUCTOR_PARAM_KEY, METHOD_PARAM_KEY, GLOBAL_CONSTRUCTOR_VARIABLE_TABLE, GLOBAL_METHOD_VARIABLE_TABLE
 # ============================================================================================
         field_result = "Fields:\n"
         for key, value in FIELD_DICTIONARY.items():
@@ -117,11 +118,13 @@ class Class_decl(Node):
                 constructorParamsId.append(CONSTRUCTOR_PARAM_KEY)
                 CONSTRUCTOR_PARAM_KEY += 1
             GLOBAL_CONSTRUCTOR_VARIABLE_TABLE.append(variableTable)
-            str(value["block"])
+            block_string_representation = str(value['block'])
             for variableTable in GLOBAL_CONSTRUCTOR_VARIABLE_TABLE:
                 for key, stuff, in variableTable.items():
                     variable_result = variable_result + f'VARIABLE {key}, {stuff["variableName"]}, {stuff["variableKind"]}, {stuff["variableType"]}\n'
-            constructor_result = f'{constructor_result} {str(constructorParamsId)[1:-1]}\n{variable_result}Constructor Body:\n{str(value["block"])}\n'
+            constructor_result = f'{constructor_result} {str(constructorParamsId)[1:-1]}\n{variable_result}Constructor Body:\n{block_string_representation}\n'
+
+            GLOBAL_CONSTRUCTOR_VARIABLE_TABLE = {}
 # ============================================================================================
         method_result = "Methods:\n"
         for key, value in METHOD_DICTIONARY.items():
@@ -139,11 +142,12 @@ class Class_decl(Node):
                 methodParamsId.append(METHOD_PARAM_KEY)
                 METHOD_PARAM_KEY += 1
             GLOBAL_METHOD_VARIABLE_TABLE.append(variableTable)
-            str(value['block'])
+            block_string_representation = str(value['block'])
             for variableTable in GLOBAL_METHOD_VARIABLE_TABLE:
                 for key, stuff in variableTable.items():
                     variable_result = variable_result + f'VARIABLE {key}, {stuff["variableName"]}, {stuff["variableKind"]}, {stuff["variableType"]}\n'
-            method_result = f'{method_result} {str(methodParamsId)[1:-1]}\n{variable_result}Method Body:\n{str(value["block"])}\n'
+            method_result = f'{method_result} {str(methodParamsId)[1:-1]}\n{variable_result}Method Body:\n{block_string_representation}\n'
+            GLOBAL_METHOD_VARIABLE_TABLE = []
 # ============================================================================================
         return f'Class Name: {self.className}\nSuperclass Name: {self.superClassName}\n{field_result}{constructor_result}{method_result}'
     
@@ -261,7 +265,7 @@ class Block(Node):
         super().__init__()
         self.stmtList = stmtList
     def __str__(self):
-        global CONSTRUCTOR_PARAM_KEY, METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK
+        global CONSTRUCTOR_PARAM_KEY, METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK, VAR_DECL_AVALIABILITY, GLOBAL_METHOD_VARIABLE_TABLE, GLOBAL_CONSTRUCTOR_VARIABLE_TABLE
         currentKey = 0
         if METHOD_BLOCK:
             currentKey = METHOD_PARAM_KEY
@@ -269,10 +273,18 @@ class Block(Node):
             currentKey = CONSTRUCTOR_PARAM_KEY
         variableTable = {}
         result = 'Block([\n'
+        prevStmt = None
+        add_var_decl_status = True
         for stmt in self.stmtList.stmts[::-1]:
-            print(type(stmt))
+            # print(type(stmt))
+            if (not isinstance(stmt, Var_Decl) and add_var_decl_status):
+                add_var_decl_status = False
+                if METHOD_BLOCK:
+                    GLOBAL_METHOD_VARIABLE_TABLE.append(variableTable)
+                else:
+                    GLOBAL_CONSTRUCTOR_VARIABLE_TABLE.append(variableTable)
             if (isinstance(stmt, Var_Decl)):
-                if len(variableTable) != 0:
+                if (not isinstance(prevStmt, Var_Decl) and prevStmt != None):
                     print("we have a problem, why are you adding another variable decl")
                     sys.exit()
                 for variable in stmt.variable_list.vars[::-1]:
@@ -281,10 +293,8 @@ class Block(Node):
                         'variableKind': 'local',
                         'variableType': stmt.type,
                     }
-                if METHOD_BLOCK:
-                    GLOBAL_METHOD_VARIABLE_TABLE.append(variableTable)
-                else:
-                    GLOBAL_CONSTRUCTOR_VARIABLE_TABLE.append(variableTable)
+                    currentKey += 1
+
             elif (stmt == ';'):
                 result += "Skip-stmt()\n"
             elif (isinstance(stmt, Block)):
@@ -303,7 +313,7 @@ class Block(Node):
                 result += str(stmt)
             elif (isinstance(stmt, Method_Invocation)):
                 result += str(stmt)
-
+            prevStmt = stmt
         return result + "])"
 
 class Stmt_List(Node):

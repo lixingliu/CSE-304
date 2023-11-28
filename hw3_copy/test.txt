@@ -1,5 +1,16 @@
-class hello_world{
-    A(int i, int j, int k) {
-        int x, y, z;
+class A {
+    int x;
+    A () {
+        this.x = 0;
+    }
+    int f() {
+        return this.x + 1;
+    }
+    public int g(int a, int b, int c) {
+        int i;
+        int j;
+        i = this.f();
+        i++;
+        return i;
     }
 }
