@@ -69,21 +69,20 @@ class Block(Node):
     def __init__(self, stmtList):
         super().__init__()
         self.stmtList = stmtList
-        global VARIABLE_TABLE
+        global VARIABLE_TABLE, VARIABLE_KEY
         insideVariableTable = {}
-        # left off here need to rethink this
-        currentKey = 0
-        if stmtList != None:
-            for stmt in self.stmtList.stmts[::-1]:
-                if (isinstance(stmt, Var_Decl)):
-                    for variable in stmt.variable_list.vars[::-1]:
-                        insideVariableTable[currentKey] = {
-                            'variableName': variable,
-                            'variableKind': 'local',
-                            'variableType': stmt.type,
-                        }
-                        currentKey += 1
+        # currentKey = 1
+        for stmt in self.stmtList.stmts[::-1]:
+            if (isinstance(stmt, Var_Decl)):
+                for variable in stmt.variable_list.vars[::-1]:
+                    insideVariableTable[VARIABLE_KEY] = {
+                        'variableName': variable,
+                        'variableKind': 'local',
+                        'variableType': stmt.type,
+                    }
+                    VARIABLE_KEY += 1
         VARIABLE_TABLE.append(insideVariableTable)
+        print("86", VARIABLE_TABLE)
     def __str__(self):
         global CONSTRUCTOR_PARAM_KEY, METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK, VAR_DECL_AVALIABILITY, GLOBAL_METHOD_VARIABLE_TABLE, GLOBAL_CONSTRUCTOR_VARIABLE_TABLE, VARIABLE_TABLE
         currentKey = 0
@@ -100,24 +99,23 @@ class Block(Node):
             if (not isinstance(stmt, Var_Decl) and add_var_decl_status):
                 add_var_decl_status = False
                 # print(insideVariableTable)
-                print(VARIABLE_TABLE)
                 # if METHOD_BLOCK:
                 #     GLOBAL_METHOD_VARIABLE_TABLE.append(insideVariableTable)
                 # else:
                 #     VARIABLE_TABLE.append(insideVariableTable)
-            if (isinstance(stmt, Var_Decl)):
-                if (not isinstance(prevStmt, Var_Decl) and prevStmt != None):
-                    print("we have a problem, why are you adding another variable decl")
-                    sys.exit()
-                for variable in stmt.variable_list.vars[::-1]:
-                    insideVariableTable[currentKey] = {
-                        'variableName': variable,
-                        'variableKind': 'local',
-                        'variableType': stmt.type,
-                    }
-                    currentKey += 1
+            # if (isinstance(stmt, Var_Decl)):
+            #     if (not isinstance(prevStmt, Var_Decl) and prevStmt != None):
+            #         print("we have a problem, why are you adding another variable decl")
+            #         sys.exit()
+            #     for variable in stmt.variable_list.vars[::-1]:
+            #         insideVariableTable[currentKey] = {
+            #             'variableName': variable,
+            #             'variableKind': 'local',
+            #             'variableType': stmt.type,
+            #         }
+            #         currentKey += 1
 
-            elif (stmt == ';'):
+            if (stmt == ';'):
                 result += "Skip-stmt()\n"
             elif (isinstance(stmt, Block)):
                 pass
@@ -126,9 +124,9 @@ class Block(Node):
             elif (stmt == 'break'):
                 result += "Break-stmt()\n"
             elif (isinstance(stmt, Auto)):
-                result += str(stmt)
+                result = result + "Expr( " + str(stmt) + " ), "
             elif (isinstance(stmt, Assign)):
-                result += str(stmt)
+                result = result + "Expr( " + str(stmt) + " ), "
             elif (isinstance(stmt, Return)):
                 result += str(stmt)
             elif (isinstance(stmt, For_decl)):
@@ -151,89 +149,92 @@ class Return(Node):
         return f'Return-stmt({str(self.return_val)})'
     
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'scan_int',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("int"),
-    'block': Block(Stmt_List())
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'scan_int',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("int"),
+#     'block': Block(Stmt_List())
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'scan_float',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("float"),
-    'block': Block(Stmt_List())
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'scan_float',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("float"),
+#     'block': Block(Stmt_List())
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-GLOBAL_CLASS_RECORD["In"] = {
-    'className': "In",
-    'superClassName': '',
-    'constructors': CONSTRUCTOR_DICTIONARY,
-    'fields': FIELD_DICTIONARY,
-    'methods': METHOD_DICTIONARY,   
-}
+# GLOBAL_CLASS_RECORD["In"] = {
+#     'className': "In",
+#     'superClassName': '',
+#     'constructors': {},
+#     'fields': {},
+#     'methods': METHOD_DICTIONARY,   
+# }
 
-METHOD_DICTIONARY = {}
-FIELD_DICTIONARY = {}
-METHOD_DICTIONARY = {}
+# METHOD_DICTIONARY = {}
+# FIELD_DICTIONARY = {}
+# METHOD_DICTIONARY = {}
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("int"),
-    'block': Block(Stmt_List().stmts.append(Return("")))
-}
+# stmt_list = Stmt_List()
+# stmt_list.stmts.append(Return(""))
 
-METHOD_KEY += 1
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("int"),
+#     'block': Block(stmt_list)
+# }
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("float"),
-    'block': Block(Stmt_List().stmts.append(Return("")))
-}
+# METHOD_KEY += 1
 
-METHOD_KEY += 1
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("float"),
+#     'block': Block(stmt_list)
+# }
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("boolean"),
-    'block': Block(Stmt_List().stmts.append(Return("")))
-}
+# METHOD_KEY += 1
 
-METHOD_KEY += 1
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("boolean"),
+#     'block': Block(stmt_list)
+# }
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("string"),
-    'block': Block(Stmt_List().stmts.append(Return("")))
-}
+# METHOD_KEY += 1
 
-METHOD_KEY += 1
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("string"),
+#     'block': Block(stmt_list)
+# }
 
-GLOBAL_CLASS_RECORD["Out"] = {
-    'className': "Out",
-    'superClassName': '',
-    'constructors': CONSTRUCTOR_DICTIONARY,
-    'fields': FIELD_DICTIONARY,
-    'methods': METHOD_DICTIONARY,   
-}
+# METHOD_KEY += 1
 
-METHOD_DICTIONARY = {}
-FIELD_DICTIONARY = {}
-METHOD_DICTIONARY = {}
+# GLOBAL_CLASS_RECORD["Out"] = {
+#     'className': "Out",
+#     'superClassName': '',
+#     'constructors': {},
+#     'fields': {},
+#     'methods': METHOD_DICTIONARY,   
+# }
+
+# METHOD_DICTIONARY = {}
+# FIELD_DICTIONARY = {}
+# METHOD_DICTIONARY = {}
 
 class Program(Node):
     def __init__(self, classes):
@@ -260,19 +261,21 @@ class Program(Node):
                     for variable_key, variable_value in variableTable.items():
                         if (variable_value["variableKind"] == "formal"):
                             constructorParamId.append(variable_key)
-                        variableTableResult = variableTableResult + f'VARIABLE {variable_key}, {variable_value["variableName"]}, {variable_value["variableKind"]}, {variable_value["variableType"]}\n'                # for variable_key, variable_value in constructor_value["variableTable"].items():
+                        variableTableResult = variableTableResult + f'VARIABLE {variable_key}, {variable_value["variableName"]}, {variable_value["variableKind"]}, {variable_value["variableType"]}\n'
 
                 constructor_result = f'{constructor_result} {str(constructorParamId)[1:-1]}\n{variableTableResult}Constructor Body:\n{constructor_value["block"]}\n'
 # ========================================================================================================================================================================================
             method_result = "Methods:\n"
             for method_key, method_value in value["methods"].items():
-                method_result += f'METHOD: {method_key}, {method_value["methodName"]}, {key}, {method_value["type"]}\nMethod Parameters:'
+                method_result += f'METHOD: {method_key}, {method_value["methodName"]}, {key}, {method_value["modifier"].visibility}, {method_value["modifier"].applicability}, {method_value["type"]}\nMethod Parameters:'
                 variableTableResult = "Variable Table:\n"
                 methodParamId = []
-                # for variable_key, variable_value in method_value["variableTable"].items():
-                #     if (variable_value["variableKind"] == "formal"):
-                #         methodParamId.append(variable_key)
-                #     variableTableResult = variableTableResult + f'VARIABLE {variable_key}, {variable_value["variableName"]}, {variable_value["variableKind"]}, {variable_value["variableType"]}\n'
+                for variableTable in method_value["variableTable"]:
+                    for variable_key, variable_value in variableTable.items():
+                        if (variable_value["variableKind"] == "formal"):
+                            methodParamId.append(variable_key)
+                        variableTableResult = variableTableResult + f'VARIABLE {variable_key}, {variable_value["variableName"]}, {variable_value["variableKind"]}, {variable_value["variableType"]}\n'
+
                 method_result = f'{method_result} {str(methodParamId)[1:-1]}\n{variableTableResult}Method Body:\n{method_value["block"]}\n'
 # ========================================================================================================================================================================================
 
@@ -292,7 +295,7 @@ class Class_decl(Node):
         self.superClassName = superClassName
         self.classBody = classBody
         
-        global GLOBAL_CLASS_RECORD, CONSTRUCTOR_DICTIONARY, FIELD_DICTIONARY, METHOD_DICTIONARY, CLASS_NAME
+        global GLOBAL_CLASS_RECORD, CONSTRUCTOR_DICTIONARY, FIELD_DICTIONARY, METHOD_DICTIONARY, CLASS_NAME, VARIABLE_KEY
 
         CLASS_NAME = self.className
 
@@ -303,7 +306,7 @@ class Class_decl(Node):
             'fields': FIELD_DICTIONARY,
             'methods': METHOD_DICTIONARY,            
         } 
-
+        VARIABLE_KEY = 1
         CONSTRUCTOR_DICTIONARY = {}
         FIELD_DICTIONARY = {}
         METHOD_DICTIONARY = {}
@@ -416,13 +419,13 @@ class Auto(Node):
         self.lhs = lhs
     def __str__(self):
         if (self.pre == "++"):
-            return f'Auto-expr({self.lhs}, auto-increment, pre) '
+            return f'Auto({self.lhs}, auto-increment, pre) '
         elif (self.pre == "--"):
-            return f'Auto-expr({self.lhs}, auto-decrement, pre) '
+            return f'Auto({self.lhs}, auto-decrement, pre) '
         elif (self.post == "++"):
-            return f'Auto-expr({self.lhs}, auto-increment, post) '
+            return f'Auto({self.lhs}, auto-increment, post) '
         elif (self.post == "--"):
-            return f'Auto-expr({self.lhs}, auto-decrement, post) '
+            return f'Auto({self.lhs}, auto-decrement, post) '
 
 class Assign(Node):
     def __init__(self, lhs = None, expr = None):
@@ -430,7 +433,7 @@ class Assign(Node):
         self.lhs = lhs
         self.expr = expr
     def __str__(self):
-        return f'Assign-expr({str(self.lhs)}, {str(self.expr)}) '
+        return f'Assign({str(self.lhs)}, {str(self.expr)}) '
 
 class Field_Access(Node):
     def __init__(self, primary, id):
