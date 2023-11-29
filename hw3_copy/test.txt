@@ -3,14 +3,11 @@ class A {
     A () {
         this.x = 0;
     }
-    int f() {
-        return this.x + 1;
-    }
-    public int g(int a, int b, int c) {
-        int i;
-        int j;
-        i = this.f();
-        i++;
-        return i;
+}
+
+class B extends A {
+    int y;
+    B() {
+        this.y = 5;
     }
 }
