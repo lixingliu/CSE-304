@@ -1,13 +1,10 @@
 class A {
     int x;
-    A () {
-        this.x = 0;
+    A(int xx) {
+        int xxx;
+        this.x = 6;
     }
-}
-
-class B extends A {
-    int y;
-    B() {
-        this.y = 5;
+    int g(int yy) {
+        return;
     }
 }
