@@ -167,10 +167,11 @@ def p_stmt(p):
             | var_decl
             | ';' '''
     if len(p) == 6 and p[1] == 'if':
-       pass #do this
+        p[0] = If_decl(p[3], p[5], None)
     elif len(p) == 8 and p[1] == 'if':
-        pass #do this
+        p[0] = If_decl(p[3], p[5], p[7])
     elif len(p) == 6 and p[1] == 'while':
+        # p[0] = While_decl(p[3], p[5])
         pass #do this
     elif len(p) == 10 and p[1] == 'for':
       p[0] = For_decl(p[3], p[5], p[7], p[9])
@@ -211,7 +212,7 @@ def p_literal(p):
                 | NULL
                 | TRUE
                 | FALSE''' 
-    p[0] = Literal(p[1])
+    p[0] = str(Literal(p[1]))
 
 def p_primary(p):
     '''primary : literal
@@ -225,8 +226,8 @@ def p_primary(p):
         p[0] = p[1]
     elif len(p) == 4 and p[1] == '(':
         pass #do this -> LEFT PAREN expr RIGHT PAREN
-    elif len(p) == 5 and p[1] == 'new':
-        pass #do this -> NEW ID LEFT PAREN ARG RIGHT PAREN
+    elif len(p) == 6:
+        p[0] = New(ID(p[2]), p[4])
 
 def p_arguments(p):
     ''' arguments : expr arguments_cont
@@ -234,7 +235,7 @@ def p_arguments(p):
     if len(p) == 2:
         p[0] = Arguments_cont()
     else:
-        p[2].args.append(p[1])
+        p[2].args.append(str(p[1]))
         p[0] = p[2]
 
 def p_arguments_cont(p):
@@ -254,7 +255,7 @@ def p_field_access(p):
     '''field_access : primary '.' ID
                     | ID'''
     if len(p) == 2:
-        p[0] = str(p[1])
+        p[0] = ID(p[1])
     else:
         p[0] = Field_Access(p[1], p[3])
     
@@ -339,10 +340,9 @@ def p_minus_expr(p):
     '''expr : MINUS expr %prec UMINUS'''
     p[0] = Uminus(p[1], p[2])
 
-# do this one
 def p_not_expr(p):
     '''expr : NOT expr'''
-    pass
+    p[0] = Not(p[2])
 
 def p_stmt_expr(p):
     '''stmt_expr : assign

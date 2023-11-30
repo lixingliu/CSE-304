@@ -82,39 +82,12 @@ class Block(Node):
                     }
                     VARIABLE_KEY += 1
         VARIABLE_TABLE.append(insideVariableTable)
-        print("86", VARIABLE_TABLE)
     def __str__(self):
-        global CONSTRUCTOR_PARAM_KEY, METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK, VAR_DECL_AVALIABILITY, GLOBAL_METHOD_VARIABLE_TABLE, GLOBAL_CONSTRUCTOR_VARIABLE_TABLE, VARIABLE_TABLE
-        currentKey = 0
-        if METHOD_BLOCK:
-            currentKey = METHOD_PARAM_KEY
-        else:
-            currentKey = CONSTRUCTOR_PARAM_KEY
-        insideVariableTable = {}
         result = 'Block([\n'
-        prevStmt = None
         add_var_decl_status = True
         for stmt in self.stmtList.stmts[::-1]:
-            # print(type(stmt))
             if (not isinstance(stmt, Var_Decl) and add_var_decl_status):
                 add_var_decl_status = False
-                # print(insideVariableTable)
-                # if METHOD_BLOCK:
-                #     GLOBAL_METHOD_VARIABLE_TABLE.append(insideVariableTable)
-                # else:
-                #     VARIABLE_TABLE.append(insideVariableTable)
-            # if (isinstance(stmt, Var_Decl)):
-            #     if (not isinstance(prevStmt, Var_Decl) and prevStmt != None):
-            #         print("we have a problem, why are you adding another variable decl")
-            #         sys.exit()
-            #     for variable in stmt.variable_list.vars[::-1]:
-            #         insideVariableTable[currentKey] = {
-            #             'variableName': variable,
-            #             'variableKind': 'local',
-            #             'variableType': stmt.type,
-            #         }
-            #         currentKey += 1
-
             if (stmt == ';'):
                 result += "Skip-stmt()\n"
             elif (isinstance(stmt, Block)):
@@ -124,17 +97,18 @@ class Block(Node):
             elif (stmt == 'break'):
                 result += "Break-stmt()\n"
             elif (isinstance(stmt, Auto)):
-                result = result + "Expr( " + str(stmt) + " ), "
+                result = result + "Expr( " + str(stmt) + "),\n"
             elif (isinstance(stmt, Assign)):
-                result = result + "Expr( " + str(stmt) + " ), "
+                result = result + "Expr( " + str(stmt) + "),\n"
             elif (isinstance(stmt, Return)):
                 result += str(stmt)
             elif (isinstance(stmt, For_decl)):
                 result += str(stmt)
             elif (isinstance(stmt, Method_Invocation)):
+                result = result + str(stmt) + ",\n"
+            elif (isinstance(stmt, If_decl)):
                 result += str(stmt)
-            prevStmt = stmt
-        return result + "\n])"
+        return result[:-2] + result[-1] + "])"
 
 class Stmt_List(Node):
     def __init__(self):
@@ -241,7 +215,7 @@ class Program(Node):
         super().__init__()
         self.classes = classes
     def __str__(self):
-        global CLASS_NAME, METHOD_DICTIONARY, CONSTRUCTOR_DICTIONARY, GLOBAL_CLASS_RECORD, FIELD_DICTIONARY
+        global CLASS_NAME, METHOD_DICTIONARY, CONSTRUCTOR_DICTIONARY, GLOBAL_CLASS_RECORD, FIELD_DICTIONARY, VARIABLE_TABLE
         result = ""
         for key, value in GLOBAL_CLASS_RECORD.items():
             if value["className"] == 'Out' or value["className"] == "In":
@@ -275,7 +249,7 @@ class Program(Node):
                         if (variable_value["variableKind"] == "formal"):
                             methodParamId.append(variable_key)
                         variableTableResult = variableTableResult + f'VARIABLE {variable_key}, {variable_value["variableName"]}, {variable_value["variableKind"]}, {variable_value["variableType"]}\n'
-
+                VARIABLE_TABLE = method_value["variableTable"]
                 method_result = f'{method_result} {str(methodParamId)[1:-1]}\n{variableTableResult}Method Body:\n{method_value["block"]}\n'
 # ========================================================================================================================================================================================
 
@@ -322,8 +296,11 @@ class Field_Decl(Node):
         self.fieldModifier = fieldModifier
         self.fieldVarDecl = fieldVarDecl
         global FIELD_KEY, CLASS_NAME, FIELD_DICTIONARY
-        
-        # result = ''
+        built_in_types = ["int", "float", "boolean", "string"]
+
+        if (str(self.fieldVarDecl.type) not in built_in_types):
+            self.fieldVarDecl.type = f'user({self.fieldVarDecl.type})'
+
         for variable in self.fieldVarDecl.variable_list.vars[::-1]:
             FIELD_DICTIONARY[FIELD_KEY] = {
                 'className': CLASS_NAME,
@@ -331,7 +308,6 @@ class Field_Decl(Node):
                 'fieldModifier': str(self.fieldModifier),
                 'type': str(self.fieldVarDecl.type)
             }
-            # result = result + f'FIELD {FIELD_KEY}, {variable}, {CLASS_NAME}, {str(self.fieldModifier)}, {str(self.fieldVarDecl.type)}\n' 
             FIELD_KEY += 1
 
 class Constructor_Decl(Node):
@@ -342,7 +318,7 @@ class Constructor_Decl(Node):
         self.formals = formals
         self.block = block
 
-        global CONSTRUCTOR_KEY, CONSTRUCTOR_BLOCK, METHOD_BLOCK, VARIABLE_TABLE
+        global CONSTRUCTOR_KEY, CONSTRUCTOR_BLOCK, METHOD_BLOCK, VARIABLE_TABLE, VARIABLE_KEY
         CONSTRUCTOR_BLOCK = True
         METHOD_BLOCK = False
 
@@ -355,6 +331,7 @@ class Constructor_Decl(Node):
         }
         VARIABLE_TABLE = []
         CONSTRUCTOR_KEY += 1
+        VARIABLE_KEY = 1
     
 class Method_Decl(Node):
     def __init__(self, modifier, type, id, formals, block):
@@ -364,7 +341,7 @@ class Method_Decl(Node):
         self.type = type
         self.formals = formals
         self.block = block
-        global METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK, VARIABLE_TABLE
+        global METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK, VARIABLE_TABLE, VARIABLE_KEY
         CONSTRUCTOR_BLOCK = False
         METHOD_BLOCK = True
 
@@ -378,6 +355,7 @@ class Method_Decl(Node):
         }
         METHOD_KEY += 1
         VARIABLE_TABLE = []
+        VARIABLE_KEY = 1
 
     
 class Var_Decl(Node):
@@ -419,13 +397,13 @@ class Auto(Node):
         self.lhs = lhs
     def __str__(self):
         if (self.pre == "++"):
-            return f'Auto({self.lhs}, auto-increment, pre) '
+            return f'Auto({self.lhs}, auto-increment, pre)'
         elif (self.pre == "--"):
-            return f'Auto({self.lhs}, auto-decrement, pre) '
+            return f'Auto({self.lhs}, auto-decrement, pre)'
         elif (self.post == "++"):
-            return f'Auto({self.lhs}, auto-increment, post) '
+            return f'Auto({self.lhs}, auto-increment, post)'
         elif (self.post == "--"):
-            return f'Auto({self.lhs}, auto-decrement, post) '
+            return f'Auto({self.lhs}, auto-decrement, post)'
 
 class Assign(Node):
     def __init__(self, lhs = None, expr = None):
@@ -468,7 +446,7 @@ class For_decl(Node):
         self.cond3 = cond3
         self.forBody = forBody
     def __str__(self):
-        return f'For-stmt({str(self.cond1)}, {str(self.cond2)}, {str(self.cond3)}, {str(self.forBody)})'
+        return f'For-stmt({str(self.cond1)}, {str(self.cond2)}, {str(self.cond3)}, {str(self.forBody)})\n'
     
 class Binary_Expr(Node):
     def __init__(self, leftExpr, rightExpr, binaryType):
@@ -522,3 +500,41 @@ class Arguments_cont(Node):
     def __init__(self):
         super().__init__()
         self.args = []   
+
+class New(Node):
+    def __init__(self, id, arguments):
+        super().__init__()
+        self.id = id
+        self.arguments = arguments
+        print("499", self.arguments)
+    def __str__(self):
+        return f'New-object({self.id}, {str(self.arguments.args)})'
+    
+class If_decl(Node):
+    def __init__(self, expr, stmtOne, stmtTwo):
+        super().__init__()
+        self.expr = expr
+        self.stmtOne = stmtOne
+        self.stmtTwo = stmtTwo
+    def __str__(self):
+        return f'If-stmt({str(self.expr)}, {str(self.stmtOne)}, else {str(self.stmtTwo)})'
+    
+class Not(Node):
+    def __init__(self, expr):
+        super().__init__()
+        self.expr = expr
+    def __str__(self):
+        return f'Unary-expression(NEG, {str(self.expr)})'
+
+class ID(Node):
+    def __init__(self, id):
+        super().__init__()
+        self.id = id
+    def __str__(self):
+        global VARIABLE_TABLE
+        variableId = ''
+        for variableTable in VARIABLE_TABLE[::-1]:
+            for key, value in variableTable.items():
+                if self.id == value["variableName"]:
+                    variableId = f'Variable({key})'
+        return variableId
