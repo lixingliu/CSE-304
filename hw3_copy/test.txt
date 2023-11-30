@@ -1,11 +1,13 @@
-class B {
-    B() {
-        int y;
-        int z;
-        z = 8;
-        for (y = 0; y < 10; y++) {
-            z++;
+class A {
+    int f() {
+    int x;
+    int y;
+        {
+            int p;
+            p = 5;
+            return y + 4;
         }
-        z = y;
+        return x + 1;
     }
+
 }

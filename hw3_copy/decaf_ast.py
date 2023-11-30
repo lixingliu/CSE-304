@@ -54,6 +54,13 @@ class Formals_const(Node):
         super().__init__()
         self.formals = []
 
+class Var_Decl(Node):
+    def __init__(self, type, variable_list):
+        super().__init__()
+        self.type = type
+        self.variable_list = variable_list
+    
+
 class Type(Node):
     def __init__(self, type_value):
         super().__init__()
@@ -91,7 +98,7 @@ class Block(Node):
             if (stmt == ';'):
                 result += "Skip-stmt()\n"
             elif (isinstance(stmt, Block)):
-                pass #do this
+                result = result + str(stmt) + ",\n"
             elif (stmt == 'continue'):
                 result += "Continue-stmt() "
             elif (stmt == 'break'):
@@ -125,92 +132,92 @@ class Return(Node):
         return f'Return-stmt({str(self.return_val)})'
     
 
-# METHOD_DICTIONARY[METHOD_KEY] = {
-#     'methodName': 'scan_int',
-#     'modifier': Modifier("public", "static"),
-#     'formals': Formals_const(),
-#     'type': Type("int"),
-#     'block': Block(Stmt_List())
-# }
+METHOD_DICTIONARY[METHOD_KEY] = {
+    'methodName': 'scan_int',
+    'modifier': Modifier("public", "static"),
+    'formals': Formals_const(),
+    'type': Type("int"),
+    'block': Block(Stmt_List())
+}
 
-# METHOD_KEY += 1
+METHOD_KEY += 1
 
-# METHOD_DICTIONARY[METHOD_KEY] = {
-#     'methodName': 'scan_float',
-#     'modifier': Modifier("public", "static"),
-#     'formals': Formals_const(),
-#     'type': Type("float"),
-#     'block': Block(Stmt_List())
-# }
+METHOD_DICTIONARY[METHOD_KEY] = {
+    'methodName': 'scan_float',
+    'modifier': Modifier("public", "static"),
+    'formals': Formals_const(),
+    'type': Type("float"),
+    'block': Block(Stmt_List())
+}
 
-# METHOD_KEY += 1
+METHOD_KEY += 1
 
-# GLOBAL_CLASS_RECORD["In"] = {
-#     'className': "In",
-#     'superClassName': '',
-#     'constructors': {},
-#     'fields': {},
-#     'methods': METHOD_DICTIONARY,   
-# }
+GLOBAL_CLASS_RECORD["In"] = {
+    'className': "In",
+    'superClassName': '',
+    'constructors': {},
+    'fields': {},
+    'methods': METHOD_DICTIONARY,   
+}
 
-# METHOD_DICTIONARY = {}
-# FIELD_DICTIONARY = {}
-# METHOD_DICTIONARY = {}
+METHOD_DICTIONARY = {}
+FIELD_DICTIONARY = {}
+METHOD_DICTIONARY = {}
 
-# stmt_list = Stmt_List()
-# stmt_list.stmts.append(Return(""))
+stmt_list = Stmt_List()
+stmt_list.stmts.append(Return(""))
 
-# METHOD_DICTIONARY[METHOD_KEY] = {
-#     'methodName': 'print',
-#     'modifier': Modifier("public", "static"),
-#     'formals': Formals_const(),
-#     'type': Type("int"),
-#     'block': Block(stmt_list)
-# }
+METHOD_DICTIONARY[METHOD_KEY] = {
+    'methodName': 'print',
+    'modifier': Modifier("public", "static"),
+    'formals': Formals_const(),
+    'type': Type("int"),
+    'block': Block(stmt_list)
+}
 
-# METHOD_KEY += 1
+METHOD_KEY += 1
 
-# METHOD_DICTIONARY[METHOD_KEY] = {
-#     'methodName': 'print',
-#     'modifier': Modifier("public", "static"),
-#     'formals': Formals_const(),
-#     'type': Type("float"),
-#     'block': Block(stmt_list)
-# }
+METHOD_DICTIONARY[METHOD_KEY] = {
+    'methodName': 'print',
+    'modifier': Modifier("public", "static"),
+    'formals': Formals_const(),
+    'type': Type("float"),
+    'block': Block(stmt_list)
+}
 
-# METHOD_KEY += 1
+METHOD_KEY += 1
 
-# METHOD_DICTIONARY[METHOD_KEY] = {
-#     'methodName': 'print',
-#     'modifier': Modifier("public", "static"),
-#     'formals': Formals_const(),
-#     'type': Type("boolean"),
-#     'block': Block(stmt_list)
-# }
+METHOD_DICTIONARY[METHOD_KEY] = {
+    'methodName': 'print',
+    'modifier': Modifier("public", "static"),
+    'formals': Formals_const(),
+    'type': Type("boolean"),
+    'block': Block(stmt_list)
+}
 
-# METHOD_KEY += 1
+METHOD_KEY += 1
 
-# METHOD_DICTIONARY[METHOD_KEY] = {
-#     'methodName': 'print',
-#     'modifier': Modifier("public", "static"),
-#     'formals': Formals_const(),
-#     'type': Type("string"),
-#     'block': Block(stmt_list)
-# }
+METHOD_DICTIONARY[METHOD_KEY] = {
+    'methodName': 'print',
+    'modifier': Modifier("public", "static"),
+    'formals': Formals_const(),
+    'type': Type("string"),
+    'block': Block(stmt_list)
+}
 
-# METHOD_KEY += 1
+METHOD_KEY += 1
 
-# GLOBAL_CLASS_RECORD["Out"] = {
-#     'className': "Out",
-#     'superClassName': '',
-#     'constructors': {},
-#     'fields': {},
-#     'methods': METHOD_DICTIONARY,   
-# }
+GLOBAL_CLASS_RECORD["Out"] = {
+    'className': "Out",
+    'superClassName': '',
+    'constructors': {},
+    'fields': {},
+    'methods': METHOD_DICTIONARY,   
+}
 
-# METHOD_DICTIONARY = {}
-# FIELD_DICTIONARY = {}
-# METHOD_DICTIONARY = {}
+METHOD_DICTIONARY = {}
+FIELD_DICTIONARY = {}
+METHOD_DICTIONARY = {}
 
 class Program(Node):
     def __init__(self, classes):
@@ -360,13 +367,6 @@ class Method_Decl(Node):
         VARIABLE_TABLE = []
         VARIABLE_KEY = 1
 
-    
-class Var_Decl(Node):
-    def __init__(self, type, variable_list):
-        super().__init__()
-        self.type = type
-        self.variable_list = variable_list
-    
 class Variables_cont(Node):
     def __init__(self):
         super().__init__()
