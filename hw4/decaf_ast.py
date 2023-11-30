@@ -6,11 +6,13 @@ CLASS_NAME = ""
 
 CONSTRUCTOR_DICTIONARY = {}
 CONSTRUCTOR_KEY = 1
+CONSTRUCTOR_BLOCK = False
 
 CONSTRUCTOR_PARAM_KEY = 1
 
 METHOD_DICTIONARY = {}
 METHOD_KEY = 1
+METHOD_BLOCK = False
 
 METHOD_PARAM_KEY = 1
 
@@ -80,9 +82,6 @@ class Block(Node):
         for stmt in self.stmtList.stmts[::-1]:
             if (isinstance(stmt, Var_Decl)):
                 for variable in stmt.variable_list.vars[::-1]:
-                    if any(entry.get('variableName') == variable for entry in insideVariableTable.values()):
-                        print("DO NOT PUT SAME VARIABLES")
-                        sys.exit()
                     insideVariableTable[VARIABLE_KEY] = {
                         'variableName': variable,
                         'variableKind': 'local',
@@ -225,7 +224,7 @@ class Program(Node):
         super().__init__()
         self.classes = classes
     def __str__(self):
-        global GLOBAL_CLASS_RECORD, VARIABLE_TABLE
+        global CLASS_NAME, METHOD_DICTIONARY, CONSTRUCTOR_DICTIONARY, GLOBAL_CLASS_RECORD, FIELD_DICTIONARY, VARIABLE_TABLE
         result = ""
         for key, value in GLOBAL_CLASS_RECORD.items():
             if value["className"] == 'Out' or value["className"] == "In":
@@ -265,7 +264,7 @@ class Program(Node):
 # ========================================================================================================================================================================================
 
             
-            result = result + f'Class Name: {key}\nSuperclass Name: {value["superClassName"]}\n{field_result}{constructor_result}{method_result}' + "-------------------------------------------------------------------------------------\n"
+            result = result + f'Class Name: {key}\nSuperclass Name: {value["superClassName"]}\n{field_result}{constructor_result}{method_result}' + "======================\n"
         return result
     
 class Class_decl_list(Node):
@@ -282,11 +281,8 @@ class Class_decl(Node):
         
         global GLOBAL_CLASS_RECORD, CONSTRUCTOR_DICTIONARY, FIELD_DICTIONARY, METHOD_DICTIONARY, CLASS_NAME, VARIABLE_KEY
 
-        if self.className in GLOBAL_CLASS_RECORD.keys():
-            print("why do you have 2 classes with the same name")
-            sys.exit()
-
         CLASS_NAME = self.className
+
         GLOBAL_CLASS_RECORD[self.className] = {
             'className': self.className,
             'superClassName': self.superClassName,
@@ -316,9 +312,6 @@ class Field_Decl(Node):
             self.fieldVarDecl.type = f'user({self.fieldVarDecl.type})'
 
         for variable in self.fieldVarDecl.variable_list.vars[::-1]:
-            if any(entry.get('variableName') == variable for entry in FIELD_DICTIONARY.values()):
-                print("shouldbt have fields with the same name")
-                sys.exit()
             FIELD_DICTIONARY[FIELD_KEY] = {
                 'className': CLASS_NAME,
                 'variableName': variable,
@@ -335,7 +328,9 @@ class Constructor_Decl(Node):
         self.formals = formals
         self.block = block
 
-        global CONSTRUCTOR_KEY, VARIABLE_TABLE, VARIABLE_KEY
+        global CONSTRUCTOR_KEY, CONSTRUCTOR_BLOCK, METHOD_BLOCK, VARIABLE_TABLE, VARIABLE_KEY
+        CONSTRUCTOR_BLOCK = True
+        METHOD_BLOCK = False
 
         CONSTRUCTOR_DICTIONARY[CONSTRUCTOR_KEY] = {
             'modifier': self.modifier,
@@ -356,7 +351,9 @@ class Method_Decl(Node):
         self.type = type
         self.formals = formals
         self.block = block
-        global METHOD_KEY, VARIABLE_TABLE, VARIABLE_KEY
+        global METHOD_KEY, METHOD_BLOCK, CONSTRUCTOR_BLOCK, VARIABLE_TABLE, VARIABLE_KEY
+        CONSTRUCTOR_BLOCK = False
+        METHOD_BLOCK = True
 
         METHOD_DICTIONARY[METHOD_KEY] = {
             'methodName': self.methodName,
@@ -374,6 +371,8 @@ class Variables_cont(Node):
     def __init__(self):
         super().__init__()
         self.vars = []
+    
+
     
 class Formal_param(Node):
     def __init__(self, type, variable):

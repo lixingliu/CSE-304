@@ -1,10 +1,7 @@
 class A {
-    int one;
-    int oneh;
     int f() {
-        int x;
-        int y;
-        int xl;
+    int x;
+    int y;
         {
             int p;
             p = 5;
