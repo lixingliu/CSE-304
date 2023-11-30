@@ -91,23 +91,25 @@ class Block(Node):
             if (stmt == ';'):
                 result += "Skip-stmt()\n"
             elif (isinstance(stmt, Block)):
-                pass
+                pass #do this
             elif (stmt == 'continue'):
-                result += "Continue-stmt()\n"
+                result += "Continue-stmt() "
             elif (stmt == 'break'):
                 result += "Break-stmt()\n"
             elif (isinstance(stmt, Auto)):
-                result = result + "Expr( " + str(stmt) + "),\n"
+                result = result + str(stmt) + ",\n"
             elif (isinstance(stmt, Assign)):
-                result = result + "Expr( " + str(stmt) + "),\n"
+                result = result + str(stmt) + ",\n"
             elif (isinstance(stmt, Return)):
-                result += str(stmt)
+                result = result + str(stmt) + ",\n"
             elif (isinstance(stmt, For_decl)):
-                result += str(stmt)
+                result = result + str(stmt) + ",\n"
             elif (isinstance(stmt, Method_Invocation)):
                 result = result + str(stmt) + ",\n"
             elif (isinstance(stmt, If_decl)):
-                result += str(stmt)
+                result = result + str(stmt) + ",\n"
+            elif (isinstance(stmt, While_decl)):
+                result = result + str(stmt) + ",\n"
         return result[:-2] + result[-1] + "])"
 
 class Stmt_List(Node):
@@ -236,6 +238,7 @@ class Program(Node):
                         if (variable_value["variableKind"] == "formal"):
                             constructorParamId.append(variable_key)
                         variableTableResult = variableTableResult + f'VARIABLE {variable_key}, {variable_value["variableName"]}, {variable_value["variableKind"]}, {variable_value["variableType"]}\n'
+                VARIABLE_TABLE = constructor_value["variableTable"]
 
                 constructor_result = f'{constructor_result} {str(constructorParamId)[1:-1]}\n{variableTableResult}Constructor Body:\n{constructor_value["block"]}\n'
 # ========================================================================================================================================================================================
@@ -397,13 +400,13 @@ class Auto(Node):
         self.lhs = lhs
     def __str__(self):
         if (self.pre == "++"):
-            return f'Auto({self.lhs}, auto-increment, pre)'
+            return f'Expr( Auto({self.lhs}, auto-increment, pre) )'
         elif (self.pre == "--"):
-            return f'Auto({self.lhs}, auto-decrement, pre)'
+            return f'Expr( Auto({self.lhs}, auto-decrement, pre) )'
         elif (self.post == "++"):
-            return f'Auto({self.lhs}, auto-increment, post)'
+            return f'Expr( Auto({self.lhs}, auto-increment, post) )'
         elif (self.post == "--"):
-            return f'Auto({self.lhs}, auto-decrement, post)'
+            return f'Expr( Auto({self.lhs}, auto-decrement, post) )'
 
 class Assign(Node):
     def __init__(self, lhs = None, expr = None):
@@ -411,7 +414,7 @@ class Assign(Node):
         self.lhs = lhs
         self.expr = expr
     def __str__(self):
-        return f'Assign({str(self.lhs)}, {str(self.expr)}) '
+        return f'Expr( Assign({str(self.lhs)}, {str(self.expr)}) )'
 
 class Field_Access(Node):
     def __init__(self, primary, id):
@@ -446,7 +449,7 @@ class For_decl(Node):
         self.cond3 = cond3
         self.forBody = forBody
     def __str__(self):
-        return f'For-stmt({str(self.cond1)}, {str(self.cond2)}, {str(self.cond3)}, {str(self.forBody)})\n'
+        return f'For-stmt({str(self.cond1)}, {str(self.cond2)}, {str(self.cond3)}, {str(self.forBody)})'
     
 class Binary_Expr(Node):
     def __init__(self, leftExpr, rightExpr, binaryType):
@@ -538,3 +541,18 @@ class ID(Node):
                 if self.id == value["variableName"]:
                     variableId = f'Variable({key})'
         return variableId
+    
+class While_decl(Node):
+    def __init__(self, expr, stmt):
+        super().__init__()
+        self.expr = expr
+        self.stmt = stmt
+    def __str__(self):
+        return f"While-stmt({str(self.expr)}, {str(self.stmt)})"
+    
+class Paren(Node):
+    def __init__(self, expr):
+        super().__init__()
+        self.expr = expr
+    def __str__(self):
+        return str(self.expr)

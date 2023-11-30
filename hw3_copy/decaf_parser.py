@@ -39,7 +39,6 @@ def p_class_decl_list(p):
     else:
         p[2].classList.append(p[1])
         p[0] = p[2] 
-    pass
 
 def p_class_decl(p):
     '''class_decl : CLASS ID EXTENDS ID '{' class_body_decl '}'
@@ -48,7 +47,6 @@ def p_class_decl(p):
         p[0] = Class_decl(className=p[2], classBody=p[4])
     else:
         p[0] = Class_decl(className=p[2], superClassName=p[4], classBody=p[6])
-    pass
     
 def p_class_body_decl(p):
     '''class_body_decl : field_decl
@@ -94,7 +92,6 @@ def p_variables(p):
     '''variables : variable variables_cont'''
     p[2].vars.append(p[1])
     p[0] = p[2]
-    pass
 
 def p_variables_cont(p):
     '''variables_cont : ',' variable variables_cont
@@ -104,7 +101,6 @@ def p_variables_cont(p):
     else:
         p[3].vars.append(p[2])
         p[0] = p[3]
-    pass
 
 def p_variable(p):
     '''variable : ID'''
@@ -171,8 +167,7 @@ def p_stmt(p):
     elif len(p) == 8 and p[1] == 'if':
         p[0] = If_decl(p[3], p[5], p[7])
     elif len(p) == 6 and p[1] == 'while':
-        # p[0] = While_decl(p[3], p[5])
-        pass #do this
+        p[0] = While_decl(p[3], p[5])
     elif len(p) == 10 and p[1] == 'for':
       p[0] = For_decl(p[3], p[5], p[7], p[9])
     elif len(p) == 4 and p[1] == 'return':
@@ -225,7 +220,7 @@ def p_primary(p):
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4 and p[1] == '(':
-        pass #do this -> LEFT PAREN expr RIGHT PAREN
+        p[0] = Paren(p[2])
     elif len(p) == 6:
         p[0] = New(ID(p[2]), p[4])
 
@@ -262,7 +257,6 @@ def p_field_access(p):
 def p_method_invocation(p):
     ''' method_invocation : field_access LEFTPAREN arguments RIGHTPAREN '''
     p[0] = Method_Invocation(p[1], p[3])
-    pass
 
 def p_expr(p):
     '''expr : primary
@@ -282,7 +276,6 @@ def p_assign(p):
             p[0] = Auto(p[2], None, p[1])
         if(p[1] == '--' or p[1] == "++"):
             p[0] = Auto(None, p[1], p[2])
-    pass
 
 def p_add_expr(p):
     '''expr : expr PLUS expr'''
@@ -348,11 +341,9 @@ def p_stmt_expr(p):
     '''stmt_expr : assign
                 | method_invocation'''
     p[0] = p[1]
-    pass
     
 def p_empty(p):
     '''empty :'''
-    pass
 
 def p_error(p):
     print()
