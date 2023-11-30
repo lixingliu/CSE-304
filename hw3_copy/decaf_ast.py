@@ -76,19 +76,26 @@ class Block(Node):
         self.stmtList = stmtList
         global VARIABLE_TABLE, VARIABLE_KEY
         insideVariableTable = {}
-        # currentKey = 1
+        variableStatus = True
         for stmt in self.stmtList.stmts[::-1]:
             if (isinstance(stmt, Var_Decl)):
-                for variable in stmt.variable_list.vars[::-1]:
-                    if any(entry.get('variableName') == variable for entry in insideVariableTable.values()):
-                        print("DO NOT PUT SAME VARIABLES")
-                        sys.exit()
-                    insideVariableTable[VARIABLE_KEY] = {
-                        'variableName': variable,
-                        'variableKind': 'local',
-                        'variableType': stmt.type,
-                    }
-                    VARIABLE_KEY += 1
+                if (variableStatus):
+                    for variable in stmt.variable_list.vars[::-1]:
+                        if any(entry.get('variableName') == variable for entry in insideVariableTable.values()):
+                            print("DO NOT PUT SAME VARIABLES")
+                            sys.exit()
+                        insideVariableTable[VARIABLE_KEY] = {
+                            'variableName': variable,
+                            'variableKind': 'local',
+                            'variableType': stmt.type,
+                        }
+                        VARIABLE_KEY += 1
+                else:
+                    print("WOAH WHY ARE U ADDING A VARIABLE NOT AT TOP OF BLOCK")
+                    sys.exit()
+            else:
+                variableStatus = False
+    
         VARIABLE_TABLE.append(insideVariableTable)
     def __str__(self):
         result = 'Block([\n'

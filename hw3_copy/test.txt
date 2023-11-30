@@ -1,16 +1,9 @@
 class A {
-    int one;
-    int oneh;
-    int f() {
-        int x;
-        int y;
-        int xl;
-        {
-            int p;
-            p = 5;
-            return y + 4;
-        }
-        return x + 1;
+    int x;
+    A () {
+        int Y;
+        this.x = 0;
+        int j;
     }
 
 }
