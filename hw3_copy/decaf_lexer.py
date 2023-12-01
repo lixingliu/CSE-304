@@ -107,9 +107,7 @@ def t_INT_CONST(t):
 # \\. means it represents anything like \n, \t, \\, or \"; stuff with special meaning
 # [^"\\] means it will ignore all " and \; " and \ are special special characters that strings cannot have
 def t_STRING_CONST(t):
-    r'\"(?:\\.|[^\"\\])*\"'
-    t.value = t.value[1:-1]
-    t.value = re.sub(r'\\(.)', r'1', t.value) 
+    r'\".*\"'
     return t
 
 t_INCREMENT = r'\+\+'

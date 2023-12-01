@@ -437,6 +437,7 @@ class Literal(Node):
     def __init__(self, literal):
         super().__init__()
         self.literal = literal
+        print("440", self.literal)
     def __str__(self):
         if (self.literal == "true"):
             return f'Constant(True)'

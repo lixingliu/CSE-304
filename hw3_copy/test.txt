@@ -1,9 +1,5 @@
-class A {
-    int x;
-    A () {
-        int Y;
-        this.x = 0;
-        int j;
+class hello_world{
+    public static void main() {
+        Out.print("Hello World!\n");
     }
-
 }
