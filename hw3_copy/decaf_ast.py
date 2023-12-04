@@ -272,7 +272,7 @@ class Program(Node):
 # ========================================================================================================================================================================================
 
             
-            result = result + f'Class Name: {key}\nSuperclass Name: {value["superClassName"]}\n{field_result}{constructor_result}{method_result}' + "-------------------------------------------------------------------------------------\n"
+            result = result + f'Class Name: {key}\nSuperclass Name: {value["superClassName"]}\n{field_result}{constructor_result}{method_result}' + "--------------------------------------------------------------------------\n"
         return result
     
 class Class_decl_list(Node):
