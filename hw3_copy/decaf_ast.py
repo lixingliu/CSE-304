@@ -82,7 +82,7 @@ class Block(Node):
                 if (variableStatus):
                     for variable in stmt.variable_list.vars[::-1]:
                         if any(entry.get('variableName') == variable for entry in insideVariableTable.values()):
-                            print("DO NOT PUT SAME VARIABLES")
+                            print(f"Error: Variable names must be unique within a block. You are trying to declare multiple variables of the name {variable}")
                             sys.exit()
                         insideVariableTable[VARIABLE_KEY] = {
                             'variableName': variable,
@@ -91,7 +91,7 @@ class Block(Node):
                         }
                         VARIABLE_KEY += 1
                 else:
-                    print("WOAH WHY ARE U ADDING A VARIABLE NOT AT TOP OF BLOCK")
+                    print("Error: Variables must be declared at the top of the block before any other statements other than variable declarations")
                     sys.exit()
             else:
                 variableStatus = False
@@ -290,7 +290,7 @@ class Class_decl(Node):
         global GLOBAL_CLASS_RECORD, CONSTRUCTOR_DICTIONARY, FIELD_DICTIONARY, METHOD_DICTIONARY, CLASS_NAME, VARIABLE_KEY
 
         if self.className in GLOBAL_CLASS_RECORD.keys():
-            print("why do you have 2 classes with the same name")
+            print(f"Error: Class Names must be unique. You have multiple class names of {self.className}")
             sys.exit()
 
         CLASS_NAME = self.className
@@ -324,7 +324,7 @@ class Field_Decl(Node):
 
         for variable in self.fieldVarDecl.variable_list.vars[::-1]:
             if any(entry.get('variableName') == variable for entry in FIELD_DICTIONARY.values()):
-                print("shouldbt have fields with the same name")
+                print(f"Error: Multiple Fields with the name {variable} has been detected. Field variables must have unique names")
                 sys.exit()
             FIELD_DICTIONARY[FIELD_KEY] = {
                 'className': CLASS_NAME,
@@ -437,7 +437,6 @@ class Literal(Node):
     def __init__(self, literal):
         super().__init__()
         self.literal = literal
-        print("440", self.literal)
     def __str__(self):
         if (self.literal == "true"):
             return f'Constant(True)'
@@ -518,7 +517,6 @@ class New(Node):
         super().__init__()
         self.id = id
         self.arguments = arguments
-        print("499", self.arguments)
     def __str__(self):
         return f'New-object({self.id}, {str(self.arguments.args)})'
     
@@ -543,12 +541,17 @@ class ID(Node):
         super().__init__()
         self.id = id
     def __str__(self):
-        global VARIABLE_TABLE
+        global VARIABLE_TABLE, GLOBAL_CLASS_RECORD
         variableId = ''
         for variableTable in VARIABLE_TABLE[::-1]:
             for key, value in variableTable.items():
                 if self.id == value["variableName"]:
                     variableId = f'Variable({key})'
+        if (self.id in GLOBAL_CLASS_RECORD.keys()):
+            return str(self.id)
+        if (variableId == ''):
+            print(f'ERROR: Variable {self.id} has not been declared')
+            sys.exit()
         return variableId
     
 class While_decl(Node):
