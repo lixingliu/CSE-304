@@ -100,6 +100,8 @@ class Block(Node):
     def __str__(self):
         result = 'Block([\n'
         add_var_decl_status = True
+        if len(self.stmtList.stmts) == 0:
+            result += "Skip-stmt()\n"
         for stmt in self.stmtList.stmts[::-1]:
             if (not isinstance(stmt, Var_Decl) and add_var_decl_status):
                 add_var_decl_status = False
@@ -505,7 +507,10 @@ class Method_Invocation(Node):
         self.fieldAccess = fieldAccess
         self.arguments = arguments
     def __str__(self):
-        return f'Method-call({self.fieldAccess.primary}, {self.fieldAccess.id}, {str(self.arguments.args[::-1])})'
+        arguments = []
+        for arg in self.arguments.args[::-1]:
+            arguments.append(str(arg))
+        return f'Method-call({self.fieldAccess.primary}, {self.fieldAccess.id}, {str(arguments)})'
     
 class Arguments_cont(Node):
     def __init__(self):
@@ -518,7 +523,10 @@ class New(Node):
         self.id = id
         self.arguments = arguments
     def __str__(self):
-        return f'New-object({self.id}, {str(self.arguments.args)})'
+        arguments = []
+        for args in self.arguments.args:
+            arguments.append(str(args))
+        return f'New-object({self.id}, {str(arguments)})'
     
 class If_decl(Node):
     def __init__(self, expr, stmtOne, stmtTwo):
