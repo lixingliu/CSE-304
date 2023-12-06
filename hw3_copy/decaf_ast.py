@@ -554,7 +554,6 @@ class ID(Node):
     def __str__(self):
         global VARIABLE_TABLE, GLOBAL_CLASS_RECORD, FIELD_DICTIONARY
         variableId = ''
-        print(FIELD_DICTIONARY)
         for variableTable in VARIABLE_TABLE[::-1]:
             for key, value in variableTable.items():
                 if self.id == value["variableName"]:
