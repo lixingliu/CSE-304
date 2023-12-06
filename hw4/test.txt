@@ -1,13 +1,8 @@
-class A {
-    int f() {
-    int x;
-    int y;
-        {
-            int p;
-            p = 5;
-            return y + 4;
-        }
-        return x + 1;
+class test005
+{
+    public static void main()
+    {   
+        boolean a;
+        a = 17 > 14;
     }
-
 }

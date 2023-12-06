@@ -15,8 +15,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 def just_scan():
-    # fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = "test.txt"
+    fn = sys.argv[1] if len(sys.argv) > 1 else ""
     if fn == "":
         print("Missing file name for source program.")
         print("USAGE: python3 decaf_checker.py <decaf_source_file_name>")
@@ -35,10 +34,8 @@ def just_scan():
 
 
 def main():
-    # fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    # fn = "C:\\Users\\lixin\\CSE-304\\hw2\\hello_world.decaf"
-    fn = "test.txt"
-    # fn = "C:\\Users\\L\\CSE-304\\hw3\\test.txt"
+    fn = sys.argv[1] if len(sys.argv) > 1 else ""
+    
     source = []
     if fn == "":
         print("Missing file name for source program.")

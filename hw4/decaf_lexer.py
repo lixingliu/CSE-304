@@ -77,13 +77,13 @@ t_GREATERTHAN = r'>'
 t_LESSTHAN = r'<'
 
 
-# this is interpreted as /* <stuff> */;
-# <stuff> is represetned by .*? : . repesents any character and .* means zero or more any character
-t_ignore_MULTI_COMMENT = r'/\*.*?\*/'
-
 # this is interpreted as // <stuff>
 # <stuff> is represented by .* measning zero or more any character
 t_ignore_SING_COMMENT = r'//.*'
+
+# this is interpreted as /* <stuff> */;
+# <stuff> is represetned by .*? : . repesents any character and .* means zero or more any character
+t_ignore_MULTI_COMMENT = r'/\*(.|\n)*?\*/'
 
 # \d matches any digit; [0-9] and the '+' signifies one or more occurences
 # \d+\.\d* is used for at least one number in front [0-9] followed by a . and then zero or more digits
@@ -107,9 +107,7 @@ def t_INT_CONST(t):
 # \\. means it represents anything like \n, \t, \\, or \"; stuff with special meaning
 # [^"\\] means it will ignore all " and \; " and \ are special special characters that strings cannot have
 def t_STRING_CONST(t):
-    r'\"(?:\\.|[^\"\\])*\"'
-    t.value = t.value[1:-1]
-    t.value = re.sub(r'\\(.)', r'1', t.value) 
+    r'\".*\"'
     return t
 
 t_INCREMENT = r'\+\+'

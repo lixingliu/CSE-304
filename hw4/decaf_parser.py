@@ -230,7 +230,7 @@ def p_arguments(p):
     if len(p) == 2:
         p[0] = Arguments_cont()
     else:
-        p[2].args.append(str(p[1]))
+        p[2].args.append((p[1]))
         p[0] = p[2]
 
 def p_arguments_cont(p):
