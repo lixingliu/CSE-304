@@ -91,7 +91,7 @@ class Block(Node):
                         }
                         VARIABLE_KEY += 1
                 else:
-                    print("Error: Variables must be declared at the top of the block before any other statements other than variable declarations")
+                    print(f"Error: Invalid Variable Declaration: {str(stmt.type)} {str(stmt.variable_list.vars[::-1][0])}. Variables must be declared at the top of the block before any other statements other than variable declarations")
                     sys.exit()
             else:
                 variableStatus = False
@@ -110,9 +110,9 @@ class Block(Node):
             elif (isinstance(stmt, Block)):
                 result = result + str(stmt) + ",\n"
             elif (stmt == 'continue'):
-                result += "Continue-stmt() "
+                result += "Continue-stmt()" + ",\n"
             elif (stmt == 'break'):
-                result += "Break-stmt()\n"
+                result += "Break-stmt()" + ",\n"
             elif (isinstance(stmt, Auto)):
                 result = result + str(stmt) + ",\n"
             elif (isinstance(stmt, Assign)):
@@ -234,9 +234,10 @@ class Program(Node):
         super().__init__()
         self.classes = classes
     def __str__(self):
-        global GLOBAL_CLASS_RECORD, VARIABLE_TABLE
+        global GLOBAL_CLASS_RECORD, VARIABLE_TABLE, FIELD_DICTIONARY    
         result = ""
         for key, value in GLOBAL_CLASS_RECORD.items():
+            FIELD_DICTIONARY = value["fields"]
             if value["className"] == 'Out' or value["className"] == "In":
                 continue
 
@@ -459,6 +460,8 @@ class For_decl(Node):
         self.cond3 = cond3
         self.forBody = forBody
     def __str__(self):
+        if (self.forBody == ';'):
+            self.forBody = "Skip-stmt()"
         return f'For-stmt({str(self.cond1)}, {str(self.cond2)}, {str(self.cond3)}, {str(self.forBody)})'
     
 class Binary_Expr(Node):
@@ -549,12 +552,17 @@ class ID(Node):
         super().__init__()
         self.id = id
     def __str__(self):
-        global VARIABLE_TABLE, GLOBAL_CLASS_RECORD
+        global VARIABLE_TABLE, GLOBAL_CLASS_RECORD, FIELD_DICTIONARY
         variableId = ''
+        print(FIELD_DICTIONARY)
         for variableTable in VARIABLE_TABLE[::-1]:
             for key, value in variableTable.items():
                 if self.id == value["variableName"]:
                     variableId = f'Variable({key})'
+                    return variableId
+        for key, value in FIELD_DICTIONARY.items():
+            if (self.id == value["variableName"]):
+                return f'Field-access({self.id})'
         if (self.id in GLOBAL_CLASS_RECORD.keys()):
             return str(self.id)
         if (variableId == ''):
