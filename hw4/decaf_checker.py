@@ -36,7 +36,7 @@ def just_scan():
 
 def main():
     # fn = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = "test.txt"
+    fn = "test1.txt"
     source = []
     if fn == "":
         print("Missing file name for source program.")

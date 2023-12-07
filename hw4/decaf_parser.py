@@ -207,7 +207,8 @@ def p_literal(p):
                 | NULL
                 | TRUE
                 | FALSE''' 
-    p[0] = str(Literal(p[1]))
+    # p[0] = str(Literal(p[1]))
+    p[0] = (Literal(p[1]))
 
 def p_primary(p):
     '''primary : literal
@@ -327,7 +328,7 @@ def p_gte_expr(p):
 
 def p_pos_expr(p):
     '''expr : PLUS expr %prec UPLUS'''
-    p[0] = p[2]
+    p[0] = Uplus(p[1], p[2])
 
 def p_minus_expr(p):
     '''expr : MINUS expr %prec UMINUS'''

@@ -31,6 +31,8 @@ VARIABLE_TABLE = []
 VARIABLE_KEY = 1
 
 GLOBAL_CLASS_RECORD = {}
+CURRENT_CLASS_DICTIONARY = {}
+import decaf_typecheck as typechecker
 
 class Node():
     def __init__(self):
@@ -72,7 +74,7 @@ class Var_Decl(Node):
 class Type(Node):
     def __init__(self, type_value):
         super().__init__()
-        built_in_types = ["int", "float", "boolean", "string"]
+        built_in_types = ["int", "float", "boolean", "string", "void", "error", "null", "class-literal"]
         if not type_value in built_in_types:
             self.type_value = f"user({type_value})"
         else:
@@ -80,6 +82,7 @@ class Type(Node):
     def __str__(self):
         return str(self.type_value)
 
+    #def __eq__(self)!!!
 class Block(Node):
     def __init__(self, stmtList):
         super().__init__()
@@ -152,102 +155,103 @@ class Return(Node):
         return f'Return-stmt({str(self.return_val)})'
     
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'scan_int',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("int"),
-    'block': Block(Stmt_List())
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'scan_int',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("int"),
+#     'block': Block(Stmt_List())
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'scan_float',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("float"),
-    'block': Block(Stmt_List())
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'scan_float',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("float"),
+#     'block': Block(Stmt_List())
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-GLOBAL_CLASS_RECORD["In"] = {
-    'className': "In",
-    'superClassName': '',
-    'constructors': {},
-    'fields': {},
-    'methods': METHOD_DICTIONARY,   
-}
+# GLOBAL_CLASS_RECORD["In"] = {
+#     'className': "In",
+#     'superClassName': '',
+#     'constructors': {},
+#     'fields': {},
+#     'methods': METHOD_DICTIONARY,   
+# }
 
-METHOD_DICTIONARY = {}
-FIELD_DICTIONARY = {}
-METHOD_DICTIONARY = {}
+# METHOD_DICTIONARY = {}
+# FIELD_DICTIONARY = {}
+# METHOD_DICTIONARY = {}
 
-stmt_list = Stmt_List()
-stmt_list.stmts.append(Return(""))
+# stmt_list = Stmt_List()
+# stmt_list.stmts.append(Return(""))
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("int"),
-    'block': Block(stmt_list)
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("int"),
+#     'block': Block(stmt_list)
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("float"),
-    'block': Block(stmt_list)
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("float"),
+#     'block': Block(stmt_list)
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("boolean"),
-    'block': Block(stmt_list)
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("boolean"),
+#     'block': Block(stmt_list)
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-METHOD_DICTIONARY[METHOD_KEY] = {
-    'methodName': 'print',
-    'modifier': Modifier("public", "static"),
-    'formals': Formals_const(),
-    'type': Type("string"),
-    'block': Block(stmt_list)
-}
+# METHOD_DICTIONARY[METHOD_KEY] = {
+#     'methodName': 'print',
+#     'modifier': Modifier("public", "static"),
+#     'formals': Formals_const(),
+#     'type': Type("string"),
+#     'block': Block(stmt_list)
+# }
 
-METHOD_KEY += 1
+# METHOD_KEY += 1
 
-GLOBAL_CLASS_RECORD["Out"] = {
-    'className': "Out",
-    'superClassName': '',
-    'constructors': {},
-    'fields': {},
-    'methods': METHOD_DICTIONARY,   
-}
+# GLOBAL_CLASS_RECORD["Out"] = {
+#     'className': "Out",
+#     'superClassName': '',
+#     'constructors': {},
+#     'fields': {},
+#     'methods': METHOD_DICTIONARY,   
+# }
 
-METHOD_DICTIONARY = {}
-FIELD_DICTIONARY = {}
-METHOD_DICTIONARY = {}
+# METHOD_DICTIONARY = {}
+# FIELD_DICTIONARY = {}
+# METHOD_DICTIONARY = {}
 
 class Program(Node):
     def __init__(self, classes):
         super().__init__()
         self.classes = classes
     def __str__(self):
-        global GLOBAL_CLASS_RECORD, VARIABLE_TABLE, FIELD_DICTIONARY    
+        global GLOBAL_CLASS_RECORD, VARIABLE_TABLE, FIELD_DICTIONARY, CURRENT_CLASS_DICTIONARY  
         result = ""
         for key, value in GLOBAL_CLASS_RECORD.items():
             FIELD_DICTIONARY = value["fields"]
+            CURRENT_CLASS_DICTIONARY = value
             if value["className"] == 'Out' or value["className"] == "In":
                 continue
 
@@ -435,7 +439,16 @@ class Assign(Node):
         self.lhs = lhs
         self.expr = expr
     def __str__(self):
-        return f'Expr( Assign({str(self.lhs)}, {str(self.expr)}) )'
+        global VARIABLE_TABLE
+        lhs_type = None
+        rhs_type = None
+        lhs_type = typechecker.get_lhs_type(self.lhs)
+        rhs_type = typechecker.find_expr_type(self.expr)
+
+        print("446", lhs_type)
+        print("448", rhs_type)
+
+        return f'Expr( Assign({str(self.lhs)}, {str(self.expr)}), {lhs_type}, {rhs_type} )'
 
 class Field_Access(Node):
     def __init__(self, primary, id):
@@ -443,7 +456,35 @@ class Field_Access(Node):
         self.primary = primary
         self.id = id
     def __str__(self):
-        return f'Field-access({self.primary}, {self.id})'
+        global FIELD_DICTIONARY, GLOBAL_CLASS_RECORD, VARIABLE_TABLE, CURRENT_CLASS_DICTIONARY
+
+        if (isinstance(self.primary, ID)):
+            className = typechecker.get_type(VARIABLE_TABLE, self.primary.id)
+            classObject = GLOBAL_CLASS_RECORD[className]
+            classField = classObject["fields"]
+            for key, value in classField.items():
+                if (self.id == value["variableName"]):
+                    return f'Field-access({self.primary}, {self.id}, {key})'
+                
+        if (self.primary == "this"):
+            for key, value in FIELD_DICTIONARY.items():
+                if (self.id == value["variableName"]):
+                    return f'Field-access({self.primary}, {self.id}, {key})'
+                
+        if(self.primary == "super"):
+            superClassName = CURRENT_CLASS_DICTIONARY["superClassName"]
+            if superClassName == "":
+                print("Error: Super class does not exist")
+                sys.exit()
+            classObject = GLOBAL_CLASS_RECORD[superClassName]
+            classField = classObject['fields']
+            for key, value in classField.items():
+                if (self.id == value["variableName"]):
+                    return f'Field-access({self.primary}, {self.id}, {key})'
+                
+        print("Error 472")
+        sys.exit()
+        
     
 
 class Literal(Node):
@@ -453,6 +494,8 @@ class Literal(Node):
     def __str__(self):
         if (self.literal == "true"):
             return f'Constant(True)'
+        if (self.literal == "false"):
+            return f'Constant(False)'
         if (isinstance(self.literal, int)):
             return f'Constant(Integer-constant({self.literal}))'
         elif (isinstance(self.literal, float)):
@@ -506,6 +549,14 @@ class Binary_Expr(Node):
         elif(self.binaryType == '>='):
             return f'Binary(geq, {str(self.leftExpr)}, {str(self.rightExpr)})'
         
+#todo CREATE A UPLUS
+class Uplus(Node):
+    def __init__(self, type = None, expr = None):
+        super().__init__()
+        self.type = type
+        self.expr = expr
+    def __str__(self):
+        return f'Unary-expression(PLUS, {str(self.expr)})'
 class Uminus(Node):
     def __init__(self, type = None, expr = None):
         super().__init__()
@@ -523,6 +574,9 @@ class Method_Invocation(Node):
         arguments = []
         for arg in self.arguments.args[::-1]:
             arguments.append(str(arg))
+        
+        if(isinstance(self.fieldAccess, ID)):
+           return f"Method-call({self.fieldAccess.id}, {str(arguments)})"
         return f'Method-call({self.fieldAccess.primary}, {self.fieldAccess.id}, {str(arguments)})'
     
 class Arguments_cont(Node):
@@ -533,7 +587,7 @@ class Arguments_cont(Node):
 class New(Node):
     def __init__(self, id, arguments):
         super().__init__()
-        self.id = id
+        self.id = id    
         self.arguments = arguments
     def __str__(self):
         arguments = []
@@ -548,6 +602,12 @@ class If_decl(Node):
         self.stmtOne = stmtOne
         self.stmtTwo = stmtTwo
     def __str__(self):
+        expr_type = typechecker.find_expr_type(self.expr)
+        print(expr_type)
+        stmt_one_type = typechecker.get_stmt_type(self.stmtOne)
+        if (expr_type != "boolean"):
+            print("Error: If condition has to be type boolean")
+            sys.exit()
         return f'If-stmt({str(self.expr)}, {str(self.stmtOne)}, else {str(self.stmtTwo)})'
     
 class Not(Node):
@@ -578,6 +638,8 @@ class ID(Node):
             print(f'ERROR: Variable {self.id} has not been declared')
             sys.exit()
         return variableId
+
+
     
 class While_decl(Node):
     def __init__(self, expr, stmt):

@@ -1,8 +1,23 @@
-class test005
-{
-    public static void main()
-    {   
-        boolean a;
-        a = 17 > 14;
+class Circle
+
+{    
+    public static float pi;
+    circle() {
+        int x;
+        float y;
+        y = 5.5;
+        x = y;
+        this.pi = 5;
     }
 }
+
+/*
+    public static float pi;
+    public float radius;
+    
+    public Circle(float r)
+    {
+        this.pi = this.f();
+        r = this.y();
+    }
+*/
