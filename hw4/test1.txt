@@ -1,13 +1,22 @@
-class a04_error02
+class A
 {
-    public static void main()
+    public static float x;
+    public int y;
+    
+    public A()
+    {
+        A.x = 10.0;
+        this.y = 10;
+    }
+    
+    public static int double(int n)
+    {
+        return n * 2;
+    }
+    
+    public int get_y()
     {
         int a;
-        
-        a = 0;
-        if (17 > 5)
-        {
-            for(a=0;a<5;a++);
-        }
+        a = this.double(1);
     }
 }

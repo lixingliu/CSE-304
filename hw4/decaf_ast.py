@@ -13,7 +13,7 @@ import sys
 FIELD_DICTIONARY = {}
 FIELD_KEY = 1
 CLASS_NAME = ""
-
+GLOBAL_CONSTRUCTOR_DICTIONARY = {}
 CONSTRUCTOR_DICTIONARY = {}
 CONSTRUCTOR_KEY = 1
 
@@ -24,14 +24,12 @@ METHOD_KEY = 1
 
 METHOD_PARAM_KEY = 1
 
-GLOBAL_CONSTRUCTOR_VARIABLE_TABLE = []
-GLOBAL_METHOD_VARIABLE_TABLE = []
-
 VARIABLE_TABLE = []
 VARIABLE_KEY = 1
 
 GLOBAL_CLASS_RECORD = {}
 CURRENT_CLASS_DICTIONARY = {}
+CURRENT_METHOD_DICTIONARY = {}
 import decaf_typecheck as typechecker
 
 class Node():
@@ -152,6 +150,16 @@ class Return(Node):
         super().__init__()
         self.return_val = return_val
     def __str__(self):
+        return_val = typechecker.get_return_type(self.return_val)
+        if (return_val == "error non-void method"):
+            print("RETURN statement - NON-VOID method returns nothing")
+            sys.exit()
+        if (return_val == "error void method"):
+            print("RETURN statement - VOID method returns a value")
+            sys,exit()
+        if (return_val == "error"):
+            print("RETURN statement - return variable does not match method type")
+            sys.exit()
         return f'Return-stmt({str(self.return_val)})'
     
 
@@ -247,7 +255,7 @@ class Program(Node):
         super().__init__()
         self.classes = classes
     def __str__(self):
-        global GLOBAL_CLASS_RECORD, VARIABLE_TABLE, FIELD_DICTIONARY, CURRENT_CLASS_DICTIONARY  
+        global GLOBAL_CLASS_RECORD, VARIABLE_TABLE, FIELD_DICTIONARY, CURRENT_CLASS_DICTIONARY, CURRENT_METHOD_DICTIONARY
         result = ""
         for key, value in GLOBAL_CLASS_RECORD.items():
             FIELD_DICTIONARY = value["fields"]
@@ -276,6 +284,7 @@ class Program(Node):
 # ========================================================================================================================================================================================
             method_result = "Methods:\n"
             for method_key, method_value in value["methods"].items():
+                CURRENT_METHOD_DICTIONARY = method_value
                 method_result += f'METHOD: {method_key}, {method_value["methodName"]}, {key}, {method_value["modifier"].visibility}, {method_value["modifier"].applicability}, {method_value["type"]}\nMethod Parameters:'
                 variableTableResult = "Variable Table:\n"
                 methodParamId = []
@@ -359,9 +368,17 @@ class Constructor_Decl(Node):
         self.formals = formals
         self.block = block
 
-        global CONSTRUCTOR_KEY, VARIABLE_TABLE, VARIABLE_KEY
+        global CONSTRUCTOR_KEY, VARIABLE_TABLE, VARIABLE_KEY, GLOBAL_CONSTRUCTOR_DICTIONARY
 
         CONSTRUCTOR_DICTIONARY[CONSTRUCTOR_KEY] = {
+            'modifier': self.modifier,
+            'constructorName': self.constructorName,
+            'formals': self.formals,
+            'block': self.block,
+            'variableTable': VARIABLE_TABLE
+        }
+        
+        GLOBAL_CONSTRUCTOR_DICTIONARY[CONSTRUCTOR_KEY] = {
             'modifier': self.modifier,
             'constructorName': self.constructorName,
             'formals': self.formals,
@@ -440,15 +457,79 @@ class Assign(Node):
         self.expr = expr
     def __str__(self):
         global VARIABLE_TABLE
-        lhs_type = None
-        rhs_type = None
-        lhs_type = typechecker.get_lhs_type(self.lhs)
-        rhs_type = typechecker.find_expr_type(self.expr)
-
-        print("446", lhs_type)
-        print("448", rhs_type)
-
-        return f'Expr( Assign({str(self.lhs)}, {str(self.expr)}), {lhs_type}, {rhs_type} )'
+        assign_type = typechecker.get_assign_type(self.lhs, self.expr)
+        if (assign_type == "error"):
+            if (isinstance(self.expr, ID)):
+                print("Variable not the same type as assigner")
+                sys.exit()
+            if (isinstance(self.expr, Literal)):
+                print("Literal not the same type as assigner")
+                sys.exit()
+            if (isinstance(self.expr, Field_Access)):
+                print("Field access not the same type as the assigner")
+                sys.exit()
+            if (isinstance(self.expr, New)):
+                print("New object does not match assigner")
+                sys.exit()
+            if (isinstance(self.expr, Method_Invocation)):
+                print("Method type is not the same as the assigner")
+                sys.exit()
+            if (isinstance(self.expr, Assign)):
+                print("ASSIGN statement - type not equal to assigner")
+                sys.exit()
+            if (isinstance(self.expr, Auto)):
+                print("AUTO statement - type not equal to assigner")
+                sys.exit()            
+            if (isinstance(self.expr, Binary_Expr)):
+                if (self.expr.binaryType == "+"):
+                    print("BINARY ADDITION - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == "-"):
+                    print("BINARY SUBTRACTION  - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == "*"):
+                    print("BINARY MULTIPLICATION  - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == "/"):
+                    print("BINARY DIVISION  - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == "&&"):
+                    print("BINARY AND - Operand not a boolean")
+                    sys.exit()
+                if (self.expr.binaryType == "||"):
+                    print("BINARY OR - Operand not a boolean")
+                    sys.exit()
+                if (self.expr.binaryType == "<"):
+                    print("BINARY LESS THAN - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == "<="):
+                    print("BINARY LESS THAN OR EQUAL - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == ">"):
+                    print("BINARY GREATER THAN - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == ">="):
+                    print("BINARY GREATER THAN OR EQUAL - Operand not a number")
+                    sys.exit()
+                if (self.expr.binaryType == "=="):
+                    print("BINARY EQUALITY - Operands are not of congruent types")
+                    sys.exit()
+                if (self.expr.binaryType == "!="):
+                    print("BINARY INEQUALITY - Operands are not of congruent types")
+                    sys.exit()
+            if (isinstance(self.expr, Not)):
+                print("UNARY NEGATION - Expression is not boolean")
+                sys.exit()  
+            if (isinstance(self.expr, Uminus)):
+                print("UNARY MINUS - Expression is not a number")
+                sys.exit()  
+            if (isinstance(self.expr, Uplus)):
+                print("UNARY PLUS - Expression is not a number")
+                sys.exit()  
+            return "error"
+        left = typechecker.get_lhs_type(self.lhs)
+        right = typechecker.find_expr_type(self.expr)
+        return(f'Expr( Assign({str(self.lhs)}, {str(self.expr)}), {str(left)}, {str(right)} )')
 
 class Field_Access(Node):
     def __init__(self, primary, id):
@@ -459,7 +540,10 @@ class Field_Access(Node):
         global FIELD_DICTIONARY, GLOBAL_CLASS_RECORD, VARIABLE_TABLE, CURRENT_CLASS_DICTIONARY
 
         if (isinstance(self.primary, ID)):
-            className = typechecker.get_type(VARIABLE_TABLE, self.primary.id)
+            if (self.primary.id in GLOBAL_CLASS_RECORD.keys()):
+                className = self.primary.id
+            else:
+                className = typechecker.get_type(VARIABLE_TABLE, self.primary.id)
             classObject = GLOBAL_CLASS_RECORD[className]
             classField = classObject["fields"]
             for key, value in classField.items():
@@ -470,7 +554,10 @@ class Field_Access(Node):
             for key, value in FIELD_DICTIONARY.items():
                 if (self.id == value["variableName"]):
                     return f'Field-access({self.primary}, {self.id}, {key})'
-                
+            fieldDictionary = (GLOBAL_CLASS_RECORD[CURRENT_CLASS_DICTIONARY['superClassName']])['fields']
+            for key, value in fieldDictionary.items():
+                if (self.id == value["variableName"]):
+                    return f'Field-access({self.primary}, {self.id}, {key})'
         if(self.primary == "super"):
             superClassName = CURRENT_CLASS_DICTIONARY["superClassName"]
             if superClassName == "":
@@ -481,9 +568,6 @@ class Field_Access(Node):
             for key, value in classField.items():
                 if (self.id == value["variableName"]):
                     return f'Field-access({self.primary}, {self.id}, {key})'
-                
-        print("Error 472")
-        sys.exit()
         
     
 
@@ -513,6 +597,23 @@ class For_decl(Node):
         self.cond3 = cond3
         self.forBody = forBody
     def __str__(self):
+        cond1_type = typechecker.get_stmt_expr_type(self.cond1)
+        if (cond1_type == "error"):
+            print("FOR statement - Type error in initializer")
+            sys.exit()
+        cond2_type = typechecker.find_expr_type(self.cond2)
+        if (cond2_type != "boolean"):
+            print("FOR statement - Condition not boolean")
+            sys.exit()
+        cond3_type = typechecker.get_stmt_expr_type(self.cond3)
+        if (cond3_type == "error"):
+            print("FOR statement - Type error in update expression")
+            sys.exit()
+        loop_body_type = typechecker.get_stmt_type(self.forBody)
+        if (loop_body_type == "error"):
+            print("FOR statement - Type error in loop body")
+            sys.exit()
+        
         if (self.forBody == ';'):
             self.forBody = "Skip-stmt()"
         return f'For-stmt({str(self.cond1)}, {str(self.cond2)}, {str(self.cond3)}, {str(self.forBody)})'
@@ -556,6 +657,10 @@ class Uplus(Node):
         self.type = type
         self.expr = expr
     def __str__(self):
+        expr_type = typechecker.find_expr_type(self.expr)
+        if (expr_type != "int" and expr_type != "float"):
+            print("UNARY MINUS - Expression is not a number")
+            sys.exit()
         return f'Unary-expression(PLUS, {str(self.expr)})'
 class Uminus(Node):
     def __init__(self, type = None, expr = None):
@@ -563,6 +668,10 @@ class Uminus(Node):
         self.type = type
         self.expr = expr
     def __str__(self):
+        # expr_type = typechecker.find_expr_type(self.expr)
+        # if (expr_type != "int" and expr_type != "float"):
+        #     print("UNARY MINUS - Expression is not a number")
+        #     sys.exit()
         return f'Unary-expression(MINUS, {str(self.expr)})'
 
 class Method_Invocation(Node):
@@ -604,9 +713,16 @@ class If_decl(Node):
     def __str__(self):
         expr_type = typechecker.find_expr_type(self.expr)
         print(expr_type)
+        if(expr_type != "boolean"):
+            print("IF statement - Condition not boolean")
+            sys.exit()
         stmt_one_type = typechecker.get_stmt_type(self.stmtOne)
-        if (expr_type != "boolean"):
-            print("Error: If condition has to be type boolean")
+        if (stmt_one_type == "error"):
+            print("IF statement - Type error in THEN statement")
+            sys.exit()
+        stmt_two_type = typechecker.get_stmt_type(self.stmtTwo)
+        if (stmt_two_type == "error"):
+            print("IF statement - Type error in ELSE statement")
             sys.exit()
         return f'If-stmt({str(self.expr)}, {str(self.stmtOne)}, else {str(self.stmtTwo)})'
     
@@ -615,6 +731,10 @@ class Not(Node):
         super().__init__()
         self.expr = expr
     def __str__(self):
+        expr_type = typechecker.find_expr_type(self.expr)
+        if (expr_type != "boolean"):
+            print("UNARY NEGATION - Expression is not boolean")
+            sys.exit()
         return f'Unary-expression(NEG, {str(self.expr)})'
 
 class ID(Node):
@@ -647,6 +767,14 @@ class While_decl(Node):
         self.expr = expr
         self.stmt = stmt
     def __str__(self):
+        expr_type = typechecker.find_expr_type(self.expr)
+        if (expr_type != "boolean"):
+            print("WHILE statement - Condition not boolean")
+            sys.exit()
+        stmt_type = typechecker.get_stmt_type(self.stmt)
+        if (stmt_type == "error"):
+            print("WHILE statement - Type error in loop body")
+            sys.exit()
         return f"While-stmt({str(self.expr)}, {str(self.stmt)})"
     
 class Paren(Node):
