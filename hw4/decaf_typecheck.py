@@ -85,6 +85,8 @@ def get_type(variableTable, id):
         return "boolean"
     if (id == "false"):
         return "boolean"
+    if (id.startswith('"') and id.endswith('"')):
+        return "string"
     for table in variableTable[::-1]:
         for key, value in table.items():
             if id == value["variableName"]:
@@ -101,8 +103,8 @@ def get_type(variableTable, id):
     for key, value in fieldDictionary.items():
         if (id == value["variableName"]):
             return(value["type"])
-    if (isinstance(id, str)):
-        return "string"
+        
+
         
 
     
@@ -233,7 +235,6 @@ def get_method_invocation_type(fieldAccess, arguments):
                 else:
                     return method["type"]
             if (className == fieldAccess.primary.id):
-                print(applicability)
                 if (applicability == "non-static"):
                     print("STATIC METHOD INVOCATION - No such method")
                     sys.exit()
@@ -429,7 +430,7 @@ def get_assign_type(lhs, expr):
     lhs_type = get_lhs_type(lhs)
     if (lhs_type == "error"):
         return "error"
-    expr_type = find_expr_type(expr)  
+    expr_type = find_expr_type(expr)
     if (lhs_type in ast.GLOBAL_CLASS_RECORD):
         if (expr_type == "null"):
             return lhs_type
