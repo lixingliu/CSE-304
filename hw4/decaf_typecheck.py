@@ -44,10 +44,7 @@ def combine_type(leftType, rightType, binaryType):
         return "boolean"
     # doing == and !=
     elif binaryType in equalityComparisons:
-        print("47", leftType)
-        print("48", rightType)
         result = check_subtype(rightType, leftType)
-        print("48", result)
         if (result == False):
             return "error"
         else:
@@ -78,11 +75,6 @@ def get_super_type(currentClassDirectory, globalClassRecord, id):
             return(value["type"])
 
 def get_type(variableTable, id):
-    for table in variableTable[::-1]:
-        for key, value in table.items():
-            if id == value["variableName"]:
-                return value["variableType"]
-
     if (id == "null"):
         return "null"
     if (isinstance(id, int)):
@@ -93,8 +85,26 @@ def get_type(variableTable, id):
         return "boolean"
     if (id == "false"):
         return "boolean"
+    for table in variableTable[::-1]:
+        for key, value in table.items():
+            if id == value["variableName"]:
+                return value["variableType"]
+    currentFieldDictionary = ast.CURRENT_CLASS_DICTIONARY["fields"]
+    for key, value in currentFieldDictionary.items():
+        if (id == value["variableName"]):
+            return value["type"]
+
+    if (ast.CURRENT_CLASS_DICTIONARY["superClassName"] == ""):
+        print("NON-STATIC FIELD ACCESS - No such field")
+        sys.exit()
+    fieldDictionary = (ast.GLOBAL_CLASS_RECORD[ast.CURRENT_CLASS_DICTIONARY["superClassName"]])["fields"]
+    for key, value in fieldDictionary.items():
+        if (id == value["variableName"]):
+            return(value["type"])
     if (isinstance(id, str)):
         return "string"
+        
+
     
 def get_object_type(variableTable, id):
     for table in variableTable[::-1]:
@@ -103,7 +113,6 @@ def get_object_type(variableTable, id):
                return(value["variableType"])    
 
 def get_method_invocation_type(fieldAccess, arguments):
-
     if (isinstance(fieldAccess, ast.ID)):
         for key, value in ast.CURRENT_CLASS_DICTIONARY["methods"].items():
             if (value["methodName"] == fieldAccess.id):
@@ -131,7 +140,7 @@ def get_method_invocation_type(fieldAccess, arguments):
                 applicability = "non-static"
             else:
                 applicability = "static"
-            if (applicability == "non-static"):
+            if applicability == "static":
                 print("NON-STATIC METHOD INVOCATION - No such method")
                 sys.exit()
 
@@ -162,9 +171,11 @@ def get_method_invocation_type(fieldAccess, arguments):
                     return(value['type'])
                 
         if (isinstance(fieldAccess.primary, ast.ID)):
+            status = False
             if (fieldAccess.primary.id in ast.GLOBAL_CLASS_RECORD.keys()):
                 className = fieldAccess.primary.id
             else:
+                status = True
                 className = get_type(ast.VARIABLE_TABLE, fieldAccess.primary.id)
             classObject = ast.GLOBAL_CLASS_RECORD[className]
             classMethods = classObject['methods']
@@ -182,12 +193,67 @@ def get_method_invocation_type(fieldAccess, arguments):
                 else:
                     print("STATIC METHOD INVOCATION - No such method")
                     sys.exit()
+                
+            if (status == True):
+                list1 = []
+                list2 = []
+                for arg in arguments.args:
+                    list1.append(find_expr_type(arg))
+                for formal in method["formals"].formals:
+                    list2.append(formal.type)
+                for i in range(len(list1)):
+                    result = check_subtype(list1[i], list2[i])
+                    if (result == False):
+                        print("STATIC METHOD INVOCATION - Bad arguments")
+                        sys.exit()
+                if (isinstance(method["type"], ast.Type)):
+                    return method["type"].type_value
+                else:
+                    return method["type"]
+
             applicability = method['modifier'].applicability
             if applicability == "instance":
                 applicability = "non-static"
             else:
                 applicability = "static"
-            if applicability == "static":
+            if (ast.CURRENT_CLASS_DICTIONARY == classObject):
+                list1 = []
+                list2 = []
+                for arg in arguments.args:
+                    list1.append(find_expr_type(arg))
+                for formal in method["formals"].formals:
+                    list2.append(formal.type)
+                for i in range(len(list1)):
+                    result = check_subtype(list1[i], list2[i])
+                    if (result == False):
+                        print("STATIC METHOD INVOCATION - Bad arguments")
+                        sys.exit()
+                if (isinstance(method["type"], ast.Type)):
+                    return method["type"].type_value
+                else:
+                    return method["type"]
+            if (className == fieldAccess.primary.id):
+                print(applicability)
+                if (applicability == "non-static"):
+                    print("STATIC METHOD INVOCATION - No such method")
+                    sys.exit()
+                else:
+                    list1 = []
+                    list2 = []
+                    for arg in arguments.args:
+                        list1.append(find_expr_type(arg))
+                    for formal in method["formals"].formals:
+                        list2.append(formal.type)
+                    for i in range(len(list1)):
+                        result = check_subtype(list1[i], list2[i])
+                        if (result == False):
+                            print("STATIC METHOD INVOCATION - Bad arguments")
+                            sys.exit()
+                    if (isinstance(method["type"], ast.Type)):
+                        return method["type"].type_value
+                    else:
+                        return method["type"]
+            if applicability == "non-static":
                 print("STATIC METHOD INVOCATION - No such method")
                 sys.exit()
 
@@ -202,11 +268,15 @@ def get_method_invocation_type(fieldAccess, arguments):
                 if (result == False):
                     print("STATIC METHOD INVOCATION - Bad arguments")
                     sys.exit()
-            return method["type"]
+            if (isinstance(method["type"], ast.Type)):
+                return method["type"].type_value
+            else:
+                return method["type"]
 
 def get_lhs_type(lhs):
     if (isinstance(lhs, ast.ID)):
-        return(get_type(ast.VARIABLE_TABLE, lhs.id))
+        result = get_type(ast.VARIABLE_TABLE, lhs.id)
+        return(result)
     if (isinstance(lhs, ast.Field_Access)):
         if (lhs.primary == 'this'):
             result =(get_this_type(ast.FIELD_DICTIONARY, lhs.id))
@@ -286,7 +356,8 @@ def find_expr_type(expr):
     if (isinstance(expr, ast.New)):
         return(get_new_type(expr))
     if (isinstance(expr, ast.Method_Invocation)):
-        return(get_method_invocation_type(expr.fieldAccess, expr.arguments))
+        result = get_method_invocation_type(expr.fieldAccess, expr.arguments)
+        return(result)
     if (isinstance(expr, ast.Assign)):
         return get_assign_type(expr.lhs, expr.expr)
     if (isinstance(expr, ast.Auto)):
@@ -337,7 +408,7 @@ def get_neg_type(expr):
     if (result != "boolean"):
         return "error"
     else:
-        return "continue"
+        return "boolean"
 
 def get_uminus_type(expr):
     result = find_expr_type(expr)
@@ -359,6 +430,9 @@ def get_assign_type(lhs, expr):
     if (lhs_type == "error"):
         return "error"
     expr_type = find_expr_type(expr)  
+    if (lhs_type in ast.GLOBAL_CLASS_RECORD):
+        if (expr_type == "null"):
+            return lhs_type
     if (expr_type == "error"):
         return "error"
     result = check_subtype(expr_type, lhs_type)
@@ -473,7 +547,6 @@ def check_subtype(subType, superType):
     if (subType == "int" and superType == "float"):
         return True
     if ("user" in superType and subType == "null"):
-        print("437")
         return True
     return False
     # todo null
