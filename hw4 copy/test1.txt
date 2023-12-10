@@ -1,0 +1,31 @@
+class BankAccount
+{
+    public int account_number;
+    public float balance;
+    
+    public BankAccount(int id)
+    {
+        this.account_number = id; 
+        this.balance = 0.0;
+    }
+    
+    public float deposit(float amount)
+    {
+        this.balance = this.balance + amount;
+        return this.balance;
+    }
+    
+    public float withdrawal(float amount)
+    {
+        if (this.balance > amount)
+        {
+            this.balance = this.balance - amount;
+        }
+        return this.balance;
+    }
+    
+    public float get_balance()
+    {
+        return this.balance;
+    }
+}
