@@ -139,7 +139,7 @@ def p_formal_param(p):
 
 def p_block(p):
     '''block : '{' stmt_list '}' '''
-    p[0] = Block(p[2])
+    p[0] = Block(p[2], p.lineno(2))
 
 def p_stmt_list(p):
     ''' stmt_list : stmt stmt_list
@@ -163,15 +163,15 @@ def p_stmt(p):
             | var_decl
             | ';' '''
     if len(p) == 6 and p[1] == 'if':
-        p[0] = If_decl(p[3], p[5], None)
+        p[0] = If_decl(p[3], p[5], None, p.lineno(2))
     elif len(p) == 8 and p[1] == 'if':
-        p[0] = If_decl(p[3], p[5], p[7])
+        p[0] = If_decl(p[3], p[5], p[7], p.lineno(2))
     elif len(p) == 6 and p[1] == 'while':
-        p[0] = While_decl(p[3], p[5])
+        p[0] = While_decl(p[3], p[5], p.lineno(2))
     elif len(p) == 10 and p[1] == 'for':
-      p[0] = For_decl(p[3], p[5], p[7], p[9])
+      p[0] = For_decl(p[3], p[5], p[7], p[9], p.lineno(2))
     elif len(p) == 4 and p[1] == 'return':
-        p[0] = Return(p[2])
+        p[0] = Return(p[2], p.lineno(2))
     elif len(p) == 3 and p[1] == 'break':
        p[0] = p[1]
     elif len(p) == 3 and p[1] == 'continue':
@@ -257,7 +257,7 @@ def p_field_access(p):
     
 def p_method_invocation(p):
     ''' method_invocation : field_access LEFTPAREN arguments RIGHTPAREN '''
-    p[0] = Method_Invocation(p[1], p[3])
+    p[0] = Method_Invocation(p[1], p[3], p.lineno(2))
 
 def p_expr(p):
     '''expr : primary
@@ -271,7 +271,7 @@ def p_assign(p):
                 | lhs DECREMENT
                 | DECREMENT lhs'''
     if(len(p) == 4):
-        p[0] = Assign(p[1], p[3])
+        p[0] = Assign(p.lineno(2), p[1], p[3], )
     if(len(p) == 3):
         if(p[2] == '++' or p[2] == '--'):
             p[0] = Auto(p[2], None, p[1])
@@ -328,7 +328,7 @@ def p_gte_expr(p):
 
 def p_pos_expr(p):
     '''expr : PLUS expr %prec UPLUS'''
-    p[0] = Uplus(p[1], p[2])
+    p[0] = Uplus(p.lineno(2), p[1], p[2])
 
 def p_minus_expr(p):
     '''expr : MINUS expr %prec UMINUS'''
@@ -336,7 +336,7 @@ def p_minus_expr(p):
 
 def p_not_expr(p):
     '''expr : NOT expr'''
-    p[0] = Not(p[2])
+    p[0] = Not(p[2], p.lineno(2))
 
 def p_stmt_expr(p):
     '''stmt_expr : assign

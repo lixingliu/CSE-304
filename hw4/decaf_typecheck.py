@@ -51,22 +51,24 @@ def combine_type(leftType, rightType, binaryType):
             return "boolean"
     return 'error'
      
-def get_this_type(fieldDictionary, id):
+def get_this_type(fieldDictionary, id, line):
     for key, value in fieldDictionary.items():
         if (id == value["variableName"]):
             return(value["type"])
     if (ast.CURRENT_CLASS_DICTIONARY["superClassName"] == ""):
         print("NON-STATIC FIELD ACCESS - No such field")
+        print(f"Error at line {line}")
         sys.exit()
     fieldDictionary = (ast.GLOBAL_CLASS_RECORD[ast.CURRENT_CLASS_DICTIONARY["superClassName"]])["fields"]
     for key, value in fieldDictionary.items():
         if (id == value["variableName"]):
             return(value["type"])
 
-def get_super_type(currentClassDirectory, globalClassRecord, id):
+def get_super_type(currentClassDirectory, globalClassRecord, id, line):
     superClassName = currentClassDirectory["superClassName"]
     if superClassName == "":
         print("SUPER EXPRESSION - No super class")
+        print(f"Error at line {line}")
         sys.exit()
     classObject = globalClassRecord[superClassName]
     classField = classObject['fields']
@@ -74,7 +76,7 @@ def get_super_type(currentClassDirectory, globalClassRecord, id):
         if (id == value["variableName"]):
             return(value["type"])
 
-def get_type(variableTable, id):
+def get_type(variableTable, id, line):
     if (id == "null"):
         return "null"
     if (isinstance(id, int)):
@@ -98,6 +100,7 @@ def get_type(variableTable, id):
 
     if (ast.CURRENT_CLASS_DICTIONARY["superClassName"] == ""):
         print("NON-STATIC FIELD ACCESS - No such field")
+        print(f"Error at line {line}")
         sys.exit()
     fieldDictionary = (ast.GLOBAL_CLASS_RECORD[ast.CURRENT_CLASS_DICTIONARY["superClassName"]])["fields"]
     for key, value in fieldDictionary.items():
@@ -114,7 +117,7 @@ def get_object_type(variableTable, id):
             if (value["variableName"] == id):
                return(value["variableType"])    
 
-def get_method_invocation_type(fieldAccess, arguments):
+def get_method_invocation_type(fieldAccess, arguments, line):
     if (isinstance(fieldAccess, ast.ID)):
         for key, value in ast.CURRENT_CLASS_DICTIONARY["methods"].items():
             if (value["methodName"] == fieldAccess.id):
@@ -136,6 +139,7 @@ def get_method_invocation_type(fieldAccess, arguments):
                             method = value
                 else:
                     print("NON-STATIC METHOD INVOCATION - No such method")
+                    print(f"Error at line {line}")
                     sys.exit()
             applicability = method['modifier'].applicability
             if applicability == "instance":
@@ -144,18 +148,20 @@ def get_method_invocation_type(fieldAccess, arguments):
                 applicability = "static"
             if applicability == "static":
                 print("NON-STATIC METHOD INVOCATION - No such method")
+                print(f"Error at line {line}")
                 sys.exit()
 
             list1 = []
             list2 = []
             for arg in arguments.args:
-                list1.append(find_expr_type(arg))
+                list1.append(find_expr_type(arg, line))
             for formal in method["formals"].formals:
                 list2.append(formal.type)
             for i in range(len(list1)):
                 result = check_subtype(list1[i], list2[i])
                 if (result == False):
                     print("NON-STATIC METHOD INVOCATION - Bad arguments")
+                    print(f"Error at line {line}")
                     sys.exit()
             return method["type"]
 
@@ -165,6 +171,7 @@ def get_method_invocation_type(fieldAccess, arguments):
             superClassName = ast.CURRENT_CLASS_DICTIONARY["superClassName"]
             if superClassName == "":
                 print("SUPER EXPRESSION - No super class")
+                print(f"Error at line {line}")
                 sys.exit()
             classObject = ast.GLOBAL_CLASS_RECORD[superClassName]
             classField = classObject['methods']
@@ -178,7 +185,7 @@ def get_method_invocation_type(fieldAccess, arguments):
                 className = fieldAccess.primary.id
             else:
                 status = True
-                className = get_type(ast.VARIABLE_TABLE, fieldAccess.primary.id)
+                className = get_type(ast.VARIABLE_TABLE, fieldAccess.primary.id, line)
             classObject = ast.GLOBAL_CLASS_RECORD[className]
             classMethods = classObject['methods']
             method = None
@@ -194,19 +201,21 @@ def get_method_invocation_type(fieldAccess, arguments):
                             method = value
                 else:
                     print("STATIC METHOD INVOCATION - No such method")
+                    print(f"Error at line {line}")
                     sys.exit()
                 
             if (status == True):
                 list1 = []
                 list2 = []
                 for arg in arguments.args:
-                    list1.append(find_expr_type(arg))
+                    list1.append(find_expr_type(arg, line))
                 for formal in method["formals"].formals:
                     list2.append(formal.type)
                 for i in range(len(list1)):
                     result = check_subtype(list1[i], list2[i])
                     if (result == False):
                         print("STATIC METHOD INVOCATION - Bad arguments")
+                        print(f"Error at line {line}")
                         sys.exit()
                 if (isinstance(method["type"], ast.Type)):
                     return method["type"].type_value
@@ -222,13 +231,14 @@ def get_method_invocation_type(fieldAccess, arguments):
                 list1 = []
                 list2 = []
                 for arg in arguments.args:
-                    list1.append(find_expr_type(arg))
+                    list1.append(find_expr_type(arg, line))
                 for formal in method["formals"].formals:
                     list2.append(formal.type)
                 for i in range(len(list1)):
                     result = check_subtype(list1[i], list2[i])
                     if (result == False):
                         print("STATIC METHOD INVOCATION - Bad arguments")
+                        print(f"Error at line {line}")
                         sys.exit()
                 if (isinstance(method["type"], ast.Type)):
                     return method["type"].type_value
@@ -237,18 +247,20 @@ def get_method_invocation_type(fieldAccess, arguments):
             if (className == fieldAccess.primary.id):
                 if (applicability == "non-static"):
                     print("STATIC METHOD INVOCATION - No such method")
+                    print(f"Error at line {line}")
                     sys.exit()
                 else:
                     list1 = []
                     list2 = []
                     for arg in arguments.args:
-                        list1.append(find_expr_type(arg))
+                        list1.append(find_expr_type(arg, line))
                     for formal in method["formals"].formals:
                         list2.append(formal.type)
                     for i in range(len(list1)):
                         result = check_subtype(list1[i], list2[i])
                         if (result == False):
                             print("STATIC METHOD INVOCATION - Bad arguments")
+                            print(f"Error at line {line}")
                             sys.exit()
                     if (isinstance(method["type"], ast.Type)):
                         return method["type"].type_value
@@ -256,34 +268,36 @@ def get_method_invocation_type(fieldAccess, arguments):
                         return method["type"]
             if applicability == "non-static":
                 print("STATIC METHOD INVOCATION - No such method")
+                print(f"Error at line {line}")
                 sys.exit()
 
             list1 = []
             list2 = []
             for arg in arguments.args:
-                list1.append(find_expr_type(arg))
+                list1.append(find_expr_type(arg, line))
             for formal in method["formals"].formals:
                 list2.append(formal.type)
             for i in range(len(list1)):
                 result = check_subtype(list1[i], list2[i])
                 if (result == False):
                     print("STATIC METHOD INVOCATION - Bad arguments")
+                    print(f"Error at line {line}")
                     sys.exit()
             if (isinstance(method["type"], ast.Type)):
                 return method["type"].type_value
             else:
                 return method["type"]
 
-def get_lhs_type(lhs):
+def get_lhs_type(lhs, line):
     if (isinstance(lhs, ast.ID)):
-        result = get_type(ast.VARIABLE_TABLE, lhs.id)
+        result = get_type(ast.VARIABLE_TABLE, lhs.id, line)
         return(result)
     if (isinstance(lhs, ast.Field_Access)):
         if (lhs.primary == 'this'):
-            result =(get_this_type(ast.FIELD_DICTIONARY, lhs.id))
+            result =(get_this_type(ast.FIELD_DICTIONARY, lhs.id, line))
             return result
         if (lhs.primary == "super"):
-            return(get_super_type(ast.CURRENT_CLASS_DICTIONARY, ast.GLOBAL_CLASS_RECORD, lhs.id))
+            return(get_super_type(ast.CURRENT_CLASS_DICTIONARY, ast.GLOBAL_CLASS_RECORD, lhs.id, line))
         if (isinstance(lhs.primary, ast.ID)):
             field_status = ""
             if (lhs.primary.id in ast.GLOBAL_CLASS_RECORD.keys()):
@@ -291,7 +305,7 @@ def get_lhs_type(lhs):
                 className = lhs.primary.id
             else:
                 field_status = "non-static"
-                className = get_type(ast.VARIABLE_TABLE, lhs.primary.id)
+                className = get_type(ast.VARIABLE_TABLE, lhs.primary.id, line)
             classObject = ast.GLOBAL_CLASS_RECORD[className]
             classField = classObject['fields']
             for key, value in classField.items():
@@ -307,38 +321,42 @@ def get_lhs_type(lhs):
                             return(value['type'])
                         else:
                             print("STATIC FIELD ACCESS - No such field")
+                            print(f"Error at line {line}")
                             sys.exit()
                     if (field_status == "non-static"):
                         if (applicability == "non-static"):
                             return(value['type'])
                         else:
                             print("NON-STATIC FIELD ACCESS - No such field")
+                            print(f"Error at line {line}")
                             sys.exit() 
                     return(value['type'])
                 
-def get_auto_type(lhs, post, pre):
-    auto_type = get_lhs_type(lhs)
+def get_auto_type(lhs, post, pre, line):
+    auto_type = get_lhs_type(lhs, line)
     if (auto_type != "int" and auto_type != "float"):
         if (pre == '++' or post == "++"):
             print("AUTO-INCREMENT - Operand is not a number")
+            print(f"Error at line {line}")
             sys.exit()
         else:
             print("AUTO-DECREMENT - Operand is not a number")
+            print(f"Error at line {line}")
             sys.exit()
     return auto_type
 
-def find_expr_type(expr):
+def find_expr_type(expr, line):
     if (isinstance(expr, ast.ID)):
-        return(get_type(ast.VARIABLE_TABLE, expr.id))
+        return(get_type(ast.VARIABLE_TABLE, expr.id, line))
     if (isinstance(expr, ast.Literal)):
-        return(get_type([], expr.literal))
+        return(get_type([], expr.literal, line))
     if (isinstance(expr, ast.Field_Access)):
         if (expr.primary == 'this'):
-            return(get_this_type(ast.FIELD_DICTIONARY, expr.id))
+            return(get_this_type(ast.FIELD_DICTIONARY, expr.id, line))
         if (expr.primary == 'super'):
-            return(get_super_type(ast.CURRENT_CLASS_DICTIONARY, ast.GLOBAL_CLASS_RECORD, expr.id))
+            return(get_super_type(ast.CURRENT_CLASS_DICTIONARY, ast.GLOBAL_CLASS_RECORD, expr.id, line))
         if (isinstance(expr.primary, ast.ID)):
-            className = get_type(ast.VARIABLE_TABLE, expr.primary.id)
+            className = get_type(ast.VARIABLE_TABLE, expr.primary.id, line)
             classObject = ast.GLOBAL_CLASS_RECORD[className]
             for key, value in classObject['fields'].items():
                 if (expr.id == value["variableName"]):
@@ -350,37 +368,38 @@ def find_expr_type(expr):
                         applicability = "non-static"
                     if (applicability != "static"):
                         print("STATIC FIELD ACCESS - No such field")
+                        print(f"Error at line {line}")
                         sys.exit()
                     return(value['type'])
     if (isinstance(expr, ast.Paren)):
-        return(find_expr_type(expr.expr))
+        return(find_expr_type(expr.expr, line))
     if (isinstance(expr, ast.New)):
-        return(get_new_type(expr))
+        return(get_new_type(expr, line))
     if (isinstance(expr, ast.Method_Invocation)):
-        result = get_method_invocation_type(expr.fieldAccess, expr.arguments)
+        result = get_method_invocation_type(expr.fieldAccess, expr.arguments, line)
         return(result)
     if (isinstance(expr, ast.Assign)):
-        return get_assign_type(expr.lhs, expr.expr)
+        return get_assign_type(expr.lhs, expr.expr, line)
     if (isinstance(expr, ast.Auto)):
-        return(get_auto_type(expr.lhs, expr.post, expr.pre))
+        return(get_auto_type(expr.lhs, expr.post, expr.pre, line))
     if (isinstance(expr, ast.Binary_Expr)):
-        result = get_binary_type(expr.leftExpr, expr.rightExpr, expr.binaryType)
+        result = get_binary_type(expr.leftExpr, expr.rightExpr, expr.binaryType, line)
         return result
     if (isinstance(expr, ast.Not)):
-        result = get_neg_type(expr.expr)
+        result = get_neg_type(expr.expr, line)
         return result
     if (isinstance(expr, ast.Uminus)):
-        result = get_uminus_type(expr.expr)
+        result = get_uminus_type(expr.expr, line)
         return result
     if (isinstance(expr, ast.Uplus)):
-        result = get_uplus_type(expr.expr)
+        result = get_uplus_type(expr.expr, line)
         return result
 
-def get_new_type(expr):
+def get_new_type(expr, line):
     list1 = []
     list2 = []
     for arg in expr.arguments.args:
-        list1.append(find_expr_type(arg))
+        list1.append(find_expr_type(arg, line))
 
     constructorObject = {}
     for key, value in ast.GLOBAL_CONSTRUCTOR_DICTIONARY.items():
@@ -389,6 +408,7 @@ def get_new_type(expr):
 
     if len(list1) != len(constructorObject["formals"].formals):
         print("CONSTRUCTOR INVOCATION - Bad arguments")
+        print(f"Error at line {line}")
         sys.exit()
     for formal in constructorObject["formals"].formals:
         list2.append(formal.type)
@@ -396,41 +416,42 @@ def get_new_type(expr):
         result = check_subtype(list1[i], list2[i])
         if (result == False):
             print("CONSTRUCTOR INVOCATION - Bad arguments")
+            print(f"Error at line {line}")
             sys.exit()
     return expr.id.id
 
 
 
-def get_paren_type(expr):
-    return(find_expr_type(expr))
+def get_paren_type(expr, line):
+    return(find_expr_type(expr, line))
 
-def get_neg_type(expr):
-    result = find_expr_type(expr)
+def get_neg_type(expr, line):
+    result = find_expr_type(expr, line)
     if (result != "boolean"):
         return "error"
     else:
         return "boolean"
 
-def get_uminus_type(expr):
-    result = find_expr_type(expr)
+def get_uminus_type(expr, line):
+    result = find_expr_type(expr, line)
     return result
 
-def get_uplus_type(expr):
-    return(find_expr_type(expr))
+def get_uplus_type(expr, line):
+    return(find_expr_type(expr, line))
 
-def get_binary_type(leftExpr, rightExpr, binaryType):
+def get_binary_type(leftExpr, rightExpr, binaryType, line):
     leftExprType = None
     rightExprType = None
-    leftExprType = find_expr_type(leftExpr)
-    rightExprType = find_expr_type(rightExpr)
+    leftExprType = find_expr_type(leftExpr, line)
+    rightExprType = find_expr_type(rightExpr, line)
     result = combine_type(leftExprType, rightExprType, binaryType)
     return result
     
-def get_assign_type(lhs, expr):
-    lhs_type = get_lhs_type(lhs)
+def get_assign_type(lhs, expr, line):
+    lhs_type = get_lhs_type(lhs, line)
     if (lhs_type == "error"):
         return "error"
-    expr_type = find_expr_type(expr)
+    expr_type = find_expr_type(expr, line)
     if (lhs_type in ast.GLOBAL_CLASS_RECORD):
         if (expr_type == "null"):
             return lhs_type
@@ -442,36 +463,36 @@ def get_assign_type(lhs, expr):
     else:
         return "error"
 
-def get_stmt_type(stmt):
+def get_stmt_type(stmt, line):
     if (isinstance(stmt, ast.If_decl)):
-        expr_type = find_expr_type(stmt.expr)
+        expr_type = find_expr_type(stmt.expr, line)
         if (expr_type != "boolean"):
             return "error"
-        stmt_one_type = get_stmt_type(stmt.stmtOne)
+        stmt_one_type = get_stmt_type(stmt.stmtOne, line)
         if (stmt_one_type != "correct"):
             return "error"
-        stmt_two_type = get_stmt_type(stmt.stmtTwo)
+        stmt_two_type = get_stmt_type(stmt.stmtTwo, line)
         if(stmt_two_type != "correct"):
             return "error"
         return "correct"
 
     if (isinstance(stmt, ast.While_decl)):
-        expr_type = find_expr_type(stmt.expr)
+        expr_type = find_expr_type(stmt.expr, line)
         if (expr_type != "boolean"):
             return "error"
-        stmt_type = get_stmt_type(stmt.stmt)
+        stmt_type = get_stmt_type(stmt.stmt, line)
         if(stmt_type == "correct"):
             return "correct"
         else:
             print("Error: invalid stmt")
 
     if (isinstance(stmt, ast.For_decl)):
-        for_cond_1_type = get_stmt_expr_type(stmt.cond1)
+        for_cond_1_type = get_stmt_expr_type(stmt.cond1, line)
         if (for_cond_1_type != "correct"):
             print("Type error in initializer")
             
-        for_cond_2_type = find_expr_type(stmt.cond2)
-        for_cond_3_type = get_stmt_expr_type(stmt.cond3)
+        for_cond_2_type = find_expr_type(stmt.cond2, line)
+        for_cond_3_type = get_stmt_expr_type(stmt.cond3, line)
         for_body_type = ""
         if (for_cond_1_type == "correct" and for_cond_2_type == "boolean" and for_cond_3_type == "correct" and for_body_type == "correct"):
             return "correct"
@@ -483,7 +504,7 @@ def get_stmt_type(stmt):
         if (stmt.return_val == None):
             return_val_type = "void"
         else:
-            return_val_type = find_expr_type(stmt.return_val)
+            return_val_type = find_expr_type(stmt.return_val, line)
         method_type = ast.CURRENT_METHOD_DICTIONARY["type"]
         if (method_type == return_val_type):
             return "correct"
@@ -495,10 +516,10 @@ def get_stmt_type(stmt):
             return "error"
 
     if (isinstance(stmt, ast.Method_Invocation)):
-        return(get_method_invocation_type(stmt.fieldAccess, stmt.arguments))
+        return(get_method_invocation_type(stmt.fieldAccess, stmt.arguments, line))
 
     if(isinstance(stmt, ast.Assign)):
-        result = get_assign_type(stmt.lhs, stmt.expr)
+        result = get_assign_type(stmt.lhs, stmt.expr, line)
         return result
     
     if (stmt == "break"):
@@ -508,7 +529,7 @@ def get_stmt_type(stmt):
         return "correct"
 
     if (isinstance(stmt, ast.Block)):
-        result = check_block_type_correct(stmt.stmtList.stmts)
+        result = check_block_type_correct(stmt.stmtList.stmts, line)
         if (result == "error"):
             return result
     
@@ -518,27 +539,27 @@ def get_stmt_type(stmt):
     if (stmt is None):
         return 'correct'
     
-def get_stmt_expr_type(stmtExpr):
+def get_stmt_expr_type(stmtExpr, line):
     if (isinstance(stmtExpr, ast.Assign)):
-        result = get_assign_type(stmtExpr.lhs, stmtExpr.expr)
+        result = get_assign_type(stmtExpr.lhs, stmtExpr.expr, line)
         if (result == False):
             return "error"
         else:
             return result
     if (isinstance(stmtExpr, ast.Auto)):
-        result = get_auto_type(stmtExpr.lhs, stmtExpr.post, stmtExpr.pre)
+        result = get_auto_type(stmtExpr.lhs, stmtExpr.post, stmtExpr.pre, line)
         if (result == "error"):
             return "error"
         else:
             return "correct"
     if (isinstance(stmtExpr, ast.Method_Invocation)):
-        result = get_method_invocation_type(stmtExpr.fieldAccess, stmtExpr.arguments)
+        result = get_method_invocation_type(stmtExpr.fieldAccess, stmtExpr.arguments, line)
         if (result):
             return "correct"
         
-def check_block_type_correct(stmts):
+def check_block_type_correct(stmts, line):
     for stmt in stmts:
-        result = get_stmt_type(stmt)
+        result = get_stmt_type(stmt, line)
         if (result == "error"):
             return result
 
@@ -553,13 +574,13 @@ def check_subtype(subType, superType):
     # todo null
     # todoc class literal
 
-def get_return_type(return_val):
+def get_return_type(return_val, line):
     if (isinstance(return_val, ast.Return)):
         return_val_type = ""
     if (return_val == None):
         return_val_type = "void"
     else:
-        return_val_type = find_expr_type(return_val)
+        return_val_type = find_expr_type(return_val, line)
     method_type = ast.CURRENT_METHOD_DICTIONARY["type"]
     if (method_type == return_val_type):
         return "correct"
