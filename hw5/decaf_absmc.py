@@ -5,16 +5,32 @@ heap = []
 control_stack = []
 data_stack = []
 
+global cur_reg
 cur_reg = 0
+global offset
+offset = 0
 
-def get_next_temp_reg ():
-   cur = cur_reg 
-   cur_reg = cur_reg + 1
-   return cur
+def get_next_temp():
+   global cur_reg
+   global offset
+   next = cur_reg + offset
+   return next
+
+def check_offset(r1):
+   global offset
+   return r1 + offset
 
 def add_temp_reg (value):
-    temp_reg.append(value)
+   global offset
+   if(value == "offset"):
+      offset = offset + 1
+   global cur_reg
+   cur = cur_reg + offset
+   temp_reg[cur] = value
+   cur_reg = cur_reg + 1
+   return cur 
 
+'''
 def set_temp_reg_i (r1, val):
     temp_reg[r1] = val
 
@@ -56,3 +72,4 @@ def ieq (r1, r2, r3):
 
 def ineq (r1, r2, r3):
    temp_reg[r1] = temp_reg[r2] != temp_reg[r3]
+'''

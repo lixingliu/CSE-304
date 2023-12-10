@@ -25,8 +25,21 @@ def assign (lhs, type, rhs, value):
             number = rhs[start_index:end_index]
 
             move(int(lhs_number)-1, int(number)-1)
-            move_immed_i(98, 0)
-            isub(int(lhs_number)-1, 98, int(number)-1)
+            next = absmc.add_temp_reg("offset")
+            move_immed_i2(next, -1)
+            imul(int(lhs_number)-1, int(lhs_number)-1, next)
+        elif("NEG" in rhs and "Variable" in rhs):
+            start_index = rhs.find("Unary-expression(NEG, Variable(") + len("Unary-expression(NEG, Variable(")
+            end_index = rhs.find("))", start_index)
+            number = rhs[start_index:end_index]
+
+            move(int(lhs_number)-1, int(number)-1)
+            next = absmc.add_temp_reg("offset")
+            move_immed_i2(next, 0)
+            next2 = absmc.get_next_temp()
+            igeq(next2, int(lhs_number)-1, next)
+            next3 = absmc.get_next_temp()
+            move(next3, next2)
 
     elif("True" in rhs):
         move_immed_i(int(lhs_number)-1, 1)
@@ -87,35 +100,47 @@ def auto (pre, post, lhs):
     lhs_end_index = lhs.find("))", lhs_start_index)
     lhs_number = lhs[lhs_start_index:lhs_end_index]
 
+    next = absmc.add_temp_reg("offset")
+    move_immed_i2(next, 1)
+
     if(post == "++"):
-        move_immed_i(98, 1)
-        iadd(int(lhs_number)-1, int(lhs_number)-1, 98)
+        iadd(int(lhs_number)-1, int(lhs_number)-1, next)
 
     elif(post == "--"):
-        move_immed_i(98, 1)
-        isub(int(lhs_number)-1, int(lhs_number)-1, 98)
+        isub(int(lhs_number)-1, int(lhs_number)-1, next)
 
 def method (name, key):
     global print
     print = print + "M_" + name + "_"  + str(key) + ":"
 
-def move_immed_i (reg, value):
-    absmc.set_temp_reg_i(reg, value)
+
+# Int
+
+def move_immed_i (r1, value):
+    result = absmc.check_offset(r1)
+    if(result > r1):
+        r1 = result
     global print
-    print = print + "\nmove_immed_i " + "t" + str(reg) + ", " + str(value)
+    print = print + "\nmove_immed_i " + "t" + str(r1) + ", " + str(value)
+
+def move_immed_i2 (r1, value):
+    global print
+    print = print + "\nmove_immed_i " + "t" + str(r1) + ", " + str(value)
 
 def move (r1, r2):
-    absmc.set_temp_reg_r(r1, r2)
+    result = absmc.check_offset(r1)
+    if(result > r1):
+        r1 = result
+    if(result == r1):
+        absmc.add_temp_reg(r1)
     global print
     print = print + "\nmove " + "t" + str(r1) + ", " + "t" + str(r2)
 
 def isub (r1, r2, r3):
-    #absmc.sub(r1, r2, r3)
     global print
     print = print + "\nisub " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
 def iadd (r1, r2, r3):
-    #absmc.add(r1, r2, r3)
     global print
     print = print + "\niadd " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
@@ -129,8 +154,11 @@ def idiv (r1, r2, r3):
     global print
     print = print + "\nidiv " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
+
+#Float
+
 def move_immed_f (reg, value):
-    absmc.set_temp_reg_i(reg, value)
+    #absmc.set_temp_reg_i(reg, value)
     global print
     if("." in str(value)):
         print = print + "\nmove_immed_f " + "t" + str(reg) + ", " + str(value)
