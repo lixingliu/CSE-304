@@ -25,7 +25,7 @@ def assign (lhs, type, rhs, value):
             number = rhs[start_index:end_index]
 
             move(int(lhs_number)-1, int(number)-1)
-            next = absmc.add_temp_reg("offset")
+            next = absmc.get_next_temp()
             move_immed_i2(next, -1)
             imul(int(lhs_number)-1, int(lhs_number)-1, next)
         elif("NEG" in rhs and "Variable" in rhs):
@@ -33,13 +33,12 @@ def assign (lhs, type, rhs, value):
             end_index = rhs.find("))", start_index)
             number = rhs[start_index:end_index]
 
-            move(int(lhs_number)-1, int(number)-1)
-            next = absmc.add_temp_reg("offset")
+            reg = move(int(lhs_number)-1, int(number)-1)
+            next = absmc.get_next_temp()
             move_immed_i2(next, 0)
             next2 = absmc.get_next_temp()
-            igeq(next2, int(lhs_number)-1, next)
-            next3 = absmc.get_next_temp()
-            move(next3, next2)
+            igeq2(next2, reg, next)
+            move2(next2+1, next2)
 
     elif("True" in rhs):
         move_immed_i(int(lhs_number)-1, 1)
@@ -100,14 +99,14 @@ def auto (pre, post, lhs):
     lhs_end_index = lhs.find("))", lhs_start_index)
     lhs_number = lhs[lhs_start_index:lhs_end_index]
 
-    next = absmc.add_temp_reg("offset")
+    next = absmc.get_next_temp()
     move_immed_i2(next, 1)
 
     if(post == "++"):
-        iadd(int(lhs_number)-1, int(lhs_number)-1, next)
+        iadd2(int(lhs_number)-1, int(lhs_number)-1, next)
 
     elif(post == "--"):
-        isub(int(lhs_number)-1, int(lhs_number)-1, next)
+        isub2(int(lhs_number)-1, int(lhs_number)-1, next)
 
 def method (name, key):
     global print
@@ -117,40 +116,61 @@ def method (name, key):
 # Int
 
 def move_immed_i (r1, value):
-    result = absmc.check_offset(r1)
-    if(result > r1):
-        r1 = result
+    r1 = absmc.check_offset(r1, r1)
     global print
     print = print + "\nmove_immed_i " + "t" + str(r1) + ", " + str(value)
 
 def move_immed_i2 (r1, value):
+    r1 = absmc.add_temp_reg("offset")
     global print
     print = print + "\nmove_immed_i " + "t" + str(r1) + ", " + str(value)
 
 def move (r1, r2):
-    result = absmc.check_offset(r1)
-    if(result > r1):
-        r1 = result
-    if(result == r1):
-        absmc.add_temp_reg(r1)
+    r1 = absmc.check_offset(r1, r1)
+    r2 = absmc.check_offset(r2, "None")
+    global print
+    print = print + "\nmove " + "t" + str(r1) + ", " + "t" + str(r2)
+    return r1
+
+def move2 (r1, r2):
+    r1 = absmc.add_temp_reg(r1)
+    r1 = absmc.add_temp_reg(r1+1)
     global print
     print = print + "\nmove " + "t" + str(r1) + ", " + "t" + str(r2)
 
 def isub (r1, r2, r3):
+    r1 = absmc.check_offset(r1, r1)
+    r2 = absmc.check_offset(r2, "None")
+    r3 = absmc.check_offset(r3, "None")
+    global print
+    print = print + "\nisub " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
+
+def isub2 (r1, r2, r3):
     global print
     print = print + "\nisub " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
 def iadd (r1, r2, r3):
+    r1 = absmc.check_offset(r1, r1)
+    r2 = absmc.check_offset(r2, "None")
+    r3 = absmc.check_offset(r3, "None")
+    global print
+    print = print + "\niadd " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
+
+def iadd2 (r1, r2, r3):
     global print
     print = print + "\niadd " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
 def imul (r1, r2, r3):
-    #absmc.mul(r1, r2, r3)
+    r1 = absmc.check_offset(r1, r1)
+    r2 = absmc.check_offset(r2, "None")
+    r3 = absmc.check_offset(r3, "None")
     global print
     print = print + "\nimul " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
 def idiv (r1, r2, r3):
-    #absmc.div(r1, r2, r3)
+    r1 = absmc.check_offset(r1, r1)
+    r2 = absmc.check_offset(r2, "None")
+    r3 = absmc.check_offset(r3, "None")
     global print
     print = print + "\nidiv " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
@@ -211,7 +231,13 @@ def igt (r1, r2, r3):
     print = print + "\nigt " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
 def igeq (r1, r2, r3):
-    #absmc.igeq(r1, r2, r3)
+    r1 = absmc.check_offset(r1, r1)
+    r2 = absmc.check_offset(r2, "None")
+    r3 = absmc.check_offset(r3, "None")
+    global print
+    print = print + "\nigeq " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
+
+def igeq2 (r1, r2, r3):
     global print
     print = print + "\nigeq " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 

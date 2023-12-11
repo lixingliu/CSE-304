@@ -16,18 +16,24 @@ def get_next_temp():
    next = cur_reg + offset
    return next
 
-def check_offset(r1):
-   global offset
-   return r1 + offset
+def check_offset(r1, value):
+   offset_count = 0
+   for i, reg in enumerate(temp_reg):
+      if(i <= r1 and reg == "offset"):
+         offset_count = offset_count + 1
+   if(temp_reg[r1 + offset_count] == None and value != "None"):
+      add_temp_reg(value)
+   return r1 + offset_count
 
 def add_temp_reg (value):
    global offset
+   global cur_reg
+   cur = get_next_temp()
+   temp_reg[cur] = value
    if(value == "offset"):
       offset = offset + 1
-   global cur_reg
-   cur = cur_reg + offset
-   temp_reg[cur] = value
-   cur_reg = cur_reg + 1
+   else:
+      cur_reg = cur_reg + 1
    return cur 
 
 '''
