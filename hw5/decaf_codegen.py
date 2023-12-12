@@ -81,10 +81,10 @@ def assign (lhs, type, rhs, value):
                 igt(int(lhs_number)-1, int(regs[0])-1, int(regs[1])-1)
             elif("geq," in rhs):
                 igeq(int(lhs_number)-1, int(regs[0])-1, int(regs[1])-1)
-            elif("eq," in rhs):
-                ieq(int(lhs_number)-1, int(regs[0])-1, int(regs[1])-1)
             elif("neq," in rhs):
                 ineq(int(lhs_number)-1, int(regs[0])-1, int(regs[1])-1)
+            elif("eq," in rhs):
+                ieq(int(lhs_number)-1, int(regs[0])-1, int(regs[1])-1)
 
     elif("Variable(" in rhs):
         start_index = rhs.find("Variable(") + len("Variable(")
