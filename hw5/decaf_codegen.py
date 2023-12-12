@@ -27,7 +27,7 @@ def assign (lhs, type, rhs, value):
             move(int(lhs_number)-1, int(number)-1)
             next = absmc.get_next_temp()
             move_immed_i2(next, -1)
-            imul(int(lhs_number)-1, int(lhs_number)-1, next)
+            imul2(int(lhs_number)-1, int(lhs_number)-1, next)
         elif("NEG" in rhs and "Variable" in rhs):
             start_index = rhs.find("Unary-expression(NEG, Variable(") + len("Unary-expression(NEG, Variable(")
             end_index = rhs.find("))", start_index)
@@ -112,6 +112,29 @@ def method (name, key):
     global print
     print = print + "M_" + name + "_"  + str(key) + ":"
 
+def if_stmt (cond, then_expr, else_expr):
+    regs = re.findall(r'Variable\((\d+)\)', cond)
+
+    regs2 = re.findall(r'Variable\(\d+\)', then_expr)
+    first_index = then_expr.find("int")  
+    second_index = then_expr.find("int", first_index + 1)
+    second_int = then_expr[second_index:second_index + 3]
+
+    if("Binary(lt," in cond):
+        ilt(int(regs[0])+2 ,int(regs[0])-1, int(regs[1])-1)
+    label = absmc.next_label()
+    bnz(int(regs[0])+2, str(label))
+    jmp(str(label + 1))
+    absmc.next_label()
+
+    global print
+    print = print + "\nL" + str(label) + ":"
+
+    if("Block([ \nExpr( Assign(" in then_expr):
+        assign(regs2[0], second_int, then_expr, then_expr)
+        
+    print = print + "\nL" + str(label+1) + ":"
+     
 
 # Int
 
@@ -164,6 +187,10 @@ def imul (r1, r2, r3):
     r1 = absmc.check_offset(r1, r1)
     r2 = absmc.check_offset(r2, "None")
     r3 = absmc.check_offset(r3, "None")
+    global print
+    print = print + "\nimul " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
+
+def imul2 (r1, r2, r3):
     global print
     print = print + "\nimul " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
@@ -250,3 +277,11 @@ def ineq (r1, r2, r3):
     #absmc.ineq(r1, r2, r3)
     global print
     print = print + "\nineq " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
+
+def bnz (r1, name):
+    global print
+    print = print + "\nbnz " + "t" + str(r1) + ", " + "L" + str(name)
+
+def jmp (name):
+    global print
+    print = print + "\njmp " + "L" + str(name)

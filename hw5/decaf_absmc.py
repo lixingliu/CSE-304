@@ -9,12 +9,19 @@ global cur_reg
 cur_reg = 0
 global offset
 offset = 0
+global cur_label
+cur_label = 0
 
 def get_next_temp():
    global cur_reg
    global offset
    next = cur_reg + offset
    return next
+
+def next_label():
+   global cur_label
+   cur_label = cur_label + 1
+   return cur_label
 
 def check_offset(r1, value):
    offset_count = 0

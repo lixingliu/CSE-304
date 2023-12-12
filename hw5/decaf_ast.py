@@ -728,6 +728,7 @@ class If_decl(Node):
         if (stmt_two_type == "error"):
             print("IF statement - Type error in ELSE statement")
             sys.exit()
+        codegen.if_stmt(str(self.expr), str(self.stmtOne), str(self.stmtTwo))
         return f'If-stmt({str(self.expr)}, {str(self.stmtOne)}, else {str(self.stmtTwo)})'
     
 class Not(Node):
