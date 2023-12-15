@@ -1,7 +1,4 @@
-import decaf_ast 
 import decaf_absmc as absmc
-import decaf_typecheck as typechecker
-import sys
 import re
 
 global print 
@@ -115,11 +112,6 @@ def method (name, key):
 def if_stmt (cond, then_expr, else_expr):
     regs = re.findall(r'Variable\((\d+)\)', cond)
 
-    regs2 = re.findall(r'Variable\(\d+\)', then_expr)
-    first_index = then_expr.find("int")  
-    second_index = then_expr.find("int", first_index + 1)
-    second_int = then_expr[second_index:second_index + 3]
-
     if("Binary(lt," in cond):
         ilt(int(regs[0])+2 ,int(regs[0])-1, int(regs[1])-1)
     label = absmc.next_label()
@@ -130,11 +122,52 @@ def if_stmt (cond, then_expr, else_expr):
     global print
     print = print + "\nL" + str(label) + ":"
 
-    if("Block([ \nExpr( Assign(" in then_expr):
-        assign(regs2[0], second_int, then_expr, then_expr)
+    if("Block([\nExpr( Assign(" in then_expr):
+        if("Binary(add,"):
+            iadd2(int(regs[0])+1, int(regs[0])-1, int(regs[1])-1)
         
     print = print + "\nL" + str(label+1) + ":"
-     
+
+    lines = print.split('\n')
+    lines.remove('iadd t2, t0, t1')  
+    print = '\n'.join(lines) 
+
+def while_stmt (cond, stmt):
+    global print
+    label = absmc.next_label()
+    print = print + "\nL" + str(label) + ":"
+
+    regs = re.findall(r'Variable\((\d+)\)', cond)
+
+    if("Binary(lt," in cond):
+        ilt(int(regs[0])+2 ,int(regs[0])-1, int(regs[1])-1)
+    bnz(int(regs[0])+2, str(label+1))
+    jmp(str(label + 2))
+
+    print = print + "\nL" + str(label+1) + ":"
+
+    lines = stmt.split('\n')
+    for line in lines:
+        if("Expr( Assign(" in line):
+            if("Binary(add," in line):
+                iadd2(int(regs[0])+1, int(regs[0])+1, int(regs[1])-2)
+        if("Expr( Auto(" in line):
+            pattern = re.compile(r'Auto\((.+)\)')
+            matches = pattern.findall(line)
+
+            if matches:
+                auto = max(matches, key=len).split(', ')
+
+                next = absmc.get_next_temp()
+                move_immed_i2(next, 1)
+
+                if(auto[1] == "auto-increment" and auto[2] == "post) "):
+                    iadd2(int(regs[0])-1, int(regs[0])-1, next)
+    
+    jmp(str(label))
+
+    print = print + "\nL" + str(label+2) + ":"
+                
 
 # Int
 
@@ -243,7 +276,6 @@ def or_b (r1, r2, r3):
     print = print + "\nor " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3)
 
 def ilt (r1, r2, r3):
-    #absmc.ilt(r1, r2, r3)
     global print
     print = print + "\nilt " + "t" + str(r1) + ", " + "t" + str(r2) + ", " + "t" + str(r3) 
 

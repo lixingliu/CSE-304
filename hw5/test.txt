@@ -1,19 +1,18 @@
-class a05_test01
+class a05_test05
 {
     public static void main()
     {
         int i;
         int j;
-        boolean x;
-        boolean y;
+        int k;
         
-        i = 10;
-        j = -i;
-        
-        x = true;
-        y = !x;
-        
-        i++;
-        i--;
+        i = 0;
+        j = 10;
+        k = 0;
+        while (i < j)
+        {
+            k = k + i;
+            i++;
+        }
     }
 }

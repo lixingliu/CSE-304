@@ -780,6 +780,7 @@ class While_decl(Node):
         if (stmt_type == "error"):
             print("WHILE statement - Type error in loop body")
             sys.exit()
+        codegen.while_stmt(str(self.expr), str(self.stmt))
         return f"While-stmt({str(self.expr)}, {str(self.stmt)})"
     
 class Paren(Node):

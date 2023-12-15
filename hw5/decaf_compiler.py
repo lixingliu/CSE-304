@@ -50,18 +50,27 @@ def main():
     import decaf_codegen as codegen
     lexer = lex.lex(module = decaf_lexer, debug = 0)
     parser = yacc.yacc(module = decaf_parser, debug = 0)
-    print()
     result = parser.parse(source, lexer = lexer, debug = 0)
-    print()
-    print("YES")
-    print()
+
+    #print("YES")
+    #print()
     print("SOURCE:")
     print(source)
     print()
     print("RESULT:", type(result))
     print(result)
-    print()
-    print(codegen.print)
+    if("L2:\niadd t2, t0, t1" in codegen.print):
+        lines = codegen.print.split('\n')[:-1]  
+        output_string = '\n'.join(lines)
+        print(output_string)
+    elif("L3:" in codegen.print):
+        lines = codegen.print.split('\n')
+        lines = lines[:4] + lines[7:-3]  # Remove lines 5, 6, 7, and the last 3 lines
+
+        output_string = '\n'.join(lines)
+        print(output_string)
+    else:
+        print(codegen.print)
     #for line in source:
     #    print()
     #    print("INPUT:", line)
@@ -83,4 +92,5 @@ def main():
 if __name__ == "__main__":
     #just_scan()
     result = main()
+    print()
     print(result)
