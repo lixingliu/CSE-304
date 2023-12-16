@@ -81,10 +81,9 @@ class Type(Node):
         return str(self.type_value)
 
 class Block(Node):
-    def __init__(self, stmtList, line):
+    def __init__(self, stmtList):
         super().__init__()
         self.stmtList = stmtList
-        self.line = line
         global VARIABLE_TABLE, VARIABLE_KEY
         insideVariableTable = {}
         variableStatus = True
@@ -94,7 +93,6 @@ class Block(Node):
                     for variable in stmt.variable_list.vars[::-1]:
                         if any(entry.get('variableName') == variable for entry in insideVariableTable.values()):
                             print(f"Error: Variable names must be unique within a block. You are trying to declare multiple variables of the name {variable}")
-                            print("Error at Line " + str(line))
                             sys.exit()
                         insideVariableTable[VARIABLE_KEY] = {
                             'variableName': variable,
@@ -147,12 +145,11 @@ class Stmt_List(Node):
         self.stmts = []
 
 class Return(Node):
-    def __init__(self, return_val, line):
+    def __init__(self, return_val):
         super().__init__()
         self.return_val = return_val
-        self.line = line
     def __str__(self):
-        return_val = typechecker.get_return_type(self.return_val, self.line)
+        return_val = typechecker.get_return_type(self.return_val)
         if (return_val == "error non-void method"):
             print("RETURN statement - NON-VOID method returns nothing")
             sys.exit()
@@ -170,7 +167,7 @@ METHOD_DICTIONARY[METHOD_KEY] = {
     'modifier': Modifier("public", "static"),
     'formals': Formals_const(),
     'type': Type("int"),
-    'block': Block(Stmt_List(), 0)
+    'block': Block(Stmt_List())
 }
 
 METHOD_KEY += 1
@@ -180,7 +177,7 @@ METHOD_DICTIONARY[METHOD_KEY] = {
     'modifier': Modifier("public", "static"),
     'formals': Formals_const(),
     'type': Type("float"),
-    'block': Block(Stmt_List(), 0)
+    'block': Block(Stmt_List())
 }
 
 METHOD_KEY += 1
@@ -198,14 +195,14 @@ FIELD_DICTIONARY = {}
 METHOD_DICTIONARY = {}
 
 stmt_list = Stmt_List()
-stmt_list.stmts.append(Return("", 0))
+stmt_list.stmts.append(Return(""))
 
 METHOD_DICTIONARY[METHOD_KEY] = {
     'methodName': 'print',
     'modifier': Modifier("public", "static"),
     'formals': Formals_const(),
     'type': Type("int"),
-    'block': Block(stmt_list, 0)
+    'block': Block(stmt_list)
 }
 
 METHOD_KEY += 1
@@ -215,7 +212,7 @@ METHOD_DICTIONARY[METHOD_KEY] = {
     'modifier': Modifier("public", "static"),
     'formals': Formals_const(),
     'type': Type("float"),
-    'block': Block(stmt_list, 0)
+    'block': Block(stmt_list)
 }
 
 METHOD_KEY += 1
@@ -225,7 +222,7 @@ METHOD_DICTIONARY[METHOD_KEY] = {
     'modifier': Modifier("public", "static"),
     'formals': Formals_const(),
     'type': Type("boolean"),
-    'block': Block(stmt_list, 0)
+    'block': Block(stmt_list)
 }
 
 METHOD_KEY += 1
@@ -235,7 +232,7 @@ METHOD_DICTIONARY[METHOD_KEY] = {
     'modifier': Modifier("public", "static"),
     'formals': Formals_const(),
     'type': Type("string"),
-    'block': Block(stmt_list, 0)
+    'block': Block(stmt_list)
 }
 
 METHOD_KEY += 1
@@ -453,107 +450,84 @@ class Auto(Node):
             return f'Expr( Auto({self.lhs}, auto-decrement, post) )'
 
 class Assign(Node):
-    def __init__(self,line, lhs = None, expr = None, ):
+    def __init__(self, lhs = None, expr = None):
         super().__init__()
         self.lhs = lhs
         self.expr = expr
-        self.line = line
     def __str__(self):
         global VARIABLE_TABLE
-        assign_type = typechecker.get_assign_type(self.lhs, self.expr, self.line)
+        assign_type = typechecker.get_assign_type(self.lhs, self.expr)
         if (assign_type == "error"):
             if (isinstance(self.expr, ID)):
                 print("Variable not the same type as assigner")
-                print(f"Error at line {self.line}")
                 sys.exit()
             if (isinstance(self.expr, Literal)):
                 print("Literal not the same type as assigner")
-                print(f"Error at line {self.line}")
                 sys.exit()
             if (isinstance(self.expr, Field_Access)):
                 print("Field access not the same type as the assigner")
-                print(f"Error at line {self.line}")
                 sys.exit()
             if (isinstance(self.expr, New)):
                 print("New object does not match assigner")
-                print(f"Error at line {self.line}")
                 sys.exit()
             if (isinstance(self.expr, Method_Invocation)):
                 print("Method type is not the same as the assigner")
-                print(f"Error at line {self.line}")
                 sys.exit()
             if (isinstance(self.expr, Assign)):
                 print("ASSIGN statement - type not equal to assigner")
-                print(f"Error at line {self.line}")
                 sys.exit()
             if (isinstance(self.expr, Auto)):
                 print("AUTO statement - type not equal to assigner")
-                print(f"Error at line {self.line}")
                 sys.exit()            
             if (isinstance(self.expr, Binary_Expr)):
                 if (self.expr.binaryType == "+"):
                     print("BINARY ADDITION - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "-"):
                     print("BINARY SUBTRACTION  - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "*"):
                     print("BINARY MULTIPLICATION  - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "/"):
                     print("BINARY DIVISION  - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "&&"):
                     print("BINARY AND - Operand not a boolean")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "||"):
                     print("BINARY OR - Operand not a boolean")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "<"):
                     print("BINARY LESS THAN - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "<="):
                     print("BINARY LESS THAN OR EQUAL - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == ">"):
                     print("BINARY GREATER THAN - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == ">="):
                     print("BINARY GREATER THAN OR EQUAL - Operand not a number")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "=="):
                     print("BINARY EQUALITY - Operands are not of congruent types")
-                    print(f"Error at line {self.line}")
                     sys.exit()
                 if (self.expr.binaryType == "!="):
                     print("BINARY INEQUALITY - Operands are not of congruent types")
-                    print(f"Error at line {self.line}")
                     sys.exit()
             if (isinstance(self.expr, Not)):
                 print("UNARY NEGATION - Expression is not boolean")
-                print(f"Error at line {self.line}")
                 sys.exit()  
             if (isinstance(self.expr, Uminus)):
                 print("UNARY MINUS - Expression is not a number")
-                print(f"Error at line {self.line}")
                 sys.exit()  
             if (isinstance(self.expr, Uplus)):
                 print("UNARY PLUS - Expression is not a number")
-                print(f"Error at line {self.line}")
                 sys.exit()  
             return "error"
-        left = typechecker.get_lhs_type(self.lhs, self.line)
-        right = typechecker.find_expr_type(self.expr, self.line)
+        left = typechecker.get_lhs_type(self.lhs)
+        right = typechecker.find_expr_type(self.expr)
         return(f'Expr( Assign({str(self.lhs)}, {str(self.expr)}), {str(left)}, {str(right)} )')
 
 class Field_Access(Node):
@@ -615,33 +589,28 @@ class Literal(Node):
             return
 
 class For_decl(Node):
-    def __init__(self, cond1, cond2, cond3, forBody, line):
+    def __init__(self, cond1, cond2, cond3, forBody):
         super().__init__()
         self.cond1 = cond1
         self.cond2 = cond2
         self.cond3 = cond3
         self.forBody = forBody
-        self.line = line
     def __str__(self):
-        cond1_type = typechecker.get_stmt_expr_type(self.cond1, self.line)
+        cond1_type = typechecker.get_stmt_expr_type(self.cond1)
         if (cond1_type == "error"):
             print("FOR statement - Type error in initializer")
-            print(f"Error at line {self.line} For condition Initializer")
             sys.exit()
-        cond2_type = typechecker.find_expr_type(self.cond2, self.line)
+        cond2_type = typechecker.find_expr_type(self.cond2)
         if (cond2_type != "boolean"):
             print("FOR statement - Condition not boolean")
-            print(f"Error at line {self.line} For condition")
             sys.exit()
-        cond3_type = typechecker.get_stmt_expr_type(self.cond3, self.line)
+        cond3_type = typechecker.get_stmt_expr_type(self.cond3)
         if (cond3_type == "error"):
             print("FOR statement - Type error in update expression")
-            print(f"Error at line {self.line} For condition Update Expression")
             sys.exit()
-        loop_body_type = typechecker.get_stmt_type(self.forBody, self.line)
+        loop_body_type = typechecker.get_stmt_type(self.forBody)
         if (loop_body_type == "error"):
             print("FOR statement - Type error in loop body")
-            print(f"Error at line {self.line} For condition Loop body")
             sys.exit()
         
         if (self.forBody == ';'):
@@ -682,13 +651,12 @@ class Binary_Expr(Node):
         
 #todo CREATE A UPLUS
 class Uplus(Node):
-    def __init__(self,line, type = None, expr = None):
+    def __init__(self, type = None, expr = None):
         super().__init__()
         self.type = type
         self.expr = expr
-        self.line
     def __str__(self):
-        expr_type = typechecker.find_expr_type(self.expr, self.line)
+        expr_type = typechecker.find_expr_type(self.expr)
         if (expr_type != "int" and expr_type != "float"):
             print("UNARY MINUS - Expression is not a number")
             sys.exit()
@@ -699,18 +667,17 @@ class Uminus(Node):
         self.type = type
         self.expr = expr
     def __str__(self):
-        expr_type = typechecker.find_expr_type(self.expr, self.line)
-        if (expr_type != "int" and expr_type != "float"):
-            print("UNARY PLUS - Expression is not a number")
-            sys.exit()
+        # expr_type = typechecker.find_expr_type(self.expr)
+        # if (expr_type != "int" and expr_type != "float"):
+        #     print("UNARY MINUS - Expression is not a number")
+        #     sys.exit()
         return f'Unary-expression(MINUS, {str(self.expr)})'
 
 class Method_Invocation(Node):
-    def __init__(self, fieldAccess, arguments, line):
+    def __init__(self, fieldAccess, arguments):
         super().__init__()
         self.fieldAccess = fieldAccess
         self.arguments = arguments
-        self.line = line
     def __str__(self):
         arguments = []
         for arg in self.arguments.args[::-1]:
@@ -737,42 +704,36 @@ class New(Node):
         return f'New-object({self.id}, {str(arguments)})'
     
 class If_decl(Node):
-    def __init__(self, expr, stmtOne, stmtTwo, line):
+    def __init__(self, expr, stmtOne, stmtTwo):
         super().__init__()
         self.expr = expr
         self.stmtOne = stmtOne
         self.stmtTwo = stmtTwo
-        self.line = line
     def __str__(self):
-        expr_type = typechecker.find_expr_type(self.expr, self.line)
+        expr_type = typechecker.find_expr_type(self.expr)
         if(expr_type != "boolean"):
             print("IF statement - Condition not boolean")
-            print("Error at Line " + str(self.line))
             sys.exit()
-        stmt_one_type = typechecker.get_stmt_type(self.stmtOne, self.line)
+        stmt_one_type = typechecker.get_stmt_type(self.stmtOne)
         if (stmt_one_type == "error"):
             print("IF statement - Type error in THEN statement")
-            print("Error In line " + str(self.line) + " If stmt. The Then block has an error")
             sys.exit()
-        stmt_two_type = typechecker.get_stmt_type(self.stmtTwo, self.line)
+        stmt_two_type = typechecker.get_stmt_type(self.stmtTwo)
         if (stmt_two_type == "error"):
             print("IF statement - Type error in ELSE statement")
-            print("Error In line " + str(self.line) + " If stmt. The Else block has an error")
             sys.exit()
         if (self.stmtTwo is None):
             self.stmtTwo = "Skip-stmt()"
         return f'If-stmt({str(self.expr)}, {str(self.stmtOne)}, else {str(self.stmtTwo)})'
     
 class Not(Node):
-    def __init__(self, expr, line):
+    def __init__(self, expr):
         super().__init__()
         self.expr = expr
-        self.line = line
     def __str__(self):
-        expr_type = typechecker.find_expr_type(self.expr, self.line)
+        expr_type = typechecker.find_expr_type(self.expr)
         if (expr_type != "boolean"):
             print("UNARY NEGATION - Expression is not boolean")
-            print(f"Error at line {self.line} Unary Negation")
             sys.exit()
         return f'Unary-expression(NEG, {str(self.expr)})'
 
@@ -801,21 +762,18 @@ class ID(Node):
 
     
 class While_decl(Node):
-    def __init__(self, expr, stmt, line):
+    def __init__(self, expr, stmt):
         super().__init__()
         self.expr = expr
         self.stmt = stmt
-        self.line = line
     def __str__(self):
-        expr_type = typechecker.find_expr_type(self.expr, self.line)
+        expr_type = typechecker.find_expr_type(self.expr)
         if (expr_type != "boolean"):
             print("WHILE statement - Condition not boolean")
-            print(f"Error at line {self.line} While condition")
             sys.exit()
-        stmt_type = typechecker.get_stmt_type(self.stmt, self.line)
+        stmt_type = typechecker.get_stmt_type(self.stmt)
         if (stmt_type == "error"):
             print("WHILE statement - Type error in loop body")
-            print(f"Error at line {self.line} While condition's body")
             sys.exit()
         return f"While-stmt({str(self.expr)}, {str(self.stmt)})"
     
